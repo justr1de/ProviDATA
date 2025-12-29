@@ -26,14 +26,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Criar cliente Supabase
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    // Priorizar variáveis de ambiente sem o prefixo NEXT_PUBLIC_ para o lado do servidor
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    console.log('Supabase URL:', supabaseUrl ? 'Carregada' : 'NÃO CARREGADA');
-    console.log('Supabase Anon Key:', supabaseAnonKey ? 'Carregada' : 'NÃO CARREGADA');
+    // O log de runtime do Vercel deve capturar esta informação
+    console.log('Supabase URL (Server):', supabaseUrl ? 'Carregada' : 'NÃO CARREGADA');
+    console.log('Supabase Anon Key (Server):', supabaseAnonKey ? 'Carregada' : 'NÃO CARREGADA');
 
     if (!supabaseUrl || !supabaseAnonKey) {
-      console.error('Variáveis de ambiente Supabase não configuradas');
+      console.error('Variáveis de ambiente Supabase não configuradas corretamente para a API Route');
       return NextResponse.json(
         { error: 'Erro de configuração do servidor' },
         { status: 500 }
