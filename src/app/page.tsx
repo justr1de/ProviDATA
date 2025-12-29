@@ -19,12 +19,10 @@ import {
   Sun,
   Moon,
   X,
-  Phone,
   Layers,
   CreditCard,
   Info,
   PhoneCall,
-  LogIn,
   Key
 } from 'lucide-react';
 
@@ -89,8 +87,13 @@ const planoIlimitado = [
   'Suporte prioritário',
 ];
 
-// Palavras para marca d'água
-const watermarkWords = ['Cidadão', 'Saúde', 'Educação', 'Segurança', 'Meio Ambiente', 'Infraestrutura', 'Transporte', 'Assistência Social'];
+// Palavras para marca d'água - mais palavras e espalhadas
+const watermarkWords = [
+  'Cidadão', 'Saúde', 'Educação', 'Segurança', 'Meio Ambiente', 
+  'Infraestrutura', 'Transporte', 'Assistência', 'Cultura', 'Esporte',
+  'Habitação', 'Saneamento', 'Iluminação', 'Mobilidade', 'Acessibilidade',
+  'Cidadão', 'Saúde', 'Educação', 'Segurança', 'Meio Ambiente'
+];
 
 export default function HomePage() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -143,7 +146,7 @@ export default function HomePage() {
       color: isDark ? '#f1f5f9' : '#1e293b'
     }}>
       
-      {/* HEADER com marca d'água */}
+      {/* HEADER com marca d'água espalhada */}
       <header style={{ 
         position: 'fixed', 
         top: 0, 
@@ -155,7 +158,7 @@ export default function HomePage() {
         backdropFilter: 'blur(8px)',
         overflow: 'hidden'
       }}>
-        {/* Marca d'água no fundo do header */}
+        {/* Marca d'água espalhada no fundo do header */}
         <div style={{
           position: 'absolute',
           top: 0,
@@ -164,9 +167,11 @@ export default function HomePage() {
           bottom: 0,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '40px',
-          opacity: isDark ? 0.03 : 0.04,
+          justifyContent: 'space-around',
+          flexWrap: 'wrap',
+          gap: '20px',
+          padding: '0 20px',
+          opacity: isDark ? 0.04 : 0.06,
           pointerEvents: 'none',
           overflow: 'hidden'
         }}>
@@ -174,12 +179,13 @@ export default function HomePage() {
             <span 
               key={index}
               style={{
-                fontSize: '14px',
+                fontSize: `${12 + (index % 3) * 2}px`,
                 fontWeight: 700,
                 color: isDark ? '#ffffff' : '#16a34a',
                 textTransform: 'uppercase',
-                letterSpacing: '2px',
-                whiteSpace: 'nowrap'
+                letterSpacing: '1px',
+                whiteSpace: 'nowrap',
+                transform: `rotate(${(index % 5) * 2 - 4}deg)`
               }}
             >
               {word}
@@ -210,13 +216,13 @@ export default function HomePage() {
                   alt="ProviDATA" 
                   width={56} 
                   height={56} 
-                  style={{ borderRadius: '10px' }}
+                  style={{ borderRadius: '10px', objectFit: 'contain' }}
                 />
                 <span style={{ fontWeight: 700, fontSize: '22px', color: isDark ? '#f1f5f9' : '#1e293b' }}>ProviDATA</span>
               </Link>
             </div>
 
-            {/* Nav - Botões com ícones e efeito hover */}
+            {/* Nav - Botões com efeito espelho */}
             <nav style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               {navItems.map((item) => (
                 <a 
@@ -232,23 +238,38 @@ export default function HomePage() {
                     backgroundColor: isDark ? '#1e293b' : '#f3f4f6',
                     border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
                     boxShadow: isDark 
-                      ? '0 4px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.2)' 
-                      : '0 4px 6px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.05)',
+                      ? '0 4px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -2px 4px rgba(0,0,0,0.2)' 
+                      : '0 4px 6px rgba(0,0,0,0.08), inset 0 2px 0 rgba(255,255,255,1), inset 0 -2px 4px rgba(0,0,0,0.03)',
                     transition: 'all 0.2s ease',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px'
+                    gap: '6px',
+                    position: 'relative',
+                    overflow: 'hidden'
                   }}
                 >
-                  <item.icon style={{ width: '16px', height: '16px', color: '#16a34a' }} />
-                  {item.name}
+                  {/* Efeito espelho/reflexo */}
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '50%',
+                    background: isDark 
+                      ? 'linear-gradient(to bottom, rgba(255,255,255,0.08), transparent)'
+                      : 'linear-gradient(to bottom, rgba(255,255,255,0.9), transparent)',
+                    borderRadius: '10px 10px 0 0',
+                    pointerEvents: 'none'
+                  }} />
+                  <item.icon style={{ width: '16px', height: '16px', color: '#16a34a', position: 'relative', zIndex: 1 }} />
+                  <span style={{ position: 'relative', zIndex: 1 }}>{item.name}</span>
                 </a>
               ))}
             </nav>
 
             {/* Actions */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              {/* Botão Entrar - Verde com ícone de chave */}
+              {/* Botão Entrar - Verde com ícone de chave e efeito espelho */}
               <Link 
                 href="/login" 
                 style={{ 
@@ -262,14 +283,27 @@ export default function HomePage() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.4), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.1)',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}
               >
-                <Key style={{ width: '18px', height: '18px' }} />
-                Entrar
+                {/* Efeito espelho */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '50%',
+                  background: 'linear-gradient(to bottom, rgba(255,255,255,0.25), transparent)',
+                  borderRadius: '10px 10px 0 0',
+                  pointerEvents: 'none'
+                }} />
+                <Key style={{ width: '18px', height: '18px', position: 'relative', zIndex: 1 }} />
+                <span style={{ position: 'relative', zIndex: 1 }}>Entrar</span>
               </Link>
               
-              {/* Botão Dia/Noite */}
+              {/* Botão Dia/Noite com efeito espelho */}
               <button
                 onClick={toggleTheme}
                 style={{ 
@@ -284,12 +318,27 @@ export default function HomePage() {
                   justifyContent: 'center',
                   cursor: 'pointer',
                   boxShadow: isDark 
-                    ? '0 4px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)' 
-                    : '0 4px 6px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)'
+                    ? '0 4px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)' 
+                    : '0 4px 6px rgba(0,0,0,0.08), inset 0 2px 0 rgba(255,255,255,1)',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}
                 title={isDark ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
               >
-                {isDark ? <Sun style={{ width: '24px', height: '24px' }} /> : <Moon style={{ width: '24px', height: '24px' }} />}
+                {/* Efeito espelho */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '50%',
+                  background: isDark 
+                    ? 'linear-gradient(to bottom, rgba(255,255,255,0.08), transparent)'
+                    : 'linear-gradient(to bottom, rgba(255,255,255,0.9), transparent)',
+                  borderRadius: '12px 12px 0 0',
+                  pointerEvents: 'none'
+                }} />
+                {isDark ? <Sun style={{ width: '24px', height: '24px', position: 'relative', zIndex: 1 }} /> : <Moon style={{ width: '24px', height: '24px', position: 'relative', zIndex: 1 }} />}
               </button>
             </div>
           </div>
@@ -315,30 +364,31 @@ export default function HomePage() {
             ✨ A solução completa para gabinetes parlamentares
           </div>
 
-          {/* Title com efeito de relevo */}
+          {/* Title com efeito 3D */}
           <h1 style={{ 
-            fontSize: 'clamp(40px, 5vw, 64px)', 
+            fontSize: 'clamp(36px, 5vw, 56px)', 
             fontWeight: 800, 
-            lineHeight: 1.1,
+            lineHeight: 1.15,
             marginBottom: '28px',
           }}>
             <span style={{ 
               color: '#16a34a',
+              display: 'block',
               textShadow: isDark 
-                ? '0 2px 4px rgba(0,0,0,0.5), 0 4px 8px rgba(22, 163, 74, 0.3)' 
-                : '0 2px 4px rgba(0,0,0,0.1), 0 4px 8px rgba(22, 163, 74, 0.2)',
-              display: 'block'
+                ? '0 1px 0 #0d5a2d, 0 2px 0 #0a4a25, 0 3px 0 #083d1f, 0 4px 0 #063018, 0 5px 10px rgba(0,0,0,0.5)' 
+                : '0 1px 0 #15803d, 0 2px 0 #166534, 0 3px 0 #14532d, 0 4px 0 #052e16, 0 5px 10px rgba(0,0,0,0.15)',
+              letterSpacing: '-0.02em'
             }}>
               Plataforma para Gestão de
             </span>
             <span style={{ 
-              color: '#ffffff',
-              textShadow: isDark 
-                ? '0 2px 0 #0f4a2a, 0 4px 8px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.1)' 
-                : '0 2px 0 #15803d, 0 4px 8px rgba(22, 163, 74, 0.4), 0 1px 0 rgba(255,255,255,0.3)',
-              WebkitTextStroke: '1px #15803d',
+              color: isDark ? '#ffffff' : '#16a34a',
               display: 'block',
-              marginTop: '8px'
+              marginTop: '8px',
+              textShadow: isDark 
+                ? '0 1px 0 #0d5a2d, 0 2px 0 #0a4a25, 0 3px 0 #083d1f, 0 4px 0 #063018, 0 5px 0 #042310, 0 6px 15px rgba(0,0,0,0.6)' 
+                : '0 1px 0 #15803d, 0 2px 0 #166534, 0 3px 0 #14532d, 0 4px 0 #052e16, 0 5px 0 #022c22, 0 6px 15px rgba(0,0,0,0.2)',
+              letterSpacing: '-0.02em'
             }}>
               Pedidos de Providência
             </span>
@@ -380,11 +430,23 @@ export default function HomePage() {
                 alignItems: 'center',
                 gap: '10px',
                 textDecoration: 'none',
-                boxShadow: '0 6px 20px rgba(22, 163, 74, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                boxShadow: '0 6px 20px rgba(22, 163, 74, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+                position: 'relative',
+                overflow: 'hidden'
               }}
             >
-              Acessar demonstração
-              <ArrowRight style={{ width: '22px', height: '22px' }} />
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '50%',
+                background: 'linear-gradient(to bottom, rgba(255,255,255,0.2), transparent)',
+                borderRadius: '12px 12px 0 0',
+                pointerEvents: 'none'
+              }} />
+              <span style={{ position: 'relative', zIndex: 1 }}>Acessar demonstração</span>
+              <ArrowRight style={{ width: '22px', height: '22px', position: 'relative', zIndex: 1 }} />
             </Link>
             <button 
               onClick={() => setShowContactForm(true)}
@@ -401,11 +463,25 @@ export default function HomePage() {
                 alignItems: 'center',
                 gap: '10px',
                 boxShadow: isDark 
-                  ? '0 4px 12px rgba(0,0,0,0.3)' 
-                  : '0 4px 12px rgba(0,0,0,0.08)'
+                  ? '0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
+                  : '0 4px 12px rgba(0,0,0,0.08), inset 0 2px 0 rgba(255,255,255,1)',
+                position: 'relative',
+                overflow: 'hidden'
               }}
             >
-              Entrar em contato
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '50%',
+                background: isDark 
+                  ? 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)'
+                  : 'linear-gradient(to bottom, rgba(255,255,255,0.8), transparent)',
+                borderRadius: '12px 12px 0 0',
+                pointerEvents: 'none'
+              }} />
+              <span style={{ position: 'relative', zIndex: 1 }}>Entrar em contato</span>
             </button>
           </div>
 
@@ -805,39 +881,40 @@ export default function HomePage() {
               <Mail style={{ width: '22px', height: '22px' }} />
               contato@dataro-it.com.br
             </a>
+            {/* WhatsApp apenas com ícone */}
             <a 
               href={whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
               style={{ 
-                padding: '18px 36px', 
-                borderRadius: '12px', 
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
                 backgroundColor: '#25D366',
                 color: 'white',
-                fontWeight: 700,
-                fontSize: '16px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
+                justifyContent: 'center',
                 textDecoration: 'none',
                 boxShadow: '0 6px 20px rgba(37, 211, 102, 0.4)'
               }}
+              title="Fale conosco pelo WhatsApp"
             >
-              <MessageCircle style={{ width: '22px', height: '22px' }} />
-              (69) 9 9908-9202
+              <MessageCircle style={{ width: '28px', height: '28px' }} />
             </a>
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
+      {/* FOOTER - Centralizado */}
       <footer style={{ 
         padding: '28px 24px', 
         borderTop: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
         backgroundColor: isDark ? '#0f172a' : '#ffffff'
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+          {/* Logos centralizadas */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', marginBottom: '16px' }}>
             <Link href="https://dataro-it.com.br" target="_blank" rel="noopener noreferrer">
               <Image 
                 src="/dataro-logo.jpeg" 
@@ -852,12 +929,13 @@ export default function HomePage() {
               alt="ProviDATA" 
               width={44} 
               height={44} 
-              style={{ borderRadius: '10px' }}
+              style={{ borderRadius: '10px', objectFit: 'contain' }}
             />
             <span style={{ fontWeight: 700, color: isDark ? '#f1f5f9' : '#1e293b' }}>ProviDATA</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: isDark ? '#64748b' : '#94a3b8' }}>
-            <span>Desenvolvido por</span>
+          {/* Texto centralizado */}
+          <div style={{ fontSize: '14px', color: isDark ? '#64748b' : '#94a3b8' }}>
+            <span>Desenvolvido por </span>
             <a 
               href="https://dataro-it.com.br" 
               target="_blank" 
@@ -866,8 +944,7 @@ export default function HomePage() {
             >
               DATA-RO INTELIGÊNCIA TERRITORIAL
             </a>
-            <span>•</span>
-            <span>© 2025 Todos os direitos reservados</span>
+            <span> • Todos os direitos reservados. © 2025</span>
           </div>
         </div>
       </footer>
