@@ -43,26 +43,26 @@ export default function LoginPage() {
       <Toaster position="top-right" richColors />
 
       {/* ========== LADO ESQUERDO - FORMULÁRIO (FUNDO BRANCO) ========== */}
-      <div className="w-full lg:w-1/2 bg-white flex flex-col justify-center px-8 sm:px-16 lg:px-20 py-12">
+      <div className="w-full lg:w-1/2 bg-white flex flex-col justify-center p-8 sm:p-12 lg:p-16">
         <div className="w-full max-w-md mx-auto">
           
           {/* Logos - MESMO TAMANHO */}
-          <div className="flex items-center gap-5 mb-12">
-            <div className="w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center p-2">
+          <div className="flex items-center gap-4 mb-12">
+            <div className="w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center overflow-hidden">
               <Image 
-                src="/LogoDATA-ROsemfundo.png" 
+                src="/dataro-logo-final.png" 
                 alt="DATA-RO" 
-                width={48} 
-                height={48} 
+                width={56} 
+                height={56} 
                 className="object-contain"
               />
             </div>
-            <div className="w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center p-2">
+            <div className="w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center overflow-hidden">
               <Image 
-                src="/LogoProviDATAsemfundo.png" 
+                src="/providata-logo-final.png" 
                 alt="ProviDATA" 
-                width={48} 
-                height={48} 
+                width={56} 
+                height={56} 
                 className="object-contain"
               />
             </div>
@@ -181,12 +181,12 @@ export default function LoginPage() {
 
           {/* Logo rodapé */}
           <div className="flex justify-center mt-6">
-            <div className="w-14 h-14 bg-white rounded-xl shadow-md flex items-center justify-center p-2">
+            <div className="w-14 h-14 bg-white rounded-xl shadow-md flex items-center justify-center overflow-hidden">
               <Image 
-                src="/LogoProviDATAsemfundo.png" 
+                src="/providata-logo-final.png" 
                 alt="ProviDATA" 
-                width={40} 
-                height={40} 
+                width={48} 
+                height={48} 
                 className="object-contain"
               />
             </div>
@@ -195,8 +195,8 @@ export default function LoginPage() {
       </div>
 
       {/* ========== LADO DIREITO - PAINEL INFORMATIVO (DEGRADÊ VERDE) ========== */}
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-green-600 via-green-700 to-teal-800 flex-col justify-center px-12 xl:px-16 py-12">
-        <div className="max-w-lg">
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-green-600 via-green-700 to-teal-800 flex-col justify-center p-12 xl:p-16">
+        <div className="max-w-lg mx-auto">
           
           {/* Título */}
           <h2 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-8">
