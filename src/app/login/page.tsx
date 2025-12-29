@@ -5,32 +5,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import { Mail, Lock, ArrowRight, Eye, EyeOff, Shield, BarChart, Map, FileText, Users, Building, MapPin } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, Shield, BarChart, Map, FileText, Users, Building, MapPin, Sparkles, Lock, RefreshCw } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
-
-const StatCard = ({ icon: Icon, value, label }: { icon: React.ElementType, value: string, label: string }) => (
-  <div className="bg-white/10 rounded-xl p-4 flex items-center gap-4">
-    <div className="bg-white/20 p-3 rounded-lg">
-      <Icon className="w-6 h-6 text-white" />
-    </div>
-    <div>
-      <p className="text-2xl font-bold text-white">{value}</p>
-      <p className="text-sm text-white/80">{label}</p>
-    </div>
-  </div>
-)
-
-const FeatureItem = ({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) => (
-  <div className="flex items-start gap-4">
-    <div className="bg-white/20 p-2 rounded-md mt-1">
-      <Icon className="w-5 h-5 text-white" />
-    </div>
-    <div>
-      <h4 className="font-semibold text-white">{title}</h4>
-      <p className="text-sm text-white/80">{description}</p>
-    </div>
-  </div>
-)
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -63,92 +39,292 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex bg-white dark:bg-gray-900">
+    <div className="min-h-screen w-full flex">
       <Toaster position="top-right" richColors />
 
-      {/* Left Side - Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 sm:p-12">
-        <div className="w-full max-w-md">
-          <div className="mb-10 flex items-center gap-4">
-            <Image src="/dataro-logo-final.png" alt="DATA-RO" width={64} height={64} style={{ objectFit: 'contain', borderRadius: '12px', backgroundColor: '#ffffff', padding: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
-            <Image src="/providata-logo-final.png" alt="ProviDATA" width={64} height={64} style={{ objectFit: 'contain', borderRadius: '12px', backgroundColor: '#ffffff', padding: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800 dark:text-white">ProviDATA</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Gestão de Pedidos de Providência</p>
+      {/* ========== LADO ESQUERDO - FORMULÁRIO (FUNDO BRANCO) ========== */}
+      <div className="w-full lg:w-1/2 bg-white flex flex-col justify-center px-8 sm:px-16 lg:px-20 py-12">
+        <div className="w-full max-w-md mx-auto">
+          
+          {/* Logos - MESMO TAMANHO */}
+          <div className="flex items-center gap-5 mb-12">
+            <div className="w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center p-2">
+              <Image 
+                src="/LogoDATA-ROsemfundo.png" 
+                alt="DATA-RO" 
+                width={48} 
+                height={48} 
+                className="object-contain"
+              />
+            </div>
+            <div className="w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center p-2">
+              <Image 
+                src="/LogoProviDATAsemfundo.png" 
+                alt="ProviDATA" 
+                width={48} 
+                height={48} 
+                className="object-contain"
+              />
+            </div>
+            <div className="ml-2">
+              <h1 className="text-2xl font-bold text-gray-800">ProviDATA</h1>
+              <p className="text-sm text-gray-500">Gestão de Pedidos de Providência</p>
             </div>
           </div>
 
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">Bem-vindo!</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-8">Entre com suas credenciais para acessar o sistema.</p>
+          {/* Título */}
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">Bem-vindo!</h2>
+          <p className="text-gray-600 text-lg mb-10">Entre com suas credenciais para acessar o sistema.</p>
 
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4 rounded-r-lg mb-8 flex items-start gap-3">
-            <Shield className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-yellow-800 dark:text-yellow-300">Acesso Restrito</h3>
-              <p className="text-sm text-yellow-700 dark:text-yellow-400/80">Este sistema é de uso exclusivo. Apenas usuários autorizados pelos administradores podem acessar.</p>
+          {/* Aviso Acesso Restrito */}
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-10">
+            <div className="flex items-start gap-4">
+              <div className="bg-amber-100 p-2 rounded-lg flex-shrink-0">
+                <Shield className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-amber-800 text-base">Acesso Restrito</h3>
+                <p className="text-sm text-amber-700 mt-1 leading-relaxed">
+                  Este sistema é de uso exclusivo. Apenas usuários autorizados pelos administradores podem acessar.
+                </p>
+              </div>
             </div>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+          {/* Formulário */}
+          <form onSubmit={handleLogin} className="space-y-6">
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
-                className="w-full px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
+                className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
                 required
               />
             </div>
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
+
+            {/* Senha */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Senha</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
+                  className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none pr-12"
                   required
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)} 
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
-            <button type="submit" disabled={isLoading} className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-gray-800 text-white font-semibold hover:bg-gray-900 transition-all disabled:opacity-50">
-              {isLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><ArrowRight className="w-5 h-5" /> Entrar</>}
+
+            {/* Botão Entrar */}
+            <button 
+              type="submit" 
+              disabled={isLoading} 
+              className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-green-600 text-white font-semibold text-lg hover:bg-green-700 transition-all disabled:opacity-50 shadow-lg shadow-green-600/30"
+            >
+              {isLoading ? (
+                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <ArrowRight className="w-5 h-5" />
+                  Entrar
+                </>
+              )}
             </button>
           </form>
 
+          {/* Link Demonstração */}
           <div className="text-center mt-6">
-            <Link href="/" className="text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors">
+            <Link 
+              href="/" 
+              className="inline-block text-gray-600 hover:text-green-600 transition-colors font-medium border border-gray-200 rounded-xl px-6 py-3 hover:border-green-300"
+            >
               Acessar Demonstração
             </Link>
+          </div>
+
+          {/* Contato */}
+          <div className="mt-12 text-center">
+            <p className="text-gray-500 text-sm mb-4">Para solicitar acesso, entre em contato:</p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
+              <a href="mailto:contato@dataro-it.com.br" className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                contato@dataro-it.com.br
+              </a>
+              <a href="tel:+5569999089202" className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                (69) 9 9908-9202
+              </a>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <p className="text-center text-gray-400 text-xs mt-10">
+            © 2025 DATA-RO. Todos os direitos reservados.
+          </p>
+
+          {/* Logo rodapé */}
+          <div className="flex justify-center mt-6">
+            <div className="w-14 h-14 bg-white rounded-xl shadow-md flex items-center justify-center p-2">
+              <Image 
+                src="/LogoProviDATAsemfundo.png" 
+                alt="ProviDATA" 
+                width={40} 
+                height={40} 
+                className="object-contain"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Right Side - Info Panel */}
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-green-600 to-teal-700 flex-col justify-center p-12 text-white">
-        <div className="max-w-md mx-auto">
-          <h2 className="text-4xl font-bold leading-tight mb-4">SISTEMA DE GESTÃO DE PEDIDOS DE PROVIDÊNCIA</h2>
-          <p className="text-lg text-white/90 mb-10">Plataforma completa para organizar, rastrear e gerenciar as solicitações dos cidadãos, garantindo transparência e eficiência no gabinete parlamentar.</p>
+      {/* ========== LADO DIREITO - PAINEL INFORMATIVO (DEGRADÊ VERDE) ========== */}
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-green-600 via-green-700 to-teal-800 flex-col justify-center px-12 xl:px-16 py-12">
+        <div className="max-w-lg">
           
-          <div className="grid grid-cols-2 gap-5 mb-10">
-            <StatCard icon={FileText} value="10k+" label="Pedidos Gerenciados" />
-            <StatCard icon={Building} value="50+" label="Gabinetes Atendidos" />
-            <StatCard icon={MapPin} value="150+" label="Municípios Cobertos" />
-            <StatCard icon={Users} value="8+" label="Anos de Dados" />
+          {/* Título */}
+          <h2 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-8">
+            SISTEMA DE GESTÃO DE PEDIDOS DE PROVIDÊNCIA
+          </h2>
+
+          {/* Descrição */}
+          <p className="text-xl text-green-100 leading-relaxed mb-12">
+            Plataforma completa para organizar, rastrear e gerenciar as solicitações dos cidadãos, garantindo transparência e eficiência no gabinete parlamentar.
+          </p>
+
+          {/* Cards de Estatísticas */}
+          <div className="grid grid-cols-2 gap-6 mb-12">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+              <div className="flex items-center gap-4">
+                <div className="bg-white/20 p-3 rounded-xl">
+                  <FileText className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-white">10k+</p>
+                  <p className="text-green-200 text-sm mt-1">Pedidos Gerenciados</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+              <div className="flex items-center gap-4">
+                <div className="bg-white/20 p-3 rounded-xl">
+                  <Building className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-white">50+</p>
+                  <p className="text-green-200 text-sm mt-1">Gabinetes Atendidos</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+              <div className="flex items-center gap-4">
+                <div className="bg-white/20 p-3 rounded-xl">
+                  <MapPin className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-white">150+</p>
+                  <p className="text-green-200 text-sm mt-1">Municípios Cobertos</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+              <div className="flex items-center gap-4">
+                <div className="bg-white/20 p-3 rounded-xl">
+                  <Users className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <p className="text-3xl font-bold text-white">8+</p>
+                  <p className="text-green-200 text-sm mt-1">Anos de Dados</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <h3 className="text-2xl font-bold mb-6">Funcionalidades Principais</h3>
-          <div className="space-y-5">
-            <FeatureItem icon={BarChart} title="Dashboard Analítico" description="Visão geral com métricas e status de todos os pedidos em tempo real." />
-            <FeatureItem icon={Map} title="Mapa de Demandas" description="Visualização geográfica das solicitações para identificar áreas prioritárias." />
-            <FeatureItem icon={FileText} title="Análise de Resultados" description="Compare o volume e tipo de pedidos entre diferentes regiões e períodos." />
+          {/* Funcionalidades Principais */}
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-8">
+              <Sparkles className="w-6 h-6 text-green-200" />
+              <h3 className="text-2xl font-bold text-white">Funcionalidades Principais</h3>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-start gap-5">
+                <div className="bg-white/20 p-3 rounded-xl flex-shrink-0">
+                  <BarChart className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-white text-lg">Dashboard Analítico</h4>
+                  <p className="text-green-200 mt-2 leading-relaxed">
+                    Visão geral com métricas e status de todos os pedidos em tempo real.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-5">
+                <div className="bg-white/20 p-3 rounded-xl flex-shrink-0">
+                  <Map className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-white text-lg">Mapa de Demandas</h4>
+                  <p className="text-green-200 mt-2 leading-relaxed">
+                    Visualização geográfica das solicitações para identificar áreas prioritárias.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-5">
+                <div className="bg-white/20 p-3 rounded-xl flex-shrink-0">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-white text-lg">Análise de Resultados</h4>
+                  <p className="text-green-200 mt-2 leading-relaxed">
+                    Compare o volume e tipo de pedidos entre diferentes regiões e períodos.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* Rodapé */}
+          <div className="pt-8 border-t border-white/20 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 p-2 rounded-lg">
+                <Lock className="w-5 h-5 text-green-200" />
+              </div>
+              <span className="text-green-200">Dados Seguros</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 p-2 rounded-lg">
+                <RefreshCw className="w-5 h-5 text-green-200" />
+              </div>
+              <span className="text-green-200">Atualização Constante</span>
+            </div>
+          </div>
+
+          {/* Desenvolvido por */}
+          <p className="text-center text-green-300/60 text-sm mt-8">
+            Desenvolvido por DATA-RO Inteligência Territorial
+          </p>
         </div>
       </div>
     </div>
