@@ -406,28 +406,20 @@ style={{
 		                }}
 		                className="hover:scale-105 transition-transform duration-300"
 	              />
-	              <span style={{ 
-	                color: '#16a34a',
-	                display: 'block',
-	                textShadow: isDark 
-	                  ? '0 1px 0 #0d5a2d, 0 2px 0 #0a4a25, 0 3px 0 #083d1f, 0 4px 0 #063018, 0 5px 10px rgba(0,0,0,0.5)' 
-	                  : '0 1px 0 #15803d, 0 2px 0 #166534, 0 3px 0 #14532d, 0 4px 0 #052e16, 0 5px 10px rgba(0,0,0,0.15)',
-	                letterSpacing: '-0.02em'
-	              }}>
-	                Plataforma para Gestão de
-	              </span>
+<span className="text-providata-gradient" style={{ 
+		                display: 'block',
+		                letterSpacing: '-0.02em'
+		              }}>
+		                Plataforma para Gestão de
+		              </span>
 	            </div>
-	            <span style={{ 
-	              color: isDark ? '#ffffff' : '#1e293b',
-	              display: 'block',
-	              marginTop: '8px',
-	              textShadow: isDark 
-	                ? '0 1px 0 #0d5a2d, 0 2px 0 #0a4a25, 0 3px 0 #083d1f, 0 4px 0 #063018, 0 5px 0 #042310, 0 6px 15px rgba(0,0,0,0.6)' 
-	                : '0 1px 0 #15803d, 0 2px 0 #166534, 0 3px 0 #14532d, 0 4px 0 #052e16, 0 5px 0 #022c22, 0 6px 15px rgba(0,0,0,0.2)',
-	              letterSpacing: '-0.02em'
-	            }}>
-	              Pedidos de Providência
-	            </span>
+<span className="text-providata-gradient" style={{ 
+		              display: 'block',
+		              marginTop: '8px',
+		              letterSpacing: '-0.02em'
+		            }}>
+		              Pedidos de Providência
+		            </span>
 	          </h1>
 
           {/* Subtitle */}
