@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { ArrowRight, Eye, EyeOff, Shield, BarChart, Map, FileText, Users, Building, MapPin, Sparkles, Lock, RefreshCw } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
@@ -46,26 +45,51 @@ export default function LoginPage() {
       <div className="w-full lg:w-1/2 bg-white flex flex-col justify-center p-8 sm:p-12 lg:p-16">
         <div className="w-full max-w-md mx-auto">
           
-          {/* Logos - MESMO TAMANHO */}
+          {/* Logos - MESMO TAMANHO DE CAIXA */}
           <div className="flex items-center gap-4 mb-12">
-            <div className="w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center overflow-hidden">
-              <Image 
+            {/* Logo DATA-RO */}
+            <div 
+              className="flex-shrink-0 bg-white rounded-xl flex items-center justify-center overflow-hidden"
+              style={{ 
+                width: '64px', 
+                height: '64px', 
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                padding: '8px'
+              }}
+            >
+              <img 
                 src="/dataro-logo-final.png" 
                 alt="DATA-RO" 
-                width={56} 
-                height={56} 
-                className="object-contain"
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'contain' 
+                }}
               />
             </div>
-            <div className="w-16 h-16 bg-white rounded-xl shadow-lg flex items-center justify-center overflow-hidden">
-              <Image 
+            
+            {/* Logo ProviDATA */}
+            <div 
+              className="flex-shrink-0 bg-white rounded-xl flex items-center justify-center overflow-hidden"
+              style={{ 
+                width: '64px', 
+                height: '64px', 
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                padding: '8px'
+              }}
+            >
+              <img 
                 src="/providata-logo-final.png" 
                 alt="ProviDATA" 
-                width={56} 
-                height={56} 
-                className="object-contain"
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'contain' 
+                }}
               />
             </div>
+            
+            {/* Texto */}
             <div className="ml-2">
               <h1 className="text-2xl font-bold text-gray-800">ProviDATA</h1>
               <p className="text-sm text-gray-500">Gestão de Pedidos de Providência</p>
@@ -181,13 +205,23 @@ export default function LoginPage() {
 
           {/* Logo rodapé */}
           <div className="flex justify-center mt-6">
-            <div className="w-14 h-14 bg-white rounded-xl shadow-md flex items-center justify-center overflow-hidden">
-              <Image 
+            <div 
+              className="bg-white rounded-xl flex items-center justify-center overflow-hidden"
+              style={{ 
+                width: '56px', 
+                height: '56px', 
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                padding: '6px'
+              }}
+            >
+              <img 
                 src="/providata-logo-final.png" 
                 alt="ProviDATA" 
-                width={48} 
-                height={48} 
-                className="object-contain"
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'contain' 
+                }}
               />
             </div>
           </div>
