@@ -1105,22 +1105,24 @@ export default function HomePage() {
                       fontSize: '15px',
                       outline: 'none'
                     }}
-                    placeholder="Seu nome                  required
-                />
-              </div>
-              {/* Campo Honeypot - Visível para bots, invisível para humanos */}
-              <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', opacity: 0, height: 0, width: 0, overflow: 'hidden' }}>
-                <label htmlFor="email_confirm">Não preencha este campo</label>
-                <input
-                  type="text"
-                  id="email_confirm"
-                  name="email_confirm"
-                  value={formData.email_confirm}
-                  onChange={handleChange}
-                  tabIndex={-1}
-                  autoComplete="off"
-                />
-              </div> style={{ marginBottom: '20px' }}>
+                    placeholder="Seu nome completo"
+                    required
+                  />
+                </div>
+                {/* Campo Honeypot - Visível para bots, invisível para humanos */}
+                <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', opacity: 0, height: 0, width: 0, overflow: 'hidden' }}>
+                  <label htmlFor="email_confirm">Nao preencha este campo</label>
+                  <input
+                    type="text"
+                    id="email_confirm"
+                    name="email_confirm"
+                    value={formData.email_confirm}
+                    onChange={handleChange}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
+                <div style={{ marginBottom: '20px' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#374151', fontSize: '14px' }}>
                     Cargo
                   </label>
