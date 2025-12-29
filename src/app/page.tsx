@@ -665,17 +665,14 @@ style={{
               boxShadow: isDark 
                 ? '0 10px 30px rgba(0, 0, 0, 0.2)' 
                 : '0 10px 30px rgba(0, 0, 0, 0.08)',
-              transition: 'transform 0.3s ease-in-out',
+              transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
               position: 'relative',
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'space-between',
-              ':hover': {
-                transform: 'translateY(-5px)',
-                boxShadow: isDark ? '0 15px 40px rgba(0, 0, 0, 0.3)' : '0 15px 40px rgba(0, 0, 0, 0.15)',
-              }
-            }}>
+              justifyContent: 'space-between'
+            }}
+            className="hover:-translate-y-1 hover:shadow-xl">
               <h3 style={{ 
                 fontSize: '26px', 
                 fontWeight: 700, 
@@ -748,16 +745,13 @@ style={{
               backgroundColor: isDark ? '#1e293b' : '#ffffff',
               position: 'relative',
               boxShadow: '0 8px 24px rgba(22, 163, 74, 0.25)',
-              transition: 'transform 0.3s ease-in-out',
+              transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'space-between',
-              ':hover': {
-                transform: 'translateY(-5px)',
-                boxShadow: '0 15px 40px rgba(22, 163, 74, 0.35)',
-              }
-            }}>
+              justifyContent: 'space-between'
+            }}
+            className="hover:-translate-y-1 hover:shadow-2xl hover:shadow-green-500/30">
               <div style={{ 
                 position: 'absolute',
                 top: '-14px',
