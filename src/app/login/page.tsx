@@ -53,12 +53,14 @@ export default function LoginPage() {
       
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 glass">
-        <div className="max-w-6xl mx-auto px-6 h-24 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 h-24 flex items-center justify-center relative">
           <Link href="/" className="flex items-center gap-4">
             <Image src="/providata-logo-final.png" alt="ProviDATA" width={56} height={56} style={{ objectFit: 'contain', borderRadius: '12px', backgroundColor: '#ffffff', padding: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
             <span className="text-providata-gradient font-extrabold text-4xl tracking-tight">ProviDATA</span>
           </Link>
-          <ThemeToggle />
+          <div className="absolute right-6 top-1/2 -translate-y-1/2">
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
@@ -175,17 +177,20 @@ export default function LoginPage() {
           </div>
 
           {/* Footer */}
-          <p className="text-center text-md text-[var(--muted-foreground)] mt-10">
-            Desenvolvido por{' '}
-            <a 
-              href="https://dataro-it.com.br" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="font-medium text-[var(--foreground)] hover:text-green-600 dark:hover:text-green-400 transition-colors"
-            >
-              DATA-RO INTELIGÊNCIA TERRITORIAL
-            </a>
-          </p>
+          <div className="text-center text-md text-[var(--muted-foreground)] mt-10 space-y-2">
+            <p>
+              Desenvolvido por{' '}
+              <a 
+                href="https://dataro-it.com.br" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="font-medium text-[var(--foreground)] hover:text-green-600 dark:hover:text-green-400 transition-colors"
+              >
+                DATA-RO INTELIGÊNCIA TERRITORIAL
+              </a>
+            </p>
+            <p>&copy; {new Date().getFullYear()} ProviDATA. Todos os direitos reservados.</p>
+          </div>
         </div>
       </main>
     </div>
