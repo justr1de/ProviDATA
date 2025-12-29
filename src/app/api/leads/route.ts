@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { nome, cargo, email, telefone } = await request.json();
+    const { nome, cargo, email, telefone, mensagem } = await request.json();
 
     // Validar campos obrigatórios
-    if (!nome || !cargo || !email || !telefone) {
+    if (!nome || !cargo || !email || !telefone || !mensagem) {
       return NextResponse.json(
         { error: 'Todos os campos são obrigatórios' },
         { status: 400 }
@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
           cargo: cargo.trim(),
           email: email.trim().toLowerCase(),
           telefone: telefone.trim(),
+          mensagem: mensagem.trim(),
           status: 'novo',
         },
       ])

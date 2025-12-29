@@ -102,7 +102,8 @@ export default function HomePage() {
     nome: '',
     cargo: '',
     email: '',
-    telefone: ''
+    telefone: '',
+    mensagem: ''
   });
   const [formStatus, setFormStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   
@@ -131,7 +132,7 @@ export default function HomePage() {
       }
       
       setFormStatus('success');
-      setFormData({ nome: '', cargo: '', email: '', telefone: '' });
+      setFormData({ nome: '', cargo: '', email: '', telefone: '', mensagem: '' });
       
       setTimeout(() => {
         setShowContactForm(false);
@@ -1120,6 +1121,28 @@ export default function HomePage() {
                       outline: 'none'
                     }}
                     placeholder="(00) 0 0000-0000"
+                  />
+                </div>
+                <div style={{ marginBottom: '28px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#374151', fontSize: '14px' }}>
+                    Mensagem (Opcional)
+                  </label>
+                  <textarea
+                    value={formData.mensagem}
+                    onChange={(e) => setFormData({ ...formData, mensagem: e.target.value })}
+                    rows={4}
+                    style={{
+                      width: '100%',
+                      padding: '14px 16px',
+                      borderRadius: '10px',
+                      border: `1px solid ${isDark ? '#334155' : '#d1d5db'}`,
+                      backgroundColor: isDark ? '#0f172a' : '#ffffff',
+                      color: isDark ? '#f1f5f9' : '#1e293b',
+                      fontSize: '15px',
+                      outline: 'none',
+                      resize: 'vertical'
+                    }}
+                    placeholder="Deixe sua mensagem aqui..."
                   />
                 </div>
                 <button
