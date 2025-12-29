@@ -66,36 +66,60 @@ const planoProfissional = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-color, #ffffff)' }} className="dark:bg-gray-950">
       
-      {/* ==================== HEADER ==================== */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
+      {/* HEADER */}
+      <header style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        zIndex: 50, 
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        borderBottom: '1px solid #e5e7eb',
+        backdropFilter: 'blur(8px)'
+      }} className="dark:bg-gray-950/95 dark:border-gray-800">
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '64px' }}>
             
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-white" />
+            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ 
+                width: '36px', 
+                height: '36px', 
+                borderRadius: '8px', 
+                background: 'linear-gradient(135deg, #22c55e, #15803d)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <FileText style={{ width: '20px', height: '20px', color: 'white' }} />
               </div>
-              <span className="font-bold text-lg text-gray-900 dark:text-white">ProviDATA</span>
+              <span style={{ fontWeight: 700, fontSize: '18px' }} className="text-gray-900 dark:text-white">ProviDATA</span>
             </Link>
 
             {/* Nav */}
-            <nav className="hidden md:flex items-center gap-8">
-              <a href="#recursos" className="text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400">Recursos</a>
-              <a href="#planos" className="text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400">Planos</a>
-              <a href="#sobre" className="text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400">Sobre</a>
-              <a href="#contato" className="text-sm text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400">Contato</a>
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '32px' }} className="hidden md:flex">
+              <a href="#recursos" style={{ fontSize: '14px' }} className="text-gray-600 dark:text-gray-400 hover:text-green-600">Recursos</a>
+              <a href="#planos" style={{ fontSize: '14px' }} className="text-gray-600 dark:text-gray-400 hover:text-green-600">Planos</a>
+              <a href="#sobre" style={{ fontSize: '14px' }} className="text-gray-600 dark:text-gray-400 hover:text-green-600">Sobre</a>
+              <a href="#contato" style={{ fontSize: '14px' }} className="text-gray-600 dark:text-gray-400 hover:text-green-600">Contato</a>
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <ThemeToggle />
-              <Link href="/login" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+              <Link href="/login" style={{ fontSize: '14px' }} className="text-gray-600 dark:text-gray-400 hover:text-gray-900">
                 Entrar
               </Link>
-              <Link href="/demo" className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-medium">
+              <Link href="/demo" style={{ 
+                padding: '8px 16px', 
+                borderRadius: '8px', 
+                backgroundColor: '#16a34a',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: 500
+              }}>
                 Demo
               </Link>
             </div>
@@ -103,93 +127,164 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ==================== HERO ==================== */}
-      <section className="pb-24 px-6" style={{ paddingTop: '200px' }}>
-        <div className="max-w-4xl mx-auto text-center">
+      {/* HERO */}
+      <section style={{ paddingTop: '180px', paddingBottom: '80px', paddingLeft: '24px', paddingRight: '24px' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
           
           {/* Badge */}
-          <div className="inline-block px-4 py-2 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium mb-8">
+          <div style={{ 
+            display: 'inline-block', 
+            padding: '8px 16px', 
+            borderRadius: '9999px', 
+            backgroundColor: '#dcfce7',
+            color: '#15803d',
+            fontSize: '14px',
+            fontWeight: 500,
+            marginBottom: '32px'
+          }} className="dark:bg-green-900/30 dark:text-green-400">
             Plataforma SaaS para Gabinetes Parlamentares
           </div>
 
           {/* Title */}
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+          <h1 style={{ 
+            fontSize: 'clamp(36px, 5vw, 60px)', 
+            fontWeight: 700, 
+            lineHeight: 1.1,
+            marginBottom: '24px'
+          }} className="text-gray-900 dark:text-white">
             Gestão de Providências
             <br />
-            <span className="text-green-600 dark:text-green-400">Parlamentares</span>
+            <span style={{ color: '#16a34a' }}>Parlamentares</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p style={{ 
+            fontSize: '20px', 
+            lineHeight: 1.6,
+            marginBottom: '40px',
+            maxWidth: '700px',
+            margin: '0 auto 40px auto'
+          }} className="text-gray-600 dark:text-gray-400">
             Organize as solicitações dos cidadãos de forma simples e transparente. 
             Acompanhe prazos, encaminhe demandas e mantenha todos informados.
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            gap: '16px',
+            marginBottom: '64px'
+          }}>
             <Link 
               href="/demo"
-              className="w-full sm:w-auto px-8 py-4 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold text-lg flex items-center justify-center gap-2"
+              style={{ 
+                padding: '16px 32px', 
+                borderRadius: '8px', 
+                backgroundColor: '#16a34a',
+                color: 'white',
+                fontWeight: 600,
+                fontSize: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
             >
               Acessar demonstração
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight style={{ width: '20px', height: '20px' }} />
             </Link>
             <a 
               href="#contato"
-              className="w-full sm:w-auto px-8 py-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white font-semibold text-lg hover:border-green-500"
+              style={{ 
+                padding: '16px 32px', 
+                borderRadius: '8px', 
+                border: '2px solid #d1d5db',
+                fontWeight: 600,
+                fontSize: '16px'
+              }}
+              className="text-gray-900 dark:text-white dark:border-gray-700 hover:border-green-500"
             >
               Falar com consultor
             </a>
           </div>
 
           {/* Stats */}
-          <div className="flex items-center justify-center gap-16">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 dark:text-green-400">SaaS</div>
-              <div className="text-sm text-gray-500 dark:text-gray-500 mt-1">Modelo</div>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            gap: '48px',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '28px', fontWeight: 700, color: '#16a34a' }}>SaaS</div>
+              <div style={{ fontSize: '14px', marginTop: '4px' }} className="text-gray-500">Modelo</div>
             </div>
-            <div className="w-px h-12 bg-gray-300 dark:bg-gray-700"></div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 dark:text-green-400">Multi</div>
-              <div className="text-sm text-gray-500 dark:text-gray-500 mt-1">Tenant</div>
+            <div style={{ width: '1px', height: '48px', backgroundColor: '#d1d5db' }} className="dark:bg-gray-700 hidden sm:block"></div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '28px', fontWeight: 700, color: '#16a34a' }}>Multi</div>
+              <div style={{ fontSize: '14px', marginTop: '4px' }} className="text-gray-500">Tenant</div>
             </div>
-            <div className="w-px h-12 bg-gray-300 dark:bg-gray-700"></div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 dark:text-green-400">LGPD</div>
-              <div className="text-sm text-gray-500 dark:text-gray-500 mt-1">Conforme</div>
+            <div style={{ width: '1px', height: '48px', backgroundColor: '#d1d5db' }} className="dark:bg-gray-700 hidden sm:block"></div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '28px', fontWeight: 700, color: '#16a34a' }}>LGPD</div>
+              <div style={{ fontSize: '14px', marginTop: '4px' }} className="text-gray-500">Conforme</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ==================== RECURSOS ==================== */}
-      <section id="recursos" className="py-24 px-6 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-6xl mx-auto">
+      {/* RECURSOS */}
+      <section id="recursos" style={{ padding: '80px 24px', backgroundColor: '#f9fafb' }} className="dark:bg-gray-900">
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           
           {/* Header */}
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+            <h2 style={{ fontSize: '36px', fontWeight: 700, marginBottom: '16px' }} className="text-gray-900 dark:text-white">
               Tudo que você precisa
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            <p style={{ fontSize: '18px', maxWidth: '600px', margin: '0 auto' }} className="text-gray-600 dark:text-gray-400">
               Funcionalidades pensadas para otimizar o trabalho do gabinete parlamentar
             </p>
           </div>
 
           {/* Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+            gap: '24px'
+          }}>
             {features.map((feature, index) => (
               <div 
                 key={index}
-                className="p-8 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-500 transition-colors"
+                style={{ 
+                  padding: '32px',
+                  borderRadius: '16px',
+                  border: '1px solid #e5e7eb',
+                  backgroundColor: 'white',
+                  transition: 'border-color 0.2s'
+                }}
+                className="dark:bg-gray-800 dark:border-gray-700 hover:border-green-500"
               >
-                <div className="w-14 h-14 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-6">
-                  <feature.icon className="w-7 h-7 text-green-600 dark:text-green-400" />
+                <div style={{ 
+                  width: '56px', 
+                  height: '56px', 
+                  borderRadius: '12px', 
+                  backgroundColor: '#dcfce7',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '24px'
+                }} className="dark:bg-green-900/30">
+                  <feature.icon style={{ width: '28px', height: '28px', color: '#16a34a' }} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }} className="text-gray-900 dark:text-white">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                <p style={{ fontSize: '16px', lineHeight: 1.6 }} className="text-gray-600 dark:text-gray-400">
                   {feature.description}
                 </p>
               </div>
@@ -198,35 +293,53 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ==================== PLANOS ==================== */}
-      <section id="planos" className="py-24 px-6">
-        <div className="max-w-5xl mx-auto">
+      {/* PLANOS */}
+      <section id="planos" style={{ padding: '80px 24px' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           
           {/* Header */}
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+            <h2 style={{ fontSize: '36px', fontWeight: 700, marginBottom: '16px' }} className="text-gray-900 dark:text-white">
               Planos e Preços
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            <p style={{ fontSize: '18px', maxWidth: '600px', margin: '0 auto' }} className="text-gray-600 dark:text-gray-400">
               Escolha o plano ideal para o seu gabinete. Todos incluem suporte técnico e atualizações.
             </p>
           </div>
 
           {/* Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+            gap: '32px'
+          }}>
             
             {/* Básico */}
-            <div className="p-8 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Básico</h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-6">Para gabinetes menores</p>
+            <div style={{ 
+              padding: '32px',
+              borderRadius: '16px',
+              border: '1px solid #e5e7eb',
+              backgroundColor: 'white'
+            }} className="dark:bg-gray-800 dark:border-gray-700">
+              <h3 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }} className="text-gray-900 dark:text-white">Básico</h3>
+              <p style={{ marginBottom: '24px' }} className="text-gray-500">Para gabinetes menores</p>
               
-              <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-8">Consulte</div>
+              <div style={{ fontSize: '36px', fontWeight: 700, color: '#16a34a', marginBottom: '32px' }}>Consulte</div>
 
-              <ul className="space-y-4 mb-8">
+              <ul style={{ listStyle: 'none', padding: 0, marginBottom: '32px' }}>
                 {planoBasico.map((item, index) => (
-                  <li key={index} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-green-600 dark:text-green-400" />
+                  <li key={index} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                    <div style={{ 
+                      width: '20px', 
+                      height: '20px', 
+                      borderRadius: '50%', 
+                      backgroundColor: '#dcfce7',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }} className="dark:bg-green-900/30">
+                      <Check style={{ width: '12px', height: '12px', color: '#16a34a' }} />
                     </div>
                     <span className="text-gray-600 dark:text-gray-400">{item}</span>
                   </li>
@@ -235,29 +348,66 @@ export default function HomePage() {
 
               <a 
                 href="#contato"
-                className="w-full py-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white font-semibold flex items-center justify-center gap-2 hover:border-green-500"
+                style={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '2px solid #d1d5db',
+                  fontWeight: 600
+                }}
+                className="text-gray-900 dark:text-white dark:border-gray-600 hover:border-green-500"
               >
                 Solicitar proposta
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight style={{ width: '16px', height: '16px' }} />
               </a>
             </div>
 
             {/* Profissional */}
-            <div className="p-8 rounded-2xl bg-white dark:bg-gray-800 border-2 border-green-500 relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-green-600 text-white text-sm font-medium">
+            <div style={{ 
+              padding: '32px',
+              borderRadius: '16px',
+              border: '2px solid #16a34a',
+              backgroundColor: 'white',
+              position: 'relative'
+            }} className="dark:bg-gray-800">
+              <div style={{ 
+                position: 'absolute',
+                top: '-12px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                padding: '4px 16px',
+                borderRadius: '9999px',
+                backgroundColor: '#16a34a',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: 500
+              }}>
                 Recomendado
               </div>
               
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Profissional</h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-6">Para gabinetes completos</p>
+              <h3 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }} className="text-gray-900 dark:text-white">Profissional</h3>
+              <p style={{ marginBottom: '24px' }} className="text-gray-500">Para gabinetes completos</p>
               
-              <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-8">Consulte</div>
+              <div style={{ fontSize: '36px', fontWeight: 700, color: '#16a34a', marginBottom: '32px' }}>Consulte</div>
 
-              <ul className="space-y-4 mb-8">
+              <ul style={{ listStyle: 'none', padding: 0, marginBottom: '32px' }}>
                 {planoProfissional.map((item, index) => (
-                  <li key={index} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-3 h-3 text-green-600 dark:text-green-400" />
+                  <li key={index} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                    <div style={{ 
+                      width: '20px', 
+                      height: '20px', 
+                      borderRadius: '50%', 
+                      backgroundColor: '#dcfce7',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }} className="dark:bg-green-900/30">
+                      <Check style={{ width: '12px', height: '12px', color: '#16a34a' }} />
                     </div>
                     <span className="text-gray-600 dark:text-gray-400">{item}</span>
                   </li>
@@ -266,86 +416,140 @@ export default function HomePage() {
 
               <a 
                 href="#contato"
-                className="w-full py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold flex items-center justify-center gap-2"
+                style={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  backgroundColor: '#16a34a',
+                  color: 'white',
+                  fontWeight: 600
+                }}
               >
                 Solicitar proposta
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight style={{ width: '16px', height: '16px' }} />
               </a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ==================== SOBRE ==================== */}
-      <section id="sobre" className="py-24 px-6 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
+      {/* SOBRE */}
+      <section id="sobre" style={{ padding: '80px 24px', backgroundColor: '#f9fafb' }} className="dark:bg-gray-900">
+        <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+          <h2 style={{ fontSize: '36px', fontWeight: 700, marginBottom: '24px' }} className="text-gray-900 dark:text-white">
             Sobre o Projeto
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed mb-8">
+          <p style={{ fontSize: '18px', lineHeight: 1.8, marginBottom: '32px' }} className="text-gray-600 dark:text-gray-400">
             O ProviDATA foi desenvolvido especialmente para atender às necessidades dos gabinetes 
             parlamentares brasileiros, com foco em simplicidade, transparência e eficiência no 
             atendimento ao cidadão. Nossa plataforma permite que vereadores, deputados e senadores 
             gerenciem todas as demandas de forma organizada e profissional.
           </p>
-          <div className="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} className="text-gray-500">
             <span>Desenvolvido por</span>
-            <span className="font-bold text-gray-900 dark:text-white">DATA-RO INTELIGÊNCIA TERRITORIAL</span>
+            <span style={{ fontWeight: 700 }} className="text-gray-900 dark:text-white">DATA-RO INTELIGÊNCIA TERRITORIAL</span>
           </div>
         </div>
       </section>
 
-      {/* ==================== CONTATO ==================== */}
-      <section id="contato" className="py-24 px-6">
-        <div className="max-w-4xl mx-auto text-center">
+      {/* CONTATO */}
+      <section id="contato" style={{ padding: '80px 24px' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
           
-          <div className="w-16 h-16 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-8">
-            <Mail className="w-8 h-8 text-green-600 dark:text-green-400" />
+          <div style={{ 
+            width: '64px', 
+            height: '64px', 
+            borderRadius: '16px', 
+            backgroundColor: '#dcfce7',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 32px auto'
+          }} className="dark:bg-green-900/30">
+            <Mail style={{ width: '32px', height: '32px', color: '#16a34a' }} />
           </div>
           
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 style={{ fontSize: '36px', fontWeight: 700, marginBottom: '16px' }} className="text-gray-900 dark:text-white">
             Entre em contato
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
+          <p style={{ fontSize: '18px', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px auto' }} className="text-gray-600 dark:text-gray-400">
             Fale com nossa equipe comercial para conhecer melhor o sistema e receber uma proposta personalizada.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            gap: '16px'
+          }}>
             <a 
               href="mailto:contato@dataro-it.com.br"
-              className="w-full sm:w-auto px-8 py-4 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold flex items-center justify-center gap-2"
+              style={{ 
+                padding: '16px 32px', 
+                borderRadius: '8px', 
+                backgroundColor: '#16a34a',
+                color: 'white',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
             >
-              <Mail className="w-5 h-5" />
+              <Mail style={{ width: '20px', height: '20px' }} />
               contato@dataro-it.com.br
             </a>
             <a 
               href="https://wa.me/5569999999999"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto px-8 py-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white font-semibold flex items-center justify-center gap-2 hover:border-green-500"
+              style={{ 
+                padding: '16px 32px', 
+                borderRadius: '8px', 
+                border: '2px solid #d1d5db',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+              className="text-gray-900 dark:text-white dark:border-gray-700 hover:border-green-500"
             >
-              <MessageCircle className="w-5 h-5" />
+              <MessageCircle style={{ width: '20px', height: '20px' }} />
               WhatsApp
             </a>
           </div>
         </div>
       </section>
 
-      {/* ==================== FOOTER ==================== */}
-      <footer className="py-8 px-6 border-t border-gray-200 dark:border-gray-800">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
-              <FileText className="w-4 h-4 text-white" />
+      {/* FOOTER */}
+      <footer style={{ padding: '24px', borderTop: '1px solid #e5e7eb' }} className="dark:border-gray-800">
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ 
+              width: '32px', 
+              height: '32px', 
+              borderRadius: '8px', 
+              background: 'linear-gradient(135deg, #22c55e, #15803d)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <FileText style={{ width: '16px', height: '16px', color: 'white' }} />
             </div>
-            <span className="font-bold text-gray-900 dark:text-white">ProviDATA</span>
-            <span className="text-gray-500 dark:text-gray-500">© 2025</span>
+            <span style={{ fontWeight: 700 }} className="text-gray-900 dark:text-white">ProviDATA</span>
+            <span className="text-gray-500">© 2025</span>
           </div>
           <a 
             href="https://dataro-it.com.br" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-sm text-gray-500 dark:text-gray-500 hover:text-green-600 dark:hover:text-green-400"
+            style={{ fontSize: '14px' }}
+            className="text-gray-500 hover:text-green-600"
           >
             Desenvolvido por DATA-RO INTELIGÊNCIA TERRITORIAL
           </a>
