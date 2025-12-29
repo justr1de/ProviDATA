@@ -87,7 +87,7 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-[var(--foreground)] border-t-transparent rounded-full animate-spin" />
+          <div className="w-10 h-10 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-[var(--muted-foreground)]">Carregando...</p>
         </div>
       </div>
@@ -108,33 +108,33 @@ export default function DashboardLayout({
 
       {/* Sidebar */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full w-60 bg-[var(--background)] border-r border-[var(--border)]
+        fixed top-0 left-0 z-50 h-full w-64 bg-[var(--background)] border-r border-[var(--border)]
         transform transition-transform duration-200 ease-in-out
         lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-14 px-4 border-b border-[var(--border)]">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                <FileText className="w-4 h-4 text-white" />
+          <div className="flex items-center justify-between h-16 px-5 border-b border-[var(--border)]">
+            <Link href="/dashboard" className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center shadow-lg shadow-green-500/20">
+                <FileText className="w-5 h-5 text-white" />
               </div>
-              <span className="font-semibold text-[var(--foreground)]">ProviDATA</span>
+              <span className="font-bold text-lg text-[var(--foreground)]">ProviDATA</span>
             </Link>
             <button 
-              className="lg:hidden p-1.5 hover:bg-[var(--muted)] rounded-lg transition-colors"
+              className="lg:hidden p-2 hover:bg-[var(--muted)] rounded-lg transition-colors"
               onClick={() => setSidebarOpen(false)}
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Tenant info */}
           {tenant && (
-            <div className="px-4 py-3 border-b border-[var(--border)]">
-              <p className="text-sm font-medium text-[var(--foreground)] truncate">{tenant.parlamentar_name}</p>
-              <p className="text-xs text-[var(--muted-foreground)] truncate">
+            <div className="px-5 py-4 border-b border-[var(--border)]">
+              <p className="text-sm font-semibold text-[var(--foreground)] truncate">{tenant.parlamentar_name}</p>
+              <p className="text-xs text-[var(--muted-foreground)] truncate mt-0.5">
                 {tenant.cargo === 'vereador' ? 'Vereador(a)' : 
                  tenant.cargo === 'deputado_estadual' ? 'Deputado(a) Estadual' :
                  tenant.cargo === 'deputado_federal' ? 'Deputado(a) Federal' : 'Senador(a)'}
@@ -152,15 +152,15 @@ export default function DashboardLayout({
                   key={item.name}
                   href={item.href}
                   className={`
-                    flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors
+                    flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all
                     ${isActive 
-                      ? 'bg-[var(--foreground)] text-[var(--background)] font-medium' 
-                      : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]'
+                      ? 'bg-gradient-to-r from-green-600 to-green-700 text-white font-medium shadow-lg shadow-green-600/20' 
+                      : 'text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]'
                     }
                   `}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <item.icon className="w-4 h-4" />
+                  <item.icon className="w-5 h-5" />
                   {item.name}
                 </Link>
               )
@@ -171,18 +171,30 @@ export default function DashboardLayout({
           <div className="p-3 border-t border-[var(--border)] space-y-1">
             <Link
               href="/dashboard/notificacoes"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              className={`
+                flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all
+                ${pathname === '/dashboard/notificacoes'
+                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white font-medium shadow-lg shadow-green-600/20'
+                  : 'text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]'
+                }
+              `}
               onClick={() => setSidebarOpen(false)}
             >
-              <Bell className="w-4 h-4" />
+              <Bell className="w-5 h-5" />
               Notificações
             </Link>
             <Link
               href="/dashboard/configuracoes"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              className={`
+                flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all
+                ${pathname === '/dashboard/configuracoes'
+                  ? 'bg-gradient-to-r from-green-600 to-green-700 text-white font-medium shadow-lg shadow-green-600/20'
+                  : 'text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]'
+                }
+              `}
               onClick={() => setSidebarOpen(false)}
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-5 h-5" />
               Configurações
             </Link>
           </div>
@@ -190,12 +202,12 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main content */}
-      <div className="lg:pl-60">
+      <div className="lg:pl-64">
         {/* Header */}
-        <header className="sticky top-0 z-30 h-14 bg-[var(--background)] border-b border-[var(--border)]">
-          <div className="flex items-center justify-between h-full px-4">
+        <header className="sticky top-0 z-30 h-16 bg-[var(--background)] border-b border-[var(--border)]">
+          <div className="flex items-center justify-between h-full px-4 md:px-6">
             <button
-              className="lg:hidden p-1.5 hover:bg-[var(--muted)] rounded-lg transition-colors"
+              className="lg:hidden p-2 hover:bg-[var(--muted)] rounded-lg transition-colors"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className="w-5 h-5" />
@@ -203,32 +215,32 @@ export default function DashboardLayout({
 
             <div className="flex-1" />
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {/* Theme Toggle */}
               <ThemeToggle />
 
               {/* Notifications */}
               <Link
                 href="/dashboard/notificacoes"
-                className="relative p-2 hover:bg-[var(--muted)] rounded-lg transition-colors hidden sm:flex"
+                className="relative p-2.5 hover:bg-[var(--muted)] rounded-xl transition-colors hidden sm:flex"
               >
-                <Bell className="w-4 h-4 text-[var(--muted-foreground)]" />
-                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full" />
+                <Bell className="w-5 h-5 text-[var(--muted-foreground)]" />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-green-500 rounded-full" />
               </Link>
 
               {/* User menu */}
               <div className="relative">
                 <button
-                  className="flex items-center gap-2 p-1.5 hover:bg-[var(--muted)] rounded-lg transition-colors"
+                  className="flex items-center gap-2 p-2 hover:bg-[var(--muted)] rounded-xl transition-colors"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                 >
-                  <div className="w-7 h-7 rounded-full bg-[var(--muted)] flex items-center justify-center">
-                    <User className="w-4 h-4 text-[var(--muted-foreground)]" />
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/20 flex items-center justify-center">
+                    <User className="w-4 h-4 text-green-600 dark:text-green-400" />
                   </div>
-                  <span className="hidden sm:block text-sm text-[var(--foreground)] max-w-[100px] truncate">
+                  <span className="hidden sm:block text-sm font-medium text-[var(--foreground)] max-w-[100px] truncate">
                     {user?.nome?.split(' ')[0]}
                   </span>
-                  <ChevronDown className="w-3 h-3 text-[var(--muted-foreground)]" />
+                  <ChevronDown className="w-4 h-4 text-[var(--muted-foreground)]" />
                 </button>
 
                 {userMenuOpen && (
@@ -237,22 +249,22 @@ export default function DashboardLayout({
                       className="fixed inset-0 z-40"
                       onClick={() => setUserMenuOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-52 bg-[var(--background)] border border-[var(--border)] rounded-lg shadow-lg z-50">
-                      <div className="p-3 border-b border-[var(--border)]">
-                        <p className="text-sm font-medium text-[var(--foreground)] truncate">{user?.nome}</p>
-                        <p className="text-xs text-[var(--muted-foreground)] truncate">{user?.email}</p>
+                    <div className="absolute right-0 mt-2 w-56 bg-[var(--background)] border border-[var(--border)] rounded-xl shadow-xl z-50">
+                      <div className="p-4 border-b border-[var(--border)]">
+                        <p className="text-sm font-semibold text-[var(--foreground)] truncate">{user?.nome}</p>
+                        <p className="text-xs text-[var(--muted-foreground)] truncate mt-0.5">{user?.email}</p>
                       </div>
-                      <div className="p-1">
+                      <div className="p-2">
                         <Link
                           href="/dashboard/configuracoes"
-                          className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--foreground)] rounded-md hover:bg-[var(--muted)] transition-colors"
+                          className="flex items-center gap-3 px-3 py-2.5 text-sm text-[var(--foreground)] rounded-lg hover:bg-[var(--muted)] transition-colors"
                           onClick={() => setUserMenuOpen(false)}
                         >
                           <Settings className="w-4 h-4" />
                           Configurações
                         </Link>
                         <button
-                          className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md text-red-500 hover:bg-red-500/10 transition-colors"
+                          className="flex items-center gap-3 w-full px-3 py-2.5 text-sm rounded-lg text-red-500 hover:bg-red-500/10 transition-colors"
                           onClick={handleLogout}
                         >
                           <LogOut className="w-4 h-4" />
@@ -273,18 +285,17 @@ export default function DashboardLayout({
         </main>
 
         {/* Footer */}
-        <footer className="px-4 md:px-6 py-4 border-t border-[var(--border)] text-center">
-          <p className="text-xs text-[var(--muted-foreground)]">
+        <footer className="px-4 md:px-6 py-6 border-t border-[var(--border)] text-center">
+          <p className="text-sm text-[var(--muted-foreground)]">
             Desenvolvido por{' '}
             <a 
               href="https://dataro-it.com.br" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="font-medium text-[var(--foreground)] hover:underline"
+              className="font-medium text-[var(--foreground)] hover:text-green-600 dark:hover:text-green-400 transition-colors"
             >
               DATA-RO INTELIGÊNCIA TERRITORIAL
             </a>
-            . Todos os direitos reservados.
           </p>
         </footer>
       </div>

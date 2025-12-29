@@ -4,15 +4,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { Mail, Lock, FileText } from 'lucide-react'
+import { Mail, Lock, FileText, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
@@ -51,107 +50,146 @@ export default function LoginPage() {
       <Toaster position="top-right" richColors />
       
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-            <FileText className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-semibold text-[var(--foreground)]">ProviDATA</span>
-        </Link>
-        <ThemeToggle />
+      <header className="fixed top-0 left-0 right-0 z-50 glass">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center shadow-lg shadow-green-500/20">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold text-lg text-[var(--foreground)]">ProviDATA</span>
+          </Link>
+          <ThemeToggle />
+        </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-sm animate-fade-in">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">Entrar</h1>
-            <p className="text-sm text-[var(--muted-foreground)]">
-              Acesse sua conta para gerenciar providências
-            </p>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
-                E-mail
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted-foreground)]" />
-                <input
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                />
+      <main className="flex-1 flex items-center justify-center px-6 pt-24 pb-12">
+        <div className="w-full max-w-md animate-fade-in">
+          {/* Card */}
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-8 shadow-xl">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-green-500/20">
+                <FileText className="w-7 h-7 text-white" />
               </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
-                Senha
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted-foreground)]" />
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                />
-              </div>
+              <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">
+                Bem-vindo de volta
+              </h1>
+              <p className="text-[var(--foreground-secondary)]">
+                Acesse sua conta para continuar
+              </p>
             </div>
 
-            <div className="flex items-center justify-end">
-              <Link 
-                href="/recuperar-senha" 
-                className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+            {/* Form */}
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
+                  E-mail
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted-foreground)]" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
+                  Senha
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted-foreground)]" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-12 pr-12 py-3 rounded-xl bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 rounded border-[var(--border)] text-green-600 focus:ring-green-500/20"
+                  />
+                  <span className="text-sm text-[var(--foreground-secondary)]">Lembrar-me</span>
+                </label>
+                <Link 
+                  href="/recuperar-senha"
+                  className="text-sm text-green-600 dark:text-green-400 hover:underline"
+                >
+                  Esqueceu a senha?
+                </Link>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg shadow-green-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Esqueceu a senha?
-              </Link>
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Entrar
+                    <ArrowRight className="w-5 h-5" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[var(--border)]" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="px-4 text-sm text-[var(--muted-foreground)] bg-[var(--card)]">
+                  Novo no ProviDATA?
+                </span>
+              </div>
             </div>
 
-            <button 
-              type="submit" 
-              disabled={isLoading}
-              className="w-full py-2.5 rounded-lg bg-[var(--foreground)] text-[var(--background)] font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            {/* Register Link */}
+            <Link
+              href="/cadastro"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-[var(--border)] text-[var(--foreground)] font-semibold hover:border-green-500 hover:text-green-600 dark:hover:text-green-400 transition-all"
             >
-              {isLoading ? 'Entrando...' : 'Entrar'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center text-sm">
-            <span className="text-[var(--muted-foreground)]">
-              Não tem uma conta?{' '}
-            </span>
-            <Link 
-              href="/cadastro" 
-              className="text-[var(--foreground)] hover:underline font-medium"
-            >
-              Cadastre-se
+              Criar conta
             </Link>
           </div>
+
+          {/* Footer */}
+          <p className="text-center text-sm text-[var(--muted-foreground)] mt-8">
+            Desenvolvido por{' '}
+            <a 
+              href="https://dataro-it.com.br" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="font-medium text-[var(--foreground)] hover:text-green-600 dark:hover:text-green-400 transition-colors"
+            >
+              DATA-RO INTELIGÊNCIA TERRITORIAL
+            </a>
+          </p>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="px-6 py-4 text-center">
-        <p className="text-xs text-[var(--muted-foreground)]">
-          Desenvolvido por{' '}
-          <a 
-            href="https://dataro-it.com.br" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="font-medium text-[var(--foreground)] hover:underline"
-          >
-            DATA-RO INTELIGÊNCIA TERRITORIAL
-          </a>
-        </p>
-      </footer>
     </div>
   )
 }

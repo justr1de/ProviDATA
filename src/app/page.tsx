@@ -2,6 +2,81 @@
 
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { 
+  FileText, 
+  Users, 
+  Building2, 
+  Bell, 
+  BarChart3, 
+  Shield,
+  ArrowRight,
+  Check,
+  Mail,
+  MessageCircle,
+  Sparkles,
+  Zap,
+  ChevronRight
+} from 'lucide-react';
+
+const features = [
+  {
+    icon: FileText,
+    title: 'Providências',
+    description: 'Registre e acompanhe solicitações com protocolo automático e timeline completa.',
+  },
+  {
+    icon: Users,
+    title: 'Cidadãos',
+    description: 'Banco de dados organizado com histórico completo de cada solicitante.',
+  },
+  {
+    icon: Building2,
+    title: 'Órgãos',
+    description: 'Encaminhe para secretarias, MP, defensoria e outros órgãos públicos.',
+  },
+  {
+    icon: Bell,
+    title: 'Notificações',
+    description: 'Alertas automáticos de prazos e atualizações em tempo real.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Dashboard',
+    description: 'Estatísticas e indicadores de desempenho para tomada de decisão.',
+  },
+  {
+    icon: Shield,
+    title: 'Segurança',
+    description: 'Dados isolados por gabinete com criptografia e conformidade LGPD.',
+  },
+];
+
+const plans = [
+  {
+    name: 'Básico',
+    description: 'Para gabinetes menores',
+    features: [
+      'Até 3 usuários',
+      'Providências ilimitadas',
+      'Dashboard básico',
+      'Suporte por e-mail',
+    ],
+    highlighted: false,
+  },
+  {
+    name: 'Profissional',
+    description: 'Para gabinetes completos',
+    features: [
+      'Usuários ilimitados',
+      'Providências ilimitadas',
+      'Dashboard avançado',
+      'Relatórios personalizados',
+      'Notificações por e-mail',
+      'Suporte prioritário',
+    ],
+    highlighted: true,
+  },
+];
 
 export default function HomePage() {
   return (
@@ -10,22 +85,20 @@ export default function HomePage() {
       <header className="fixed top-0 left-0 right-0 z-50 glass">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center shadow-lg shadow-green-500/20">
+              <FileText className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold text-[var(--foreground)]">ProviDATA</span>
+            <span className="font-bold text-lg text-[var(--foreground)]">ProviDATA</span>
           </Link>
           
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#recursos" className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
+            <a href="#recursos" className="text-sm text-[var(--foreground-secondary)] hover:text-green-600 dark:hover:text-green-400 transition-colors">
               Recursos
             </a>
-            <a href="#planos" className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
+            <a href="#planos" className="text-sm text-[var(--foreground-secondary)] hover:text-green-600 dark:hover:text-green-400 transition-colors">
               Planos
             </a>
-            <a href="#sobre" className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
+            <a href="#sobre" className="text-sm text-[var(--foreground-secondary)] hover:text-green-600 dark:hover:text-green-400 transition-colors">
               Sobre
             </a>
           </nav>
@@ -33,268 +106,224 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <ThemeToggle />
             <Link 
-              href="/login" 
-              className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors hidden sm:block"
+              href="/login"
+              className="text-sm font-medium text-[var(--foreground-secondary)] hover:text-[var(--foreground)] transition-colors"
             >
               Entrar
             </Link>
             <Link 
-              href="/demo" 
-              className="text-sm px-4 py-2 rounded-lg bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 transition-opacity font-medium"
+              href="/demo"
+              className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-green-700 text-white text-sm font-medium hover:from-green-700 hover:to-green-800 transition-all shadow-lg shadow-green-600/20"
             >
-              Demonstração
+              <Sparkles className="w-4 h-4" />
+              Demo
             </Link>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[var(--foreground)] tracking-tight mb-6 leading-tight">
-            Gestão de Providências
-            <span className="block text-[var(--muted-foreground)]">Parlamentares</span>
+      <section className="pt-32 pb-20 px-6 hero-gradient">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm font-medium mb-8">
+            <Zap className="w-4 h-4" />
+            Plataforma SaaS para Gabinetes Parlamentares
+          </div>
+          
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[var(--foreground)] mb-6 leading-tight">
+            Gestão de{' '}
+            <span className="gradient-text">Providências</span>
+            <br />
+            Parlamentares
           </h1>
           
-          <p className="text-lg text-[var(--muted-foreground)] max-w-xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg sm:text-xl text-[var(--foreground-secondary)] mb-10 max-w-2xl mx-auto leading-relaxed">
             Organize as solicitações dos cidadãos de forma simples e transparente. 
             Acompanhe prazos, encaminhe demandas e mantenha todos informados.
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <Link 
-              href="/demo" 
-              className="w-full sm:w-auto px-6 py-3 rounded-lg bg-[var(--foreground)] text-[var(--background)] font-medium hover:opacity-90 transition-opacity"
+              href="/demo"
+              className="flex items-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-xl shadow-green-600/25 hover:shadow-green-600/40 hover:-translate-y-0.5"
             >
               Acessar demonstração
+              <ArrowRight className="w-5 h-5" />
             </Link>
             <a 
-              href="#contato" 
-              className="w-full sm:w-auto px-6 py-3 rounded-lg border border-[var(--border)] text-[var(--foreground)] font-medium hover:bg-[var(--muted)] transition-colors"
+              href="#contato"
+              className="flex items-center gap-2 px-8 py-3.5 rounded-xl border-2 border-[var(--border)] text-[var(--foreground)] font-semibold hover:border-green-500 hover:text-green-600 dark:hover:text-green-400 transition-all"
             >
               Falar com consultor
             </a>
           </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="py-12 px-6 border-y border-[var(--border)]">
-        <div className="max-w-4xl mx-auto grid grid-cols-3 gap-8">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-[var(--foreground)]">SaaS</div>
-            <div className="text-sm text-[var(--muted-foreground)] mt-1">Modelo</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-[var(--foreground)]">Multi</div>
-            <div className="text-sm text-[var(--muted-foreground)] mt-1">Tenant</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-[var(--foreground)]">LGPD</div>
-            <div className="text-sm text-[var(--muted-foreground)] mt-1">Conforme</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section id="recursos" className="py-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)] mb-4">
-              Tudo que você precisa
-            </h2>
-            <p className="text-[var(--muted-foreground)] max-w-lg mx-auto">
-              Funcionalidades pensadas para otimizar o trabalho do gabinete parlamentar
-            </p>
-          </div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-8 max-w-lg mx-auto">
             {[
-              {
-                icon: (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                ),
-                title: 'Providências',
-                description: 'Registre e acompanhe todas as solicitações com protocolo automático.'
-              },
-              {
-                icon: (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                ),
-                title: 'Cidadãos',
-                description: 'Banco de dados organizado com informações dos solicitantes.'
-              },
-              {
-                icon: (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                ),
-                title: 'Órgãos',
-                description: 'Encaminhe para secretarias, MP, defensoria e outros órgãos.'
-              },
-              {
-                icon: (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                  </svg>
-                ),
-                title: 'Notificações',
-                description: 'Alertas de prazos e atualizações em tempo real.'
-              },
-              {
-                icon: (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                ),
-                title: 'Dashboard',
-                description: 'Estatísticas e indicadores de desempenho em tempo real.'
-              },
-              {
-                icon: (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                ),
-                title: 'Segurança',
-                description: 'Dados isolados por gabinete com criptografia e LGPD.'
-              },
-            ].map((feature, index) => (
-              <div 
-                key={index}
-                className="p-6 rounded-xl border border-[var(--border)] bg-[var(--card)] hover:border-[var(--muted-foreground)]/30 transition-colors"
-              >
-                <div className="w-10 h-10 rounded-lg bg-[var(--muted)] flex items-center justify-center text-[var(--foreground)] mb-4">
-                  {feature.icon}
-                </div>
-                <h3 className="font-semibold text-[var(--foreground)] mb-2">{feature.title}</h3>
-                <p className="text-sm text-[var(--muted-foreground)]">{feature.description}</p>
+              { label: 'Modelo', value: 'SaaS' },
+              { label: 'Tenant', value: 'Multi' },
+              { label: 'Conforme', value: 'LGPD' },
+            ].map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-2xl sm:text-3xl font-bold gradient-text">{stat.value}</div>
+                <div className="text-sm text-[var(--muted-foreground)]">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="planos" className="py-20 px-6 border-t border-[var(--border)]">
+      {/* Features Section */}
+      <section id="recursos" className="py-24 px-6 bg-[var(--background-secondary)]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[var(--foreground)] mb-4">
+              Tudo que você precisa
+            </h2>
+            <p className="text-[var(--foreground-secondary)] max-w-2xl mx-auto">
+              Funcionalidades pensadas para otimizar o trabalho do gabinete parlamentar
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, index) => (
+              <div 
+                key={index}
+                className="group p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-green-500/50 transition-all card-hover"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500/10 to-green-600/10 flex items-center justify-center mb-4 group-hover:from-green-500/20 group-hover:to-green-600/20 transition-colors">
+                  <feature.icon className="w-6 h-6 text-green-600 dark:text-green-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-[var(--foreground)] mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-sm text-[var(--foreground-secondary)] leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Plans Section */}
+      <section id="planos" className="py-24 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)] mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[var(--foreground)] mb-4">
               Planos e Preços
             </h2>
-            <p className="text-[var(--muted-foreground)] max-w-lg mx-auto">
+            <p className="text-[var(--foreground-secondary)]">
               Escolha o plano ideal para o seu gabinete. Todos incluem suporte técnico e atualizações.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {/* Plano Básico */}
-            <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--card)]">
-              <h3 className="text-lg font-semibold text-[var(--foreground)] mb-2">Básico</h3>
-              <p className="text-sm text-[var(--muted-foreground)] mb-4">Para gabinetes menores</p>
-              <div className="mb-6">
-                <span className="text-3xl font-bold text-[var(--foreground)]">Consulte</span>
-              </div>
-              <ul className="space-y-3 mb-6">
-                {['Até 3 usuários', 'Providências ilimitadas', 'Dashboard básico', 'Suporte por e-mail'].map((item, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-[var(--muted-foreground)]">
-                    <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <a 
-                href="#contato"
-                className="block w-full py-2.5 text-center rounded-lg border border-[var(--border)] text-[var(--foreground)] font-medium hover:bg-[var(--muted)] transition-colors"
+          <div className="grid md:grid-cols-2 gap-8">
+            {plans.map((plan, index) => (
+              <div 
+                key={index}
+                className={`
+                  relative p-8 rounded-2xl border-2 transition-all card-hover
+                  ${plan.highlighted 
+                    ? 'border-green-500 bg-gradient-to-b from-green-500/5 to-transparent' 
+                    : 'border-[var(--border)] bg-[var(--card)]'
+                  }
+                `}
               >
-                Solicitar proposta
-              </a>
-            </div>
-
-            {/* Plano Profissional */}
-            <div className="p-6 rounded-xl border-2 border-blue-500 bg-[var(--card)] relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-blue-500 text-white text-xs font-medium rounded-full">
-                Recomendado
+                {plan.highlighted && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-green-600 to-green-700 text-white text-xs font-semibold">
+                    Recomendado
+                  </div>
+                )}
+                
+                <h3 className="text-xl font-bold text-[var(--foreground)] mb-1">
+                  {plan.name}
+                </h3>
+                <p className="text-sm text-[var(--foreground-secondary)] mb-6">
+                  {plan.description}
+                </p>
+                
+                <div className="mb-8">
+                  <span className="text-3xl font-bold gradient-text">Consulte</span>
+                </div>
+                
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-center gap-3 text-sm text-[var(--foreground-secondary)]">
+                      <div className="w-5 h-5 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                        <Check className="w-3 h-3 text-green-600 dark:text-green-400" />
+                      </div>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                
+                <a 
+                  href="#contato"
+                  className={`
+                    w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all
+                    ${plan.highlighted 
+                      ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg shadow-green-600/20' 
+                      : 'bg-[var(--muted)] text-[var(--foreground)] hover:bg-green-500/10 hover:text-green-600 dark:hover:text-green-400'
+                    }
+                  `}
+                >
+                  Solicitar proposta
+                  <ChevronRight className="w-4 h-4" />
+                </a>
               </div>
-              <h3 className="text-lg font-semibold text-[var(--foreground)] mb-2">Profissional</h3>
-              <p className="text-sm text-[var(--muted-foreground)] mb-4">Para gabinetes completos</p>
-              <div className="mb-6">
-                <span className="text-3xl font-bold text-[var(--foreground)]">Consulte</span>
-              </div>
-              <ul className="space-y-3 mb-6">
-                {['Usuários ilimitados', 'Providências ilimitadas', 'Dashboard avançado', 'Relatórios personalizados', 'Notificações por e-mail', 'Suporte prioritário'].map((item, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-[var(--muted-foreground)]">
-                    <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <a 
-                href="#contato"
-                className="block w-full py-2.5 text-center rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors"
-              >
-                Solicitar proposta
-              </a>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* About Section */}
-      <section id="sobre" className="py-20 px-6 border-t border-[var(--border)]">
+      <section id="sobre" className="py-24 px-6 bg-[var(--background-secondary)]">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)] mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[var(--foreground)] mb-6">
             Sobre o Projeto
           </h2>
-          <p className="text-[var(--muted-foreground)] mb-8 leading-relaxed">
+          <p className="text-[var(--foreground-secondary)] mb-8 leading-relaxed">
             O ProviDATA foi desenvolvido especialmente para atender às necessidades dos gabinetes 
             parlamentares brasileiros, com foco em simplicidade, transparência e eficiência no 
             atendimento ao cidadão.
           </p>
-          <div className="inline-flex items-center gap-2 text-sm text-[var(--muted-foreground)]">
-            <span>Desenvolvido por</span>
-            <span className="font-semibold text-[var(--foreground)]">DATA-RO INTELIGÊNCIA TERRITORIAL</span>
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+            <span className="text-sm text-[var(--foreground-secondary)]">Desenvolvido por</span>
+            <span className="font-bold text-[var(--foreground)]">DATA-RO INTELIGÊNCIA TERRITORIAL</span>
           </div>
         </div>
       </section>
 
-      {/* Contact CTA */}
-      <section id="contato" className="py-20 px-6 border-t border-[var(--border)]">
+      {/* Contact Section */}
+      <section id="contato" className="py-24 px-6">
         <div className="max-w-xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)] mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-green-600/20">
+            <Mail className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-3xl font-bold text-[var(--foreground)] mb-4">
             Entre em contato
           </h2>
-          <p className="text-[var(--muted-foreground)] mb-8">
+          <p className="text-[var(--foreground-secondary)] mb-10">
             Fale com nossa equipe comercial para conhecer melhor o sistema e receber uma proposta personalizada.
           </p>
+          
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a 
               href="mailto:contato@dataro-it.com.br"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-[var(--foreground)] text-[var(--background)] font-medium hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg shadow-green-600/20"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
+              <Mail className="w-5 h-5" />
               contato@dataro-it.com.br
             </a>
             <a 
               href="https://wa.me/5569999999999"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-[var(--border)] text-[var(--foreground)] font-medium hover:bg-[var(--muted)] transition-colors"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-[var(--border)] text-[var(--foreground)] font-semibold hover:border-green-500 hover:text-green-600 dark:hover:text-green-400 transition-all"
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-              </svg>
+              <MessageCircle className="w-5 h-5" />
               WhatsApp
             </a>
           </div>
@@ -305,26 +334,24 @@ export default function HomePage() {
       <footer className="py-8 px-6 border-t border-[var(--border)]">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
+              <FileText className="w-4 h-4 text-white" />
             </div>
             <span className="text-sm text-[var(--muted-foreground)]">
-              ProviDATA © {new Date().getFullYear()}
+              ProviDATA © 2025
             </span>
           </div>
-          <div className="text-sm text-[var(--muted-foreground)]">
+          <p className="text-sm text-[var(--muted-foreground)]">
             Desenvolvido por{' '}
             <a 
               href="https://dataro-it.com.br" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-[var(--foreground)] hover:underline"
+              className="font-medium text-[var(--foreground)] hover:text-green-600 dark:hover:text-green-400 transition-colors"
             >
               DATA-RO INTELIGÊNCIA TERRITORIAL
             </a>
-          </div>
+          </p>
         </div>
       </footer>
     </div>
