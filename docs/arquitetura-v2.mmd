@@ -1,0 +1,58 @@
+flowchart LR
+    subgraph USERS[USUARIOS]
+        direction TB
+        C[Cidadao]
+        G[Equipe Gabinete]
+        P[Parlamentar]
+    end
+
+    subgraph FRONTEND[VERCEL + NEXT.JS]
+        direction TB
+        N[Next.js 15]
+        M[Middleware Auth]
+        A[API Routes]
+    end
+
+    subgraph BACKEND[SUPABASE]
+        direction TB
+        AU[Auth + JWT]
+        DB[(PostgreSQL)]
+        RLS[RLS Multi-tenant]
+        ST[Storage]
+        RT[Realtime]
+    end
+
+    subgraph DEVOPS[CI/CD]
+        direction TB
+        GH[GitHub]
+        V[Vercel Deploy]
+    end
+
+    subgraph NOTIFY[NOTIFICACOES]
+        direction TB
+        E[Email]
+        PU[Push]
+    end
+
+    C -->|Solicita| G
+    G --> N
+    P --> N
+
+    N --> M
+    M --> AU
+    N --> DB
+    A --> DB
+
+    AU --> RLS
+    RLS --> DB
+    DB --> ST
+    DB --> RT
+    RT --> N
+
+    GH --> V
+    V --> N
+
+    A --> E
+    A --> PU
+    E --> C
+    PU --> G

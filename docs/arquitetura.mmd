@@ -1,0 +1,43 @@
+flowchart TB
+    CIDADAO[Cidadao]
+    GABINETE[Equipe do Gabinete]
+    PARLAMENTAR[Parlamentar]
+    
+    NEXTJS[Next.js 15<br/>App Router + React 19]
+    MIDDLEWARE[Middleware<br/>Auth Guard]
+    API[API Routes<br/>Serverless Functions]
+    
+    AUTH[Supabase Auth<br/>Login + JWT]
+    DATABASE[(PostgreSQL<br/>9 Tabelas)]
+    RLS[Row Level Security<br/>Multi-tenant]
+    STORAGE[Supabase Storage<br/>Arquivos]
+    REALTIME[Realtime<br/>Subscriptions]
+    
+    GITHUB[GitHub<br/>justr1de/ProviDATA]
+    VERCEL[Vercel<br/>Deploy Automatico]
+    
+    EMAIL[Email Service]
+    PUSH[Push Notifications]
+
+    CIDADAO -->|Solicita| GABINETE
+    GABINETE -->|Acessa| NEXTJS
+    PARLAMENTAR -->|Monitora| NEXTJS
+    
+    NEXTJS --> MIDDLEWARE
+    MIDDLEWARE -->|Valida| AUTH
+    NEXTJS -->|Queries| DATABASE
+    API -->|Operacoes| DATABASE
+    
+    AUTH -->|JWT| RLS
+    RLS -->|Filtra| DATABASE
+    DATABASE --> STORAGE
+    DATABASE --> REALTIME
+    REALTIME -->|Updates| NEXTJS
+    
+    GITHUB -->|Push| VERCEL
+    VERCEL -->|Hospeda| NEXTJS
+    
+    API --> EMAIL
+    API --> PUSH
+    EMAIL -->|Notifica| CIDADAO
+    PUSH -->|Alerta| GABINETE
