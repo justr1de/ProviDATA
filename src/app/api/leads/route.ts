@@ -2,11 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  console.log('Recebida nova requisição para /api/leads');
   try {
-    const body = await request.json();
-    console.log('Corpo da requisição:', JSON.stringify(body, null, 2));
-    const { nome, cargo, email, telefone, mensagem } = body;
+    const { nome, cargo, email, telefone, mensagem } = await request.json();
 
     // Validar campos obrigatórios
     if (!nome || !cargo || !email || !telefone || !mensagem) {
@@ -29,10 +26,6 @@ export async function POST(request: NextRequest) {
     // Priorizar variáveis de ambiente sem o prefixo NEXT_PUBLIC_ para o lado do servidor
     const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    // O log de runtime do Vercel deve capturar esta informação
-    console.log('Supabase URL (Server):', supabaseUrl ? 'Carregada' : 'NÃO CARREGADA');
-    console.log('Supabase Anon Key (Server):', supabaseAnonKey ? 'Carregada' : 'NÃO CARREGADA');
 
     if (!supabaseUrl || !supabaseAnonKey) {
       console.error('Variáveis de ambiente Supabase não configuradas corretamente para a API Route');
@@ -62,7 +55,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Erro detalhado ao inserir lead no Supabase:', JSON.stringify(error, null, 2));
       return NextResponse.json(
-        { error: 'Erro ao salvar dados. Tente novamente.' },
+        { error: error.message || 'Erro ao salvar dados. Tente novamente.' },
         { status: 500 }
       );
     }
