@@ -156,17 +156,13 @@ export default function HomePage() {
               
               {/* Logo ProviDATA */}
               <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-                <div style={{ 
-                  width: '40px', 
-                  height: '40px', 
-                  borderRadius: '10px', 
-                  background: 'linear-gradient(135deg, #22c55e, #15803d)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <FileText style={{ width: '22px', height: '22px', color: 'white' }} />
-                </div>
+                <Image 
+                  src="/providata-logo.png" 
+                  alt="ProviDATA" 
+                  width={48} 
+                  height={48} 
+                  style={{ borderRadius: '8px' }}
+                />
                 <span style={{ fontWeight: 700, fontSize: '20px', color: isDark ? '#f1f5f9' : '#1e293b' }}>ProviDATA</span>
               </Link>
             </div>
@@ -349,13 +345,13 @@ export default function HomePage() {
             flexWrap: 'wrap'
           }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#16a34a' }}>Acompanhamento</div>
-              <div style={{ fontSize: '14px', marginTop: '4px', color: isDark ? '#94a3b8' : '#64748b' }}>em tempo real</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#16a34a' }}>Gestão</div>
+              <div style={{ fontSize: '14px', marginTop: '4px', color: isDark ? '#94a3b8' : '#64748b' }}>Inteligente</div>
             </div>
             <div style={{ width: '1px', height: '48px', backgroundColor: isDark ? '#334155' : '#d1d5db' }}></div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#16a34a' }}>Gestão</div>
-              <div style={{ fontSize: '14px', marginTop: '4px', color: isDark ? '#94a3b8' : '#64748b' }}>Inteligente</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#16a34a' }}>Acompanhamento</div>
+              <div style={{ fontSize: '14px', marginTop: '4px', color: isDark ? '#94a3b8' : '#64748b' }}>em tempo real</div>
             </div>
             <div style={{ width: '1px', height: '48px', backgroundColor: isDark ? '#334155' : '#d1d5db' }}></div>
             <div style={{ textAlign: 'center' }}>
@@ -747,17 +743,13 @@ export default function HomePage() {
                 style={{ borderRadius: '8px' }}
               />
             </Link>
-            <div style={{ 
-              width: '32px', 
-              height: '32px', 
-              borderRadius: '8px', 
-              background: 'linear-gradient(135deg, #22c55e, #15803d)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <FileText style={{ width: '16px', height: '16px', color: 'white' }} />
-            </div>
+            <Image 
+              src="/providata-logo.png" 
+              alt="ProviDATA" 
+              width={40} 
+              height={40} 
+              style={{ borderRadius: '8px' }}
+            />
             <span style={{ fontWeight: 700, color: isDark ? '#f1f5f9' : '#1e293b' }}>ProviDATA</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: isDark ? '#64748b' : '#94a3b8' }}>
