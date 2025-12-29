@@ -220,27 +220,27 @@ export default function HomePage() {
             
             {/* Logos - Mesmo tamanho */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-	              {/* Logo DATA-RO - Fundo removido (PNG Transparente) */}
+	              {/* Logo DATA-RO - Fundo removido (v3 - Quebra de Cache) */}
 	              <Link href="https://dataro-it.com.br" target="_blank" rel="noopener noreferrer">
 	                <Image 
-	                  src="/dataro-logo-trans.png" 
+	                  src="/dataro-v3-clean.png" 
 	                  alt="DATA-RO" 
-	                  width={64} 
-	                  height={64} 
+	                  width={72} 
+	                  height={72} 
 	                  style={{ objectFit: 'contain' }}
 	                />
 	              </Link>
               
-	              {/* Logo ProviDATA - Aumentado e Fundo removido (PNG Transparente) */}
+	              {/* Logo ProviDATA - Aumentado e Fundo removido (v3 - Quebra de Cache) */}
 	              <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
 	                <Image 
-	                  src="/providata-logo-trans.png" 
+	                  src="/providata-v3-clean.png" 
 	                  alt="ProviDATA" 
-	                  width={96} 
-	                  height={96} 
+	                  width={120} 
+	                  height={120} 
 	                  style={{ objectFit: 'contain' }}
 	                />
-	                <span style={{ fontWeight: 700, fontSize: '36px', color: isDark ? '#f1f5f9' : '#1e293b' }}>ProviDATA</span>
+	                <span style={{ fontWeight: 700, fontSize: '42px', color: isDark ? '#f1f5f9' : '#1e293b' }}>ProviDATA</span>
 	              </Link>
             </div>
 
@@ -395,14 +395,14 @@ export default function HomePage() {
 	          }}>
 	            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginBottom: '16px' }}>
 	              <Image 
-	                src="/providata-logo-trans.png" 
+	                src="/providata-v3-clean.png" 
 	                alt="ProviDATA" 
-	                width={160} 
-	                height={160} 
+	                width={200} 
+	                height={200} 
 	                style={{ 
 	                  objectFit: 'contain',
-	                  boxShadow: '0 0 50px rgba(22, 163, 74, 0.8), 0 0 100px rgba(22, 163, 74, 0.6)',
-	                  filter: 'drop-shadow(0 0 10px rgba(22, 163, 74, 0.9))',
+	                  boxShadow: '0 0 60px rgba(22, 163, 74, 0.9), 0 0 120px rgba(22, 163, 74, 0.7)',
+	                  filter: 'drop-shadow(0 0 15px rgba(22, 163, 74, 1))',
 	                  transition: 'transform 0.3s ease-in-out',
 	                  ':hover': {
 	                    transform: 'scale(1.05)',
