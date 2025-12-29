@@ -69,7 +69,7 @@ export default function ProvidenciaDetailPage() {
   const [providencia, setProvidencia] = useState<Providencia | null>(null)
   const [historico, setHistorico] = useState<HistoricoProvidencia[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [newStatus, setNewStatus] = useState('')
+  const [newStatus, setNewStatus] = useState<Providencia['status']>('pendente')
   const [observacao, setObservacao] = useState('')
   const [isUpdating, setIsUpdating] = useState(false)
   const { tenant, user } = useAuthStore()
@@ -329,7 +329,7 @@ export default function ProvidenciaDetailPage() {
                 label="Novo Status"
                 options={statusOptions}
                 value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
+                onChange={(e) => setNewStatus(e.target.value as Providencia['status'])}
               />
               <Textarea
                 label="Observação"

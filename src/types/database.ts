@@ -10,6 +10,7 @@ export interface Tenant {
   logo_url?: string
   email_contato?: string
   telefone?: string
+  telefone_contato?: string
   endereco?: string
   plano: 'basico' | 'profissional' | 'enterprise'
   ativo: boolean
@@ -121,6 +122,18 @@ export interface Anexo {
   created_at: string
 }
 
+export interface HistoricoProvidencia {
+  id: string
+  providencia_id: string
+  usuario_id?: string
+  acao: string
+  status_anterior?: string
+  status_novo?: string
+  observacao?: string
+  created_at: string
+  usuario?: { nome: string }
+}
+
 export interface Historico {
   id: string
   providencia_id: string
@@ -138,7 +151,7 @@ export interface Notificacao {
   tenant_id: string
   usuario_id?: string
   providencia_id?: string
-  tipo: 'nova_providencia' | 'atualizacao' | 'prazo_proximo' | 'prazo_vencido' | 'resposta'
+  tipo: 'nova_providencia' | 'atualizacao' | 'prazo_proximo' | 'prazo_vencido' | 'resposta' | 'info' | 'alerta' | 'prazo' | 'sucesso'
   titulo: string
   mensagem?: string
   lida: boolean
