@@ -146,7 +146,7 @@ export default function HomePage() {
       }
       
       setFormStatus('success');
-      setFormData({ nome: '', cargo: '', email: '', telefone: '', mensagem: '' });
+      setFormData({ nome: '', cargo: '', email: '', telefone: '', mensagem: '', email_confirm: '' });
       
       setTimeout(() => {
         setShowContactForm(false);
