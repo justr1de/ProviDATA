@@ -1,5 +1,4 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -14,53 +13,57 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Criar cliente Supabase no servidor
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options)
-              );
-            } catch {
-              // Handle cookie setting errors
-            }
-          },
-        },
-      }
-    );
+    // Validar e-mail
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'E-mail inválido' },
+        { status: 400 }
+      );
+    }
+
+    // Criar cliente Supabase
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Variáveis de ambiente Supabase não configuradas');
+      return NextResponse.json(
+        { error: 'Erro de configuração do servidor' },
+        { status: 500 }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     // Inserir lead no Supabase
     const { data, error } = await supabase
       .from('leads')
       .insert([
         {
-          nome,
-          cargo,
-          email,
-          telefone,
+          nome: nome.trim(),
+          cargo: cargo.trim(),
+          email: email.trim().toLowerCase(),
+          telefone: telefone.trim(),
           status: 'novo',
         },
       ])
       .select();
 
     if (error) {
-      console.error('Erro ao inserir lead:', error);
+      console.error('Erro ao inserir lead no Supabase:', error);
       return NextResponse.json(
-        { error: 'Erro ao enviar formulário' },
+        { error: 'Erro ao salvar dados. Tente novamente.' },
         { status: 500 }
       );
     }
 
     return NextResponse.json(
-      { success: true, data },
+      { 
+        success: true, 
+        message: 'Dados enviados com sucesso! Nossa equipe entrará em contato em breve.',
+        data 
+      },
       { status: 201 }
     );
   } catch (error) {
