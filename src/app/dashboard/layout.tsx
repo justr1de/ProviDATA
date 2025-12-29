@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { 
   LayoutDashboard, 
   FileText, 
@@ -19,7 +20,6 @@ import {
   ChevronDown,
   User
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Toaster } from 'sonner'
 
 const navigation = [
@@ -43,6 +43,11 @@ export default function DashboardLayout({
   const { user, tenant, setUser, setTenant, setLoading, isLoading } = useAuthStore()
 
   useEffect(() => {
+    // Scroll to top on route change
+    window.scrollTo(0, 0)
+  }, [pathname])
+
+  useEffect(() => {
     const loadUserData = async () => {
       try {
         const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -52,7 +57,6 @@ export default function DashboardLayout({
           return
         }
 
-        // Buscar dados do usuário
         const { data: userData } = await supabase
           .from('users')
           .select('*, tenants(*)')
@@ -83,15 +87,15 @@ export default function DashboardLayout({
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
-          <p className="text-[var(--muted-foreground)]">Carregando...</p>
+          <div className="w-10 h-10 border-2 border-[var(--foreground)] border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-[var(--muted-foreground)]">Carregando...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[var(--secondary)]">
+    <div className="min-h-screen bg-[var(--background-secondary)] transition-colors">
       <Toaster position="top-right" richColors />
       
       {/* Mobile sidebar backdrop */}
@@ -104,37 +108,37 @@ export default function DashboardLayout({
 
       {/* Sidebar */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full w-64 bg-[var(--background)] border-r border-[var(--border)]
+        fixed top-0 left-0 z-50 h-full w-60 bg-[var(--background)] border-r border-[var(--border)]
         transform transition-transform duration-200 ease-in-out
         lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-[var(--border)]">
+          <div className="flex items-center justify-between h-14 px-4 border-b border-[var(--border)]">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[var(--primary)] flex items-center justify-center">
-                <FileText className="w-5 h-5 text-white" />
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                <FileText className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-lg">ProviDATA</span>
+              <span className="font-semibold text-[var(--foreground)]">ProviDATA</span>
             </Link>
             <button 
-              className="lg:hidden p-2 hover:bg-[var(--secondary)] rounded-lg"
+              className="lg:hidden p-1.5 hover:bg-[var(--muted)] rounded-lg transition-colors"
               onClick={() => setSidebarOpen(false)}
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Tenant info */}
           {tenant && (
             <div className="px-4 py-3 border-b border-[var(--border)]">
-              <p className="text-sm font-medium truncate">{tenant.parlamentar_name}</p>
+              <p className="text-sm font-medium text-[var(--foreground)] truncate">{tenant.parlamentar_name}</p>
               <p className="text-xs text-[var(--muted-foreground)] truncate">
                 {tenant.cargo === 'vereador' ? 'Vereador(a)' : 
                  tenant.cargo === 'deputado_estadual' ? 'Deputado(a) Estadual' :
                  tenant.cargo === 'deputado_federal' ? 'Deputado(a) Federal' : 'Senador(a)'}
-                {tenant.partido && ` - ${tenant.partido}`}
+                {tenant.partido && ` · ${tenant.partido}`}
               </p>
             </div>
           )}
@@ -142,21 +146,21 @@ export default function DashboardLayout({
           {/* Navigation */}
           <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
             {navigation.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+              const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
               return (
                 <Link
                   key={item.name}
                   href={item.href}
                   className={`
-                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                    flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors
                     ${isActive 
-                      ? 'bg-[var(--primary)] text-white' 
-                      : 'text-[var(--foreground)] hover:bg-[var(--secondary)]'
+                      ? 'bg-[var(--foreground)] text-[var(--background)] font-medium' 
+                      : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]'
                     }
                   `}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className="w-4 h-4" />
                   {item.name}
                 </Link>
               )
@@ -164,13 +168,21 @@ export default function DashboardLayout({
           </nav>
 
           {/* Footer */}
-          <div className="p-3 border-t border-[var(--border)]">
+          <div className="p-3 border-t border-[var(--border)] space-y-1">
             <Link
-              href="/dashboard/configuracoes"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--foreground)] hover:bg-[var(--secondary)] transition-colors"
+              href="/dashboard/notificacoes"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
               onClick={() => setSidebarOpen(false)}
             >
-              <Settings className="w-5 h-5" />
+              <Bell className="w-4 h-4" />
+              Notificações
+            </Link>
+            <Link
+              href="/dashboard/configuracoes"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)] transition-colors"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <Settings className="w-4 h-4" />
               Configurações
             </Link>
           </div>
@@ -178,12 +190,12 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-60">
         {/* Header */}
-        <header className="sticky top-0 z-30 h-16 bg-[var(--background)] border-b border-[var(--border)]">
+        <header className="sticky top-0 z-30 h-14 bg-[var(--background)] border-b border-[var(--border)]">
           <div className="flex items-center justify-between h-full px-4">
             <button
-              className="lg:hidden p-2 hover:bg-[var(--secondary)] rounded-lg"
+              className="lg:hidden p-1.5 hover:bg-[var(--muted)] rounded-lg transition-colors"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className="w-5 h-5" />
@@ -192,28 +204,31 @@ export default function DashboardLayout({
             <div className="flex-1" />
 
             <div className="flex items-center gap-2">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Notifications */}
               <Link
                 href="/dashboard/notificacoes"
-                className="relative p-2 hover:bg-[var(--secondary)] rounded-lg transition-colors"
+                className="relative p-2 hover:bg-[var(--muted)] rounded-lg transition-colors hidden sm:flex"
               >
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                <Bell className="w-4 h-4 text-[var(--muted-foreground)]" />
+                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full" />
               </Link>
 
               {/* User menu */}
               <div className="relative">
                 <button
-                  className="flex items-center gap-2 p-2 hover:bg-[var(--secondary)] rounded-lg transition-colors"
+                  className="flex items-center gap-2 p-1.5 hover:bg-[var(--muted)] rounded-lg transition-colors"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                 >
-                  <div className="w-8 h-8 rounded-full bg-[var(--primary)] flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
+                  <div className="w-7 h-7 rounded-full bg-[var(--muted)] flex items-center justify-center">
+                    <User className="w-4 h-4 text-[var(--muted-foreground)]" />
                   </div>
-                  <span className="hidden sm:block text-sm font-medium max-w-[120px] truncate">
-                    {user?.nome}
+                  <span className="hidden sm:block text-sm text-[var(--foreground)] max-w-[100px] truncate">
+                    {user?.nome?.split(' ')[0]}
                   </span>
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className="w-3 h-3 text-[var(--muted-foreground)]" />
                 </button>
 
                 {userMenuOpen && (
@@ -222,30 +237,22 @@ export default function DashboardLayout({
                       className="fixed inset-0 z-40"
                       onClick={() => setUserMenuOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-56 bg-[var(--background)] border border-[var(--border)] rounded-lg shadow-lg z-50">
+                    <div className="absolute right-0 mt-2 w-52 bg-[var(--background)] border border-[var(--border)] rounded-lg shadow-lg z-50">
                       <div className="p-3 border-b border-[var(--border)]">
-                        <p className="font-medium truncate">{user?.nome}</p>
-                        <p className="text-sm text-[var(--muted-foreground)] truncate">{user?.email}</p>
+                        <p className="text-sm font-medium text-[var(--foreground)] truncate">{user?.nome}</p>
+                        <p className="text-xs text-[var(--muted-foreground)] truncate">{user?.email}</p>
                       </div>
                       <div className="p-1">
                         <Link
-                          href="/dashboard/perfil"
-                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[var(--secondary)] transition-colors"
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          <User className="w-4 h-4" />
-                          Meu Perfil
-                        </Link>
-                        <Link
                           href="/dashboard/configuracoes"
-                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[var(--secondary)] transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--foreground)] rounded-md hover:bg-[var(--muted)] transition-colors"
                           onClick={() => setUserMenuOpen(false)}
                         >
                           <Settings className="w-4 h-4" />
                           Configurações
                         </Link>
                         <button
-                          className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+                          className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md text-red-500 hover:bg-red-500/10 transition-colors"
                           onClick={handleLogout}
                         >
                           <LogOut className="w-4 h-4" />
@@ -264,6 +271,22 @@ export default function DashboardLayout({
         <main className="p-4 md:p-6">
           {children}
         </main>
+
+        {/* Footer */}
+        <footer className="px-4 md:px-6 py-4 border-t border-[var(--border)] text-center">
+          <p className="text-xs text-[var(--muted-foreground)]">
+            Desenvolvido por{' '}
+            <a 
+              href="https://dataro-it.com.br" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="font-medium text-[var(--foreground)] hover:underline"
+            >
+              DATA-RO INTELIGÊNCIA TERRITORIAL
+            </a>
+            . Todos os direitos reservados.
+          </p>
+        </footer>
       </div>
     </div>
   )

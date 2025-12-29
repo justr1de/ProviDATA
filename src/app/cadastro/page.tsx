@@ -4,10 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select } from '@/components/ui/select'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Mail, Lock, User, Building2, FileText, Info } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
 
@@ -94,7 +91,6 @@ export default function CadastroPage() {
     setIsLoading(true)
 
     try {
-      // 1. Criar usuário no Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -110,7 +106,6 @@ export default function CadastroPage() {
         return
       }
 
-      // 2. Criar tenant (gabinete)
       const { data: tenantData, error: tenantError } = await supabase
         .from('tenants')
         .insert({
@@ -131,7 +126,6 @@ export default function CadastroPage() {
         return
       }
 
-      // 3. Criar usuário na tabela users
       const { error: userError } = await supabase
         .from('users')
         .insert({
@@ -159,199 +153,245 @@ export default function CadastroPage() {
     }
   }
 
+  const inputClass = "w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-sm"
+  const selectClass = "w-full px-3 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-sm appearance-none cursor-pointer"
+  const labelClass = "block text-sm font-medium text-[var(--foreground)] mb-1.5"
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4 py-8">
+    <div className="min-h-screen flex flex-col bg-[var(--background)] transition-colors">
       <Toaster position="top-right" richColors />
       
-      <div className="w-full max-w-2xl animate-fade-in">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--primary)] text-white mb-4">
-            <FileText className="w-8 h-8" />
+      {/* Header */}
+      <header className="flex items-center justify-between px-6 py-4">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+            <FileText className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-[var(--foreground)]">ProviDATA</h1>
-          <p className="text-[var(--muted-foreground)] mt-2">
-            Sistema de Gestão de Providências Parlamentares
-          </p>
-        </div>
+          <span className="font-semibold text-[var(--foreground)]">ProviDATA</span>
+        </Link>
+        <ThemeToggle />
+      </header>
 
-        <Card className="shadow-xl">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Criar Conta</CardTitle>
-            <CardDescription className="text-center">
+      {/* Main Content */}
+      <main className="flex-1 flex items-center justify-center px-6 py-8">
+        <div className="w-full max-w-2xl animate-fade-in">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">Criar Conta</h1>
+            <p className="text-sm text-[var(--muted-foreground)]">
               Cadastre seu gabinete para começar a gerenciar providências
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Dados do Gabinete */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-[var(--foreground)]">
-                  <Building2 className="w-5 h-5" />
-                  <h3 className="font-semibold">Dados do Gabinete</h3>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Dados do Gabinete */}
+            <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-4">
+              <div className="flex items-center gap-2 text-[var(--foreground)] mb-2">
+                <Building2 className="w-4 h-4" />
+                <h3 className="font-medium text-sm">Dados do Gabinete</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Nome do Gabinete</label>
+                  <input
                     name="nomeGabinete"
-                    label="Nome do Gabinete"
                     placeholder="Ex: Gabinete do Vereador João"
                     value={formData.nomeGabinete}
                     onChange={handleChange}
                     required
+                    className={inputClass}
                   />
-                  
-                  <Input
+                </div>
+                
+                <div>
+                  <label className={labelClass}>Nome do Parlamentar</label>
+                  <input
                     name="parlamentarName"
-                    label="Nome do Parlamentar"
                     placeholder="Nome completo"
                     value={formData.parlamentarName}
                     onChange={handleChange}
                     required
+                    className={inputClass}
                   />
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Select
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className={labelClass}>Cargo</label>
+                  <select
                     name="cargo"
-                    label="Cargo"
-                    options={cargoOptions}
-                    placeholder="Selecione o cargo"
                     value={formData.cargo}
                     onChange={handleChange}
                     required
-                  />
-                  
-                  <Input
+                    className={selectClass}
+                  >
+                    <option value="">Selecione</option>
+                    {cargoOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className={labelClass}>Partido</label>
+                  <input
                     name="partido"
-                    label="Partido"
                     placeholder="Ex: PSDB"
                     value={formData.partido}
                     onChange={handleChange}
+                    className={inputClass}
                   />
-                  
-                  <Select
+                </div>
+                
+                <div>
+                  <label className={labelClass}>Estado (UF)</label>
+                  <select
                     name="uf"
-                    label="Estado (UF)"
-                    options={ufOptions}
-                    placeholder="Selecione"
                     value={formData.uf}
                     onChange={handleChange}
                     required
-                  />
+                    className={selectClass}
+                  >
+                    <option value="">Selecione</option>
+                    {ufOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
                 </div>
+              </div>
 
-                {(formData.cargo === 'vereador') && (
-                  <Input
+              {formData.cargo === 'vereador' && (
+                <div>
+                  <label className={labelClass}>Município</label>
+                  <input
                     name="municipio"
-                    label="Município"
                     placeholder="Nome do município"
                     value={formData.municipio}
                     onChange={handleChange}
                     required
+                    className={inputClass}
                   />
-                )}
-              </div>
-
-              {/* Dados do Usuário */}
-              <div className="space-y-4 pt-4 border-t border-[var(--border)]">
-                <div className="flex items-center gap-2 text-[var(--foreground)]">
-                  <User className="w-5 h-5" />
-                  <h3 className="font-semibold">Dados do Administrador</h3>
                 </div>
-                
-                <Input
+              )}
+            </div>
+
+            {/* Dados do Usuário */}
+            <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-4">
+              <div className="flex items-center gap-2 text-[var(--foreground)] mb-2">
+                <User className="w-4 h-4" />
+                <h3 className="font-medium text-sm">Dados do Administrador</h3>
+              </div>
+              
+              <div>
+                <label className={labelClass}>Seu Nome</label>
+                <input
                   name="nomeUsuario"
-                  label="Seu Nome"
                   placeholder="Nome completo"
                   value={formData.nomeUsuario}
                   onChange={handleChange}
-                  icon={<User className="w-4 h-4" />}
                   required
+                  className={inputClass}
                 />
+              </div>
 
-                <Input
-                  type="email"
-                  name="email"
-                  label="E-mail"
-                  placeholder="seu@email.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  icon={<Mail className="w-4 h-4" />}
-                  required
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    type="password"
-                    name="password"
-                    label="Senha"
-                    placeholder="Mínimo 6 caracteres"
-                    value={formData.password}
+              <div>
+                <label className={labelClass}>E-mail</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted-foreground)]" />
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="seu@email.com"
+                    value={formData.email}
                     onChange={handleChange}
-                    icon={<Lock className="w-4 h-4" />}
                     required
-                  />
-                  
-                  <Input
-                    type="password"
-                    name="confirmPassword"
-                    label="Confirmar Senha"
-                    placeholder="Repita a senha"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    icon={<Lock className="w-4 h-4" />}
-                    required
+                    className={`${inputClass} pl-10`}
                   />
                 </div>
               </div>
 
-              {/* Aviso LGPD */}
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
-                <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-blue-800 dark:text-blue-200">
-                  Seus dados serão tratados de acordo com a Lei Geral de Proteção de Dados (LGPD). 
-                  Ao criar sua conta, você concorda com nossa política de privacidade.
-                </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Senha</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted-foreground)]" />
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Mínimo 6 caracteres"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      className={`${inputClass} pl-10`}
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className={labelClass}>Confirmar Senha</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted-foreground)]" />
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      placeholder="Repita a senha"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      required
+                      className={`${inputClass} pl-10`}
+                    />
+                  </div>
+                </div>
               </div>
-
-              <Button 
-                type="submit" 
-                className="w-full" 
-                size="lg"
-                isLoading={isLoading}
-              >
-                Criar Conta
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center text-sm">
-              <span className="text-[var(--muted-foreground)]">
-                Já tem uma conta?{' '}
-              </span>
-              <Link 
-                href="/login" 
-                className="text-[var(--primary)] hover:underline font-medium"
-              >
-                Faça login
-              </Link>
             </div>
-          </CardContent>
-        </Card>
 
-        <p className="text-center text-xs text-[var(--muted-foreground)] mt-8">
+            {/* Aviso LGPD */}
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-blue-500/5 border border-blue-500/20">
+              <Info className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-[var(--muted-foreground)]">
+                Seus dados serão tratados de acordo com a Lei Geral de Proteção de Dados (LGPD). 
+                Ao criar sua conta, você concorda com nossa política de privacidade.
+              </p>
+            </div>
+
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full py-2.5 rounded-lg bg-[var(--foreground)] text-[var(--background)] font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Criando conta...' : 'Criar Conta'}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center text-sm">
+            <span className="text-[var(--muted-foreground)]">
+              Já tem uma conta?{' '}
+            </span>
+            <Link 
+              href="/login" 
+              className="text-[var(--foreground)] hover:underline font-medium"
+            >
+              Faça login
+            </Link>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="px-6 py-4 text-center">
+        <p className="text-xs text-[var(--muted-foreground)]">
           Desenvolvido por{' '}
           <a 
             href="https://dataro-it.com.br" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="font-medium hover:underline"
+            className="font-medium text-[var(--foreground)] hover:underline"
           >
             DATA-RO INTELIGÊNCIA TERRITORIAL
           </a>
-          <br />
-          Todos os direitos reservados.
         </p>
-      </div>
+      </footer>
     </div>
   )
 }

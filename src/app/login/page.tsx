@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Mail, Lock, FileText } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
 
@@ -47,96 +47,111 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+    <div className="min-h-screen flex flex-col bg-[var(--background)] transition-colors">
       <Toaster position="top-right" richColors />
       
-      <div className="w-full max-w-md animate-fade-in">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--primary)] text-white mb-4">
-            <FileText className="w-8 h-8" />
+      {/* Header */}
+      <header className="flex items-center justify-between px-6 py-4">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+            <FileText className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-[var(--foreground)]">ProviDATA</h1>
-          <p className="text-[var(--muted-foreground)] mt-2">
-            Sistema de Gestão de Providências Parlamentares
-          </p>
-        </div>
+          <span className="font-semibold text-[var(--foreground)]">ProviDATA</span>
+        </Link>
+        <ThemeToggle />
+      </header>
 
-        <Card className="shadow-xl">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Entrar</CardTitle>
-            <CardDescription className="text-center">
+      {/* Main Content */}
+      <main className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-sm animate-fade-in">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">Entrar</h1>
+            <p className="text-sm text-[var(--muted-foreground)]">
               Acesse sua conta para gerenciar providências
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <Input
-                type="email"
-                label="E-mail"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                icon={<Mail className="w-4 h-4" />}
-                required
-              />
-              
-              <Input
-                type="password"
-                label="Senha"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                icon={<Lock className="w-4 h-4" />}
-                required
-              />
+            </p>
+          </div>
 
-              <div className="flex items-center justify-end">
-                <Link 
-                  href="/recuperar-senha" 
-                  className="text-sm text-[var(--primary)] hover:underline"
-                >
-                  Esqueceu a senha?
-                </Link>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
+                E-mail
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted-foreground)]" />
+                <input
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                />
               </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
+                Senha
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted-foreground)]" />
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                />
+              </div>
+            </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                size="lg"
-                isLoading={isLoading}
-              >
-                Entrar
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center text-sm">
-              <span className="text-[var(--muted-foreground)]">
-                Não tem uma conta?{' '}
-              </span>
+            <div className="flex items-center justify-end">
               <Link 
-                href="/cadastro" 
-                className="text-[var(--primary)] hover:underline font-medium"
+                href="/recuperar-senha" 
+                className="text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
               >
-                Cadastre-se
+                Esqueceu a senha?
               </Link>
             </div>
-          </CardContent>
-        </Card>
 
-        <p className="text-center text-xs text-[var(--muted-foreground)] mt-8">
+            <button 
+              type="submit" 
+              disabled={isLoading}
+              className="w-full py-2.5 rounded-lg bg-[var(--foreground)] text-[var(--background)] font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Entrando...' : 'Entrar'}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center text-sm">
+            <span className="text-[var(--muted-foreground)]">
+              Não tem uma conta?{' '}
+            </span>
+            <Link 
+              href="/cadastro" 
+              className="text-[var(--foreground)] hover:underline font-medium"
+            >
+              Cadastre-se
+            </Link>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="px-6 py-4 text-center">
+        <p className="text-xs text-[var(--muted-foreground)]">
           Desenvolvido por{' '}
           <a 
             href="https://dataro-it.com.br" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="font-medium hover:underline"
+            className="font-medium text-[var(--foreground)] hover:underline"
           >
             DATA-RO INTELIGÊNCIA TERRITORIAL
           </a>
-          <br />
-          Todos os direitos reservados.
         </p>
-      </div>
+      </footer>
     </div>
   )
 }
