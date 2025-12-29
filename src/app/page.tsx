@@ -216,18 +216,18 @@ export default function HomePage() {
         </div>
 
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '80px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '96px' }}>
             
             {/* Logos - Mesmo tamanho */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
 	              {/* Logo DATA-RO - Fundo removido (v3 - Quebra de Cache) */}
 	              <Link href="https://dataro-it.com.br" target="_blank" rel="noopener noreferrer">
 	                <Image 
 	                  src="/dataro-logo-final.png" 
 	                  alt="DATA-RO" 
-width={120} 
-                  height={120}
-style={{ objectFit: 'contain', borderRadius: '16px', backgroundColor: 'white', padding: '8px' }}
+width={48} 
+	                  height={48}
+style={{ objectFit: 'contain', borderRadius: '8px', backgroundColor: '#ffffff', padding: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
                 />
               </Link>
               
@@ -236,16 +236,16 @@ style={{ objectFit: 'contain', borderRadius: '16px', backgroundColor: 'white', p
 	                <Image 
 	                  src="/providata-logo-final.png" 
 	                  alt="ProviDATA" 
-	                  width={120} 
-	                  height={120} 
+	                  width={48} 
+	                  height={48} 
 	                  style={{ objectFit: 'contain' }}
 	                />
-	                <span className="text-providata-gradient" style={{ fontWeight: 700, fontSize: '42px' }}>ProviDATA</span>
+	                <span className="text-providata-gradient" style={{ fontWeight: 800, fontSize: '32px', letterSpacing: '-0.02em' }}>ProviDATA</span>
 	              </Link>
             </div>
 
             {/* Nav - Botões com efeito espelho */}
-            <nav style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               {navItems.map((item) => (
                 <a 
                   key={item.name}
@@ -258,7 +258,7 @@ style={{ objectFit: 'contain', borderRadius: '16px', backgroundColor: 'white', p
                     padding: '10px 16px',
                     borderRadius: '10px',
                     backgroundColor: isDark ? '#1e293b' : '#f3f4f6',
-                    border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+                    border: `2px solid ${isDark ? '#4b5563' : '#cbd5e1'}`,
                     boxShadow: isDark 
                       ? '0 4px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -2px 4px rgba(0,0,0,0.2)' 
                       : '0 4px 6px rgba(0,0,0,0.08), inset 0 2px 0 rgba(255,255,255,1), inset 0 -2px 4px rgba(0,0,0,0.03)',
@@ -332,7 +332,7 @@ style={{ objectFit: 'contain', borderRadius: '16px', backgroundColor: 'white', p
                   width: '48px',
                   height: '48px',
                   borderRadius: '12px',
-                  border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+                  border: `2px solid ${isDark ? '#4b5563' : '#cbd5e1'}`,
                   backgroundColor: isDark ? '#1e293b' : '#f3f4f6',
                   color: isDark ? '#fbbf24' : '#64748b',
                   display: 'flex',
@@ -393,26 +393,13 @@ style={{ objectFit: 'contain', borderRadius: '16px', backgroundColor: 'white', p
 	            lineHeight: 1.15,
 	            marginBottom: '28px',
 	          }}>
-	            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginBottom: '16px' }}>
-	              <Image 
-	                src="/providata-logo-final.png" 
-	                alt="ProviDATA" 
-	                width={200} 
-	                height={200} 
-style={{ 
-		                  objectFit: 'contain',
-		                  boxShadow: '0 0 60px rgba(22, 163, 74, 0.9), 0 0 120px rgba(22, 163, 74, 0.7)',
-		                  filter: 'drop-shadow(0 0 15px rgba(22, 163, 74, 1))'
-		                }}
-		                className="hover:scale-105 transition-transform duration-300"
-	              />
+
 <span className="text-providata-gradient" style={{ 
 		                display: 'block',
 		                letterSpacing: '-0.02em'
 		              }}>
 		                Plataforma para Gestão de
 		              </span>
-	            </div>
 <span className="text-providata-gradient" style={{ 
 		              display: 'block',
 		              marginTop: '8px',
@@ -576,7 +563,7 @@ style={{
                 style={{ 
                   padding: '36px',
                   borderRadius: '20px',
-                  border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+                  border: `2px solid ${isDark ? '#4b5563' : '#cbd5e1'}`,
                   backgroundColor: isDark ? '#0f172a' : '#ffffff',
                   boxShadow: isDark 
                     ? '0 4px 12px rgba(0,0,0,0.3)' 
@@ -652,7 +639,7 @@ style={{
             <div style={{ 
               padding: '40px',
               borderRadius: '20px',
-              border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+              border: `2px solid ${isDark ? '#4b5563' : '#cbd5e1'}`,
               backgroundColor: isDark ? '#1e293b' : '#ffffff',
               boxShadow: isDark 
                 ? '0 10px 30px rgba(0, 0, 0, 0.2)' 
@@ -851,10 +838,12 @@ style={{
             atendimento ao cidadão. Nossa plataforma permite que vereadores, deputados e senadores 
             gerenciem todas as demandas de forma organizada e profissional.
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-            <span style={{ color: isDark ? '#94a3b8' : '#64748b' }}>Desenvolvido por</span>
-            <span style={{ fontWeight: 700, color: isDark ? '#f1f5f9' : '#1e293b' }}>DATA-RO INTELIGÊNCIA TERRITORIAL</span>
-          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+              <Image src="/providata-logo-final.png" alt="ProviDATA" width={64} height={64} />
+              <span style={{ fontWeight: 600, color: isDark ? '#9ca3af' : '#4b5563' }}>
+                Desenvolvido por DATA-RO INTELIGÊNCIA TERRITORIAL
+              </span>
+            </div>
         </div>
       </section>
 
