@@ -23,27 +23,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Criar cliente Supabase
-    // Criar cliente Supabase
-    // Usar Service Role Key para garantir que a inserção funcione (teste de diagnóstico)
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // Chave secreta
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    if (!supabaseUrl || !supabaseServiceRoleKey) {
-      console.error('Variáveis de ambiente Supabase não configuradas corretamente para a API Route');
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Variáveis de ambiente Supabase não configuradas');
       return NextResponse.json(
-        { error: 'Erro de configuração do servidor (Chave Service Role ausente)' },
+        { error: 'Erro de configuração do servidor' },
         { status: 500 }
       );
     }
 
-    // Usar a chave Service Role para criar o cliente
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-        auth: {
-            // Desabilitar o auto-refresh de token, pois estamos usando a Service Role Key
-            autoRefreshToken: false,
-            persistSession: false,
-        }
-    });
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     // Inserir lead no Supabase
     const { data, error } = await supabase
@@ -61,9 +52,9 @@ export async function POST(request: NextRequest) {
       .select();
 
     if (error) {
-      console.error('Erro detalhado ao inserir lead no Supabase:', JSON.stringify(error, null, 2));
+      console.error('Erro ao inserir lead no Supabase:', error);
       return NextResponse.json(
-        { error: error.message || 'Erro ao salvar dados. Tente novamente.' },
+        { error: 'Erro ao salvar dados. Tente novamente.' },
         { status: 500 }
       );
     }
