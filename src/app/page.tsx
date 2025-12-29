@@ -399,15 +399,12 @@ export default function HomePage() {
 	                alt="ProviDATA" 
 	                width={200} 
 	                height={200} 
-	                style={{ 
-	                  objectFit: 'contain',
-	                  boxShadow: '0 0 60px rgba(22, 163, 74, 0.9), 0 0 120px rgba(22, 163, 74, 0.7)',
-	                  filter: 'drop-shadow(0 0 15px rgba(22, 163, 74, 1))',
-	                  transition: 'transform 0.3s ease-in-out',
-	                  ':hover': {
-	                    transform: 'scale(1.05)',
-	                  }
-	                }}
+style={{ 
+		                  objectFit: 'contain',
+		                  boxShadow: '0 0 60px rgba(22, 163, 74, 0.9), 0 0 120px rgba(22, 163, 74, 0.7)',
+		                  filter: 'drop-shadow(0 0 15px rgba(22, 163, 74, 1))'
+		                }}
+		                className="hover:scale-105 transition-transform duration-300"
 	              />
 	              <span style={{ 
 	                color: '#16a34a',
