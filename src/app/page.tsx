@@ -639,7 +639,8 @@ export default function HomePage() {
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
-            gap: '32px'
+            gap: '32px',
+            alignItems: 'stretch'
           }}>
             {/* Plano Básico */}
             <div style={{ 
@@ -648,8 +649,18 @@ export default function HomePage() {
               border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
               backgroundColor: isDark ? '#1e293b' : '#ffffff',
               boxShadow: isDark 
-                ? '0 4px 12px rgba(0,0,0,0.3)' 
-                : '0 4px 12px rgba(0,0,0,0.05)'
+                ? '0 10px 30px rgba(0, 0, 0, 0.2)' 
+                : '0 10px 30px rgba(0, 0, 0, 0.08)',
+              transition: 'transform 0.3s ease-in-out',
+              position: 'relative',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              ':hover': {
+                transform: 'translateY(-5px)',
+                boxShadow: isDark ? '0 15px 40px rgba(0, 0, 0, 0.3)' : '0 15px 40px rgba(0, 0, 0, 0.15)',
+              }
             }}>
               <h3 style={{ 
                 fontSize: '26px', 
@@ -722,7 +733,16 @@ export default function HomePage() {
               border: '2px solid #16a34a',
               backgroundColor: isDark ? '#1e293b' : '#ffffff',
               position: 'relative',
-              boxShadow: '0 8px 24px rgba(22, 163, 74, 0.25)'
+              boxShadow: '0 8px 24px rgba(22, 163, 74, 0.25)',
+              transition: 'transform 0.3s ease-in-out',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              ':hover': {
+                transform: 'translateY(-5px)',
+                boxShadow: '0 15px 40px rgba(22, 163, 74, 0.35)',
+              }
             }}>
               <div style={{ 
                 position: 'absolute',
