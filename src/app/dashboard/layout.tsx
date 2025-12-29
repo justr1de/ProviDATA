@@ -1,0 +1,270 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/store/auth-store'
+import { 
+  LayoutDashboard, 
+  FileText, 
+  Users, 
+  Building2, 
+  FolderOpen,
+  Bell,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+  ChevronDown,
+  User
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Toaster } from 'sonner'
+
+const navigation = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Providências', href: '/dashboard/providencias', icon: FileText },
+  { name: 'Cidadãos', href: '/dashboard/cidadaos', icon: Users },
+  { name: 'Órgãos', href: '/dashboard/orgaos', icon: Building2 },
+  { name: 'Categorias', href: '/dashboard/categorias', icon: FolderOpen },
+]
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
+  const supabase = createClient()
+  const { user, tenant, setUser, setTenant, setLoading, isLoading } = useAuthStore()
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser()
+        
+        if (!authUser) {
+          router.push('/login')
+          return
+        }
+
+        // Buscar dados do usuário
+        const { data: userData } = await supabase
+          .from('users')
+          .select('*, tenants(*)')
+          .eq('id', authUser.id)
+          .single()
+
+        if (userData) {
+          setUser(userData)
+          setTenant(userData.tenants)
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadUserData()
+  }, [supabase, router, setUser, setTenant, setLoading])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
+    router.refresh()
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
+          <p className="text-[var(--muted-foreground)]">Carregando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-[var(--secondary)]">
+      <Toaster position="top-right" richColors />
+      
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`
+        fixed top-0 left-0 z-50 h-full w-64 bg-[var(--background)] border-r border-[var(--border)]
+        transform transition-transform duration-200 ease-in-out
+        lg:translate-x-0
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="flex flex-col h-full">
+          {/* Logo */}
+          <div className="flex items-center justify-between h-16 px-4 border-b border-[var(--border)]">
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-[var(--primary)] flex items-center justify-center">
+                <FileText className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-bold text-lg">ProviDATA</span>
+            </Link>
+            <button 
+              className="lg:hidden p-2 hover:bg-[var(--secondary)] rounded-lg"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Tenant info */}
+          {tenant && (
+            <div className="px-4 py-3 border-b border-[var(--border)]">
+              <p className="text-sm font-medium truncate">{tenant.parlamentar_name}</p>
+              <p className="text-xs text-[var(--muted-foreground)] truncate">
+                {tenant.cargo === 'vereador' ? 'Vereador(a)' : 
+                 tenant.cargo === 'deputado_estadual' ? 'Deputado(a) Estadual' :
+                 tenant.cargo === 'deputado_federal' ? 'Deputado(a) Federal' : 'Senador(a)'}
+                {tenant.partido && ` - ${tenant.partido}`}
+              </p>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`
+                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                    ${isActive 
+                      ? 'bg-[var(--primary)] text-white' 
+                      : 'text-[var(--foreground)] hover:bg-[var(--secondary)]'
+                    }
+                  `}
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <item.icon className="w-5 h-5" />
+                  {item.name}
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* Footer */}
+          <div className="p-3 border-t border-[var(--border)]">
+            <Link
+              href="/dashboard/configuracoes"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--foreground)] hover:bg-[var(--secondary)] transition-colors"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <Settings className="w-5 h-5" />
+              Configurações
+            </Link>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <div className="lg:pl-64">
+        {/* Header */}
+        <header className="sticky top-0 z-30 h-16 bg-[var(--background)] border-b border-[var(--border)]">
+          <div className="flex items-center justify-between h-full px-4">
+            <button
+              className="lg:hidden p-2 hover:bg-[var(--secondary)] rounded-lg"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+
+            <div className="flex-1" />
+
+            <div className="flex items-center gap-2">
+              {/* Notifications */}
+              <Link
+                href="/dashboard/notificacoes"
+                className="relative p-2 hover:bg-[var(--secondary)] rounded-lg transition-colors"
+              >
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              </Link>
+
+              {/* User menu */}
+              <div className="relative">
+                <button
+                  className="flex items-center gap-2 p-2 hover:bg-[var(--secondary)] rounded-lg transition-colors"
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                >
+                  <div className="w-8 h-8 rounded-full bg-[var(--primary)] flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="hidden sm:block text-sm font-medium max-w-[120px] truncate">
+                    {user?.nome}
+                  </span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+
+                {userMenuOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40"
+                      onClick={() => setUserMenuOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-56 bg-[var(--background)] border border-[var(--border)] rounded-lg shadow-lg z-50">
+                      <div className="p-3 border-b border-[var(--border)]">
+                        <p className="font-medium truncate">{user?.nome}</p>
+                        <p className="text-sm text-[var(--muted-foreground)] truncate">{user?.email}</p>
+                      </div>
+                      <div className="p-1">
+                        <Link
+                          href="/dashboard/perfil"
+                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[var(--secondary)] transition-colors"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <User className="w-4 h-4" />
+                          Meu Perfil
+                        </Link>
+                        <Link
+                          href="/dashboard/configuracoes"
+                          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[var(--secondary)] transition-colors"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <Settings className="w-4 h-4" />
+                          Configurações
+                        </Link>
+                        <button
+                          className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+                          onClick={handleLogout}
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Sair
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Page content */}
+        <main className="p-4 md:p-6">
+          {children}
+        </main>
+      </div>
+    </div>
+  )
+}
