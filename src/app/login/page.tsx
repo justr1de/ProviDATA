@@ -54,10 +54,15 @@ export default function LoginPage() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 glass">
         <div className="max-w-6xl mx-auto px-6 h-24 flex items-center justify-center relative">
-          <Link href="/" className="flex items-center gap-4">
-            <Image src="/providata-logo-final.png" alt="ProviDATA" width={56} height={56} style={{ objectFit: 'contain', borderRadius: '12px', backgroundColor: '#ffffff', padding: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
-            <span className="text-providata-gradient font-extrabold text-4xl tracking-tight">ProviDATA</span>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="https://dataro-it.com.br" target="_blank" rel="noopener noreferrer">
+              <Image src="/dataro-logo-final.png" alt="DATA-RO" width={56} height={56} style={{ objectFit: 'contain', borderRadius: '12px', backgroundColor: '#ffffff', padding: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
+            </Link>
+            <Link href="/" className="flex items-center gap-4">
+              <Image src="/providata-logo-final.png" alt="ProviDATA" width={56} height={56} style={{ objectFit: 'contain', borderRadius: '12px', backgroundColor: '#ffffff', padding: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
+              <span className="text-providata-gradient font-extrabold text-4xl tracking-tight">ProviDATA</span>
+            </Link>
+          </div>
           <div className="absolute right-6 top-1/2 -translate-y-1/2">
             <ThemeToggle />
           </div>
@@ -65,13 +70,15 @@ export default function LoginPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 pt-24 pb-12">
-        <div className="w-full max-w-lg animate-fade-in">
+      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 pt-32 pb-12">
+        <div className="w-full max-w-md animate-fade-in">
           {/* Card */}
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-8 sm:p-12 shadow-2xl">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-8 sm:p-10 shadow-2xl">
             {/* Header */}
-            <div className="text-center mb-10">
-              <Image src="/providata-logo-final.png" alt="ProviDATA" width={96} height={96} className="mx-auto mb-6" style={{ objectFit: 'contain', borderRadius: '16px', backgroundColor: '#ffffff', padding: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }} />
+            <div className="text-center mb-8">
+              <div className="flex justify-center mb-6">
+                <Image src="/providata-logo-final.png" alt="ProviDATA" width={80} height={80} style={{ objectFit: 'contain', borderRadius: '16px', backgroundColor: '#ffffff', padding: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }} />
+              </div>
               <h1 className="text-3xl font-bold text-[var(--foreground)] mb-2">
                 Bem-vindo de volta
               </h1>
@@ -139,41 +146,23 @@ export default function LoginPage() {
                 </Link>
               </div>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white text-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg shadow-green-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    Entrar
-                    <ArrowRight className="w-5 h-5" />
-                  </>
-                )}
-              </button>
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white text-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg shadow-green-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      Entrar
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
-
-            {/* Divider */}
-            <div className="relative my-10">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[var(--border)]" />
-              </div>
-              <div className="relative flex justify-center">
-                <span className="px-4 text-md text-[var(--muted-foreground)] bg-[var(--card)]">
-                  Novo no ProviDATA?
-                </span>
-              </div>
-            </div>
-
-            {/* Register Link */}
-            <Link
-              href="/cadastro"
-              className="w-full flex items-center justify-center gap-2 py-4 rounded-xl border-2 border-[var(--border)] text-lg text-[var(--foreground)] font-semibold hover:border-green-500 hover:text-green-600 dark:hover:text-green-400 transition-all"
-            >
-              Criar conta
-            </Link>
           </div>
 
           {/* Footer */}
