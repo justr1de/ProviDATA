@@ -117,11 +117,18 @@ export default function HomePage() {
     setFormStatus('loading');
     
     try {
-      const { error } = await supabase
-        .from('leads')
-        .insert([formData]);
-      
-      if (error) throw error;
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao enviar');
+      }
       
       setFormStatus('success');
       setFormData({ nome: '', cargo: '', email: '', telefone: '' });
