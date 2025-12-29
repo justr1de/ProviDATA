@@ -386,35 +386,52 @@ export default function HomePage() {
             ✨ A solução completa para gabinetes parlamentares
           </div>
 
-          {/* Title com efeito 3D */}
-          <h1 style={{ 
-            fontSize: 'clamp(36px, 5vw, 56px)', 
-            fontWeight: 800, 
-            lineHeight: 1.15,
-            marginBottom: '28px',
-          }}>
-            <span style={{ 
-              color: '#16a34a',
-              display: 'block',
-              textShadow: isDark 
-                ? '0 1px 0 #0d5a2d, 0 2px 0 #0a4a25, 0 3px 0 #083d1f, 0 4px 0 #063018, 0 5px 10px rgba(0,0,0,0.5)' 
-                : '0 1px 0 #15803d, 0 2px 0 #166534, 0 3px 0 #14532d, 0 4px 0 #052e16, 0 5px 10px rgba(0,0,0,0.15)',
-              letterSpacing: '-0.02em'
-            }}>
-              Plataforma para Gestão de
-            </span>
-            <span style={{ 
-              color: isDark ? '#ffffff' : '#16a34a',
-              display: 'block',
-              marginTop: '8px',
-              textShadow: isDark 
-                ? '0 1px 0 #0d5a2d, 0 2px 0 #0a4a25, 0 3px 0 #083d1f, 0 4px 0 #063018, 0 5px 0 #042310, 0 6px 15px rgba(0,0,0,0.6)' 
-                : '0 1px 0 #15803d, 0 2px 0 #166534, 0 3px 0 #14532d, 0 4px 0 #052e16, 0 5px 0 #022c22, 0 6px 15px rgba(0,0,0,0.2)',
-              letterSpacing: '-0.02em'
-            }}>
-              Pedidos de Providência
-            </span>
-          </h1>
+	          {/* Title com efeito 3D */}
+	          <h1 style={{ 
+	            fontSize: 'clamp(36px, 5vw, 56px)', 
+	            fontWeight: 800, 
+	            lineHeight: 1.15,
+	            marginBottom: '28px',
+	          }}>
+	            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginBottom: '16px' }}>
+	              <Image 
+	                src="/providata-logo.png" 
+	                alt="ProviDATA" 
+	                width={100} 
+	                height={100} 
+	                style={{ 
+	                  borderRadius: '20px', 
+	                  objectFit: 'contain',
+	                  boxShadow: '0 0 30px rgba(22, 163, 74, 0.6), 0 0 60px rgba(22, 163, 74, 0.4)',
+	                  transition: 'transform 0.3s ease-in-out',
+	                  ':hover': {
+	                    transform: 'scale(1.05)',
+	                  }
+	                }}
+	              />
+	              <span style={{ 
+	                color: '#16a34a',
+	                display: 'block',
+	                textShadow: isDark 
+	                  ? '0 1px 0 #0d5a2d, 0 2px 0 #0a4a25, 0 3px 0 #083d1f, 0 4px 0 #063018, 0 5px 10px rgba(0,0,0,0.5)' 
+	                  : '0 1px 0 #15803d, 0 2px 0 #166534, 0 3px 0 #14532d, 0 4px 0 #052e16, 0 5px 10px rgba(0,0,0,0.15)',
+	                letterSpacing: '-0.02em'
+	              }}>
+	                Plataforma para Gestão de
+	              </span>
+	            </div>
+	            <span style={{ 
+	              color: isDark ? '#ffffff' : '#1e293b',
+	              display: 'block',
+	              marginTop: '8px',
+	              textShadow: isDark 
+	                ? '0 1px 0 #0d5a2d, 0 2px 0 #0a4a25, 0 3px 0 #083d1f, 0 4px 0 #063018, 0 5px 0 #042310, 0 6px 15px rgba(0,0,0,0.6)' 
+	                : '0 1px 0 #15803d, 0 2px 0 #166534, 0 3px 0 #14532d, 0 4px 0 #052e16, 0 5px 0 #022c22, 0 6px 15px rgba(0,0,0,0.2)',
+	              letterSpacing: '-0.02em'
+	            }}>
+	              Pedidos de Providência
+	            </span>
+	          </h1>
 
           {/* Subtitle */}
           <p style={{ 
