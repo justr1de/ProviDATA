@@ -31,11 +31,14 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Rotas públicas
-  const publicRoutes = ['/', '/login', '/cadastro', '/recuperar-senha']
+  // Rotas públicas (não requerem autenticação)
+  const publicRoutes = ['/', '/login', '/cadastro', '/recuperar-senha', '/demo', '/admin', '/admin/dashboard']
   const isPublicRoute = publicRoutes.some(route => request.nextUrl.pathname === route)
 
-  if (!user && !isPublicRoute) {
+  // Rotas que começam com /admin são gerenciadas separadamente
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
+
+  if (!user && !isPublicRoute && !isAdminRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
