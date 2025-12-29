@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Erro ao inserir lead no Supabase:', error);
       return NextResponse.json(
-        { error: 'Erro ao salvar dados. Tente novamente.' },
+        { error: `Erro no Supabase: ${error.message}`, details: error },
         { status: 500 }
       );
     }
