@@ -23,19 +23,27 @@ export async function POST(request: NextRequest) {
     }
 
     // Criar cliente Supabase
-    // Priorizar variáveis de ambiente sem o prefixo NEXT_PUBLIC_ para o lado do servidor
+    // Criar cliente Supabase
+    // Usar Service Role Key para garantir que a inserção funcione (teste de diagnóstico)
     const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // Chave secreta
 
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
       console.error('Variáveis de ambiente Supabase não configuradas corretamente para a API Route');
       return NextResponse.json(
-        { error: 'Erro de configuração do servidor' },
+        { error: 'Erro de configuração do servidor (Chave Service Role ausente)' },
         { status: 500 }
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    // Usar a chave Service Role para criar o cliente
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+        auth: {
+            // Desabilitar o auto-refresh de token, pois estamos usando a Service Role Key
+            autoRefreshToken: false,
+            persistSession: false,
+        }
+    });
 
     // Inserir lead no Supabase
     const { data, error } = await supabase
