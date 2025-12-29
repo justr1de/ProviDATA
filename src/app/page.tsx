@@ -104,7 +104,7 @@ export default function HomePage() {
       </header>
 
       {/* ==================== HERO ==================== */}
-      <section className="pt-32 pb-24 px-6">
+      <section className="pt-40 pb-24 px-6">
         <div className="max-w-4xl mx-auto text-center">
           
           {/* Badge */}
