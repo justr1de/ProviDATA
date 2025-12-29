@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState } from 'react'
@@ -72,6 +71,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="mb-10 flex items-center gap-4">
             <Image src="/dataro-logo-final.png" alt="DATA-RO" width={64} height={64} style={{ objectFit: 'contain', borderRadius: '12px', backgroundColor: '#ffffff', padding: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
+            <Image src="/providata-logo-final.png" alt="ProviDATA" width={64} height={64} style={{ objectFit: 'contain', borderRadius: '12px', backgroundColor: '#ffffff', padding: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }} />
             <div>
               <h1 className="text-2xl font-bold text-gray-800 dark:text-white">ProviDATA</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">Gestão de Pedidos de Providência</p>
