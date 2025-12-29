@@ -225,11 +225,11 @@ export default function HomePage() {
 	                <Image 
 	                  src="/dataro-logo-final.png" 
 	                  alt="DATA-RO" 
-	                  width={72} 
-	                  height={72} 
-	                  style={{ objectFit: 'contain' }}
-	                />
-	              </Link>
+width={120} 
+                  height={120}
+style={{ objectFit: 'contain', borderRadius: '16px', backgroundColor: 'white', padding: '8px' }}
+                />
+              </Link>
               
 	              {/* Logo ProviDATA - Aumentado e Fundo removido (v3 - Quebra de Cache) */}
 	              <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
@@ -240,7 +240,7 @@ export default function HomePage() {
 	                  height={120} 
 	                  style={{ objectFit: 'contain' }}
 	                />
-	                <span style={{ fontWeight: 700, fontSize: '42px', color: isDark ? '#f1f5f9' : '#1e293b' }}>ProviDATA</span>
+	                <span className="text-providata-gradient" style={{ fontWeight: 700, fontSize: '42px' }}>ProviDATA</span>
 	              </Link>
             </div>
 
@@ -377,7 +377,7 @@ export default function HomePage() {
             padding: '12px 24px', 
             borderRadius: '9999px', 
             backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
-            color: isDark ? '#4ade80' : '#15803d',
+            color: isDark ? 'var(--foreground)' : 'var(--foreground)',
             fontSize: '15px',
             fontWeight: 600,
             marginBottom: '40px',
