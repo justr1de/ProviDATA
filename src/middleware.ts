@@ -34,11 +34,14 @@ export async function middleware(request: NextRequest) {
   // Rotas públicas (não requerem autenticação)
   const publicRoutes = ['/', '/login', '/cadastro', '/recuperar-senha', '/demo', '/admin', '/admin/dashboard']
   const isPublicRoute = publicRoutes.some(route => request.nextUrl.pathname === route)
+  
+  // Rotas de API públicas
+  const isPublicApiRoute = request.nextUrl.pathname.startsWith('/api/leads')
 
   // Rotas que começam com /admin são gerenciadas separadamente
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
 
-  if (!user && !isPublicRoute && !isAdminRoute) {
+  if (!user && !isPublicRoute && !isAdminRoute && !isPublicApiRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
