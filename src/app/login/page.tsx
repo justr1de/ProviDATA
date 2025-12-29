@@ -38,77 +38,105 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex">
+    <div style={{ minHeight: '100vh', width: '100%', display: 'flex' }}>
       <Toaster position="top-right" richColors />
 
       {/* ========== LADO ESQUERDO - FORMULÁRIO (FUNDO BRANCO) ========== */}
-      <div className="w-full lg:w-1/2 bg-white flex flex-col justify-center p-8 sm:p-12 lg:p-16">
-        <div className="w-full max-w-md mx-auto">
+      <div 
+        style={{ 
+          width: '50%', 
+          backgroundColor: '#ffffff', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          justifyContent: 'center',
+          padding: '48px 64px'
+        }}
+      >
+        <div style={{ width: '100%', maxWidth: '420px', margin: '0 auto' }}>
           
           {/* Logos - MESMO TAMANHO DE CAIXA */}
-          <div className="flex items-center gap-4 mb-12">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '48px' }}>
             {/* Logo DATA-RO */}
             <div 
-              className="flex-shrink-0 bg-white rounded-xl flex items-center justify-center overflow-hidden"
               style={{ 
                 width: '64px', 
                 height: '64px', 
+                backgroundColor: '#ffffff',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                padding: '8px'
+                padding: '8px',
+                flexShrink: 0
               }}
             >
               <img 
                 src="/dataro-logo-final.png" 
                 alt="DATA-RO" 
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  objectFit: 'contain' 
-                }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             </div>
             
             {/* Logo ProviDATA */}
             <div 
-              className="flex-shrink-0 bg-white rounded-xl flex items-center justify-center overflow-hidden"
               style={{ 
                 width: '64px', 
                 height: '64px', 
+                backgroundColor: '#ffffff',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                padding: '8px'
+                padding: '8px',
+                flexShrink: 0
               }}
             >
               <img 
                 src="/providata-logo-final.png" 
                 alt="ProviDATA" 
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  objectFit: 'contain' 
-                }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             </div>
             
             {/* Texto */}
-            <div className="ml-2">
-              <h1 className="text-2xl font-bold text-gray-800">ProviDATA</h1>
-              <p className="text-sm text-gray-500">Gestão de Pedidos de Providência</p>
+            <div style={{ marginLeft: '8px' }}>
+              <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937', margin: 0 }}>ProviDATA</h1>
+              <p style={{ fontSize: '14px', color: '#6b7280', margin: '4px 0 0 0' }}>Gestão de Pedidos de Providência</p>
             </div>
           </div>
 
           {/* Título */}
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Bem-vindo!</h2>
-          <p className="text-gray-600 text-lg mb-10">Entre com suas credenciais para acessar o sistema.</p>
+          <h2 style={{ fontSize: '36px', fontWeight: 'bold', color: '#111827', marginBottom: '16px' }}>Bem-vindo!</h2>
+          <p style={{ fontSize: '18px', color: '#4b5563', marginBottom: '40px' }}>Entre com suas credenciais para acessar o sistema.</p>
 
           {/* Aviso Acesso Restrito */}
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-10">
-            <div className="flex items-start gap-4">
-              <div className="bg-amber-100 p-2 rounded-lg flex-shrink-0">
-                <Shield className="w-5 h-5 text-amber-600" />
+          <div 
+            style={{ 
+              backgroundColor: '#fffbeb', 
+              border: '1px solid #fde68a', 
+              borderRadius: '12px', 
+              padding: '20px',
+              marginBottom: '40px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+              <div 
+                style={{ 
+                  backgroundColor: '#fef3c7', 
+                  padding: '8px', 
+                  borderRadius: '8px',
+                  flexShrink: 0
+                }}
+              >
+                <Shield style={{ width: '20px', height: '20px', color: '#d97706' }} />
               </div>
               <div>
-                <h3 className="font-semibold text-amber-800 text-base">Acesso Restrito</h3>
-                <p className="text-sm text-amber-700 mt-1 leading-relaxed">
+                <h3 style={{ fontWeight: '600', color: '#92400e', fontSize: '16px', margin: 0 }}>Acesso Restrito</h3>
+                <p style={{ fontSize: '14px', color: '#a16207', marginTop: '8px', lineHeight: '1.5' }}>
                   Este sistema é de uso exclusivo. Apenas usuários autorizados pelos administradores podem acessar.
                 </p>
               </div>
@@ -116,38 +144,68 @@ export default function LoginPage() {
           </div>
 
           {/* Formulário */}
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin}>
             {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
-                className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none"
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  borderRadius: '12px',
+                  backgroundColor: '#f9fafb',
+                  border: '1px solid #e5e7eb',
+                  color: '#111827',
+                  fontSize: '16px',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
                 required
               />
             </div>
 
             {/* Senha */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Senha</label>
-              <div className="relative">
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>Senha</label>
+              <div style={{ position: 'relative' }}>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none pr-12"
+                  style={{
+                    width: '100%',
+                    padding: '16px',
+                    paddingRight: '48px',
+                    borderRadius: '12px',
+                    backgroundColor: '#f9fafb',
+                    border: '1px solid #e5e7eb',
+                    color: '#111827',
+                    fontSize: '16px',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
                   required
                 />
                 <button 
                   type="button" 
                   onClick={() => setShowPassword(!showPassword)} 
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  style={{
+                    position: 'absolute',
+                    right: '16px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#9ca3af'
+                  }}
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff style={{ width: '20px', height: '20px' }} /> : <Eye style={{ width: '20px', height: '20px' }} />}
                 </button>
               </div>
             </div>
@@ -156,13 +214,29 @@ export default function LoginPage() {
             <button 
               type="submit" 
               disabled={isLoading} 
-              className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-green-600 text-white font-semibold text-lg hover:bg-green-700 transition-all disabled:opacity-50 shadow-lg shadow-green-600/30"
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '12px',
+                padding: '16px',
+                borderRadius: '12px',
+                backgroundColor: '#16a34a',
+                color: '#ffffff',
+                fontWeight: '600',
+                fontSize: '18px',
+                border: 'none',
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(22, 163, 74, 0.4)',
+                opacity: isLoading ? 0.5 : 1
+              }}
             >
               {isLoading ? (
-                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div style={{ width: '24px', height: '24px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
               ) : (
                 <>
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight style={{ width: '20px', height: '20px' }} />
                   Entrar
                 </>
               )}
@@ -170,27 +244,35 @@ export default function LoginPage() {
           </form>
 
           {/* Link Demonstração */}
-          <div className="text-center mt-6">
+          <div style={{ textAlign: 'center', marginTop: '24px' }}>
             <Link 
               href="/" 
-              className="inline-block text-gray-600 hover:text-green-600 transition-colors font-medium border border-gray-200 rounded-xl px-6 py-3 hover:border-green-300"
+              style={{
+                display: 'inline-block',
+                color: '#4b5563',
+                fontWeight: '500',
+                border: '1px solid #e5e7eb',
+                borderRadius: '12px',
+                padding: '12px 24px',
+                textDecoration: 'none'
+              }}
             >
               Acessar Demonstração
             </Link>
           </div>
 
           {/* Contato */}
-          <div className="mt-12 text-center">
-            <p className="text-gray-500 text-sm mb-4">Para solicitar acesso, entre em contato:</p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
-              <a href="mailto:contato@dataro-it.com.br" className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div style={{ marginTop: '48px', textAlign: 'center' }}>
+            <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '16px' }}>Para solicitar acesso, entre em contato:</p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', fontSize: '14px' }}>
+              <a href="mailto:contato@dataro-it.com.br" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#4b5563', textDecoration: 'none' }}>
+                <svg style={{ width: '16px', height: '16px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 contato@dataro-it.com.br
               </a>
-              <a href="tel:+5569999089202" className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <a href="tel:+5569999089202" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#4b5563', textDecoration: 'none' }}>
+                <svg style={{ width: '16px', height: '16px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
                 (69) 9 9908-9202
@@ -199,17 +281,22 @@ export default function LoginPage() {
           </div>
 
           {/* Copyright */}
-          <p className="text-center text-gray-400 text-xs mt-10">
+          <p style={{ textAlign: 'center', color: '#9ca3af', fontSize: '12px', marginTop: '40px' }}>
             © 2025 DATA-RO. Todos os direitos reservados.
           </p>
 
           {/* Logo rodapé */}
-          <div className="flex justify-center mt-6">
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
             <div 
-              className="bg-white rounded-xl flex items-center justify-center overflow-hidden"
               style={{ 
                 width: '56px', 
                 height: '56px', 
+                backgroundColor: '#ffffff',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 padding: '6px'
               }}
@@ -217,11 +304,7 @@ export default function LoginPage() {
               <img 
                 src="/providata-logo-final.png" 
                 alt="ProviDATA" 
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  objectFit: 'contain' 
-                }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             </div>
           </div>
@@ -229,109 +312,118 @@ export default function LoginPage() {
       </div>
 
       {/* ========== LADO DIREITO - PAINEL INFORMATIVO (DEGRADÊ VERDE) ========== */}
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-green-600 via-green-700 to-teal-800 flex-col justify-center p-12 xl:p-16">
-        <div className="max-w-lg mx-auto">
+      <div 
+        style={{ 
+          width: '50%', 
+          background: 'linear-gradient(135deg, #16a34a 0%, #15803d 50%, #0f766e 100%)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          padding: '48px 64px'
+        }}
+      >
+        <div style={{ maxWidth: '520px', margin: '0 auto' }}>
           
           {/* Título */}
-          <h2 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-8">
+          <h2 style={{ fontSize: '42px', fontWeight: 'bold', color: '#ffffff', lineHeight: '1.2', marginBottom: '32px' }}>
             SISTEMA DE GESTÃO DE PEDIDOS DE PROVIDÊNCIA
           </h2>
 
           {/* Descrição */}
-          <p className="text-xl text-green-100 leading-relaxed mb-12">
+          <p style={{ fontSize: '20px', color: '#bbf7d0', lineHeight: '1.6', marginBottom: '48px' }}>
             Plataforma completa para organizar, rastrear e gerenciar as solicitações dos cidadãos, garantindo transparência e eficiência no gabinete parlamentar.
           </p>
 
           {/* Cards de Estatísticas */}
-          <div className="grid grid-cols-2 gap-6 mb-12">
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <FileText className="w-7 h-7 text-white" />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '48px' }}>
+            <div style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', borderRadius: '16px', padding: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '12px' }}>
+                  <FileText style={{ width: '28px', height: '28px', color: '#ffffff' }} />
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-white">10k+</p>
-                  <p className="text-green-200 text-sm mt-1">Pedidos Gerenciados</p>
+                  <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#ffffff', margin: 0 }}>10k+</p>
+                  <p style={{ fontSize: '14px', color: '#bbf7d0', marginTop: '4px' }}>Pedidos Gerenciados</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <Building className="w-7 h-7 text-white" />
+            <div style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', borderRadius: '16px', padding: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '12px' }}>
+                  <Building style={{ width: '28px', height: '28px', color: '#ffffff' }} />
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-white">50+</p>
-                  <p className="text-green-200 text-sm mt-1">Gabinetes Atendidos</p>
+                  <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#ffffff', margin: 0 }}>50+</p>
+                  <p style={{ fontSize: '14px', color: '#bbf7d0', marginTop: '4px' }}>Gabinetes Atendidos</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <MapPin className="w-7 h-7 text-white" />
+            <div style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', borderRadius: '16px', padding: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '12px' }}>
+                  <MapPin style={{ width: '28px', height: '28px', color: '#ffffff' }} />
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-white">150+</p>
-                  <p className="text-green-200 text-sm mt-1">Municípios Cobertos</p>
+                  <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#ffffff', margin: 0 }}>150+</p>
+                  <p style={{ fontSize: '14px', color: '#bbf7d0', marginTop: '4px' }}>Municípios Cobertos</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/20 p-3 rounded-xl">
-                  <Users className="w-7 h-7 text-white" />
+            <div style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', borderRadius: '16px', padding: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '12px' }}>
+                  <Users style={{ width: '28px', height: '28px', color: '#ffffff' }} />
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-white">8+</p>
-                  <p className="text-green-200 text-sm mt-1">Anos de Dados</p>
+                  <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#ffffff', margin: 0 }}>8+</p>
+                  <p style={{ fontSize: '14px', color: '#bbf7d0', marginTop: '4px' }}>Anos de Dados</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Funcionalidades Principais */}
-          <div className="mb-10">
-            <div className="flex items-center gap-3 mb-8">
-              <Sparkles className="w-6 h-6 text-green-200" />
-              <h3 className="text-2xl font-bold text-white">Funcionalidades Principais</h3>
+          <div style={{ marginBottom: '40px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
+              <Sparkles style={{ width: '24px', height: '24px', color: '#bbf7d0' }} />
+              <h3 style={{ fontSize: '24px', fontWeight: 'bold', color: '#ffffff', margin: 0 }}>Funcionalidades Principais</h3>
             </div>
 
-            <div className="space-y-6">
-              <div className="flex items-start gap-5">
-                <div className="bg-white/20 p-3 rounded-xl flex-shrink-0">
-                  <BarChart className="w-6 h-6 text-white" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
+                <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '12px', flexShrink: 0 }}>
+                  <BarChart style={{ width: '24px', height: '24px', color: '#ffffff' }} />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-white text-lg">Dashboard Analítico</h4>
-                  <p className="text-green-200 mt-2 leading-relaxed">
+                  <h4 style={{ fontWeight: '600', color: '#ffffff', fontSize: '18px', margin: 0 }}>Dashboard Analítico</h4>
+                  <p style={{ color: '#bbf7d0', marginTop: '8px', lineHeight: '1.5' }}>
                     Visão geral com métricas e status de todos os pedidos em tempo real.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-5">
-                <div className="bg-white/20 p-3 rounded-xl flex-shrink-0">
-                  <Map className="w-6 h-6 text-white" />
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
+                <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '12px', flexShrink: 0 }}>
+                  <Map style={{ width: '24px', height: '24px', color: '#ffffff' }} />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-white text-lg">Mapa de Demandas</h4>
-                  <p className="text-green-200 mt-2 leading-relaxed">
+                  <h4 style={{ fontWeight: '600', color: '#ffffff', fontSize: '18px', margin: 0 }}>Mapa de Demandas</h4>
+                  <p style={{ color: '#bbf7d0', marginTop: '8px', lineHeight: '1.5' }}>
                     Visualização geográfica das solicitações para identificar áreas prioritárias.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-5">
-                <div className="bg-white/20 p-3 rounded-xl flex-shrink-0">
-                  <FileText className="w-6 h-6 text-white" />
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
+                <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '12px', flexShrink: 0 }}>
+                  <FileText style={{ width: '24px', height: '24px', color: '#ffffff' }} />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-white text-lg">Análise de Resultados</h4>
-                  <p className="text-green-200 mt-2 leading-relaxed">
+                  <h4 style={{ fontWeight: '600', color: '#ffffff', fontSize: '18px', margin: 0 }}>Análise de Resultados</h4>
+                  <p style={{ color: '#bbf7d0', marginTop: '8px', lineHeight: '1.5' }}>
                     Compare o volume e tipo de pedidos entre diferentes regiões e períodos.
                   </p>
                 </div>
@@ -340,27 +432,41 @@ export default function LoginPage() {
           </div>
 
           {/* Rodapé */}
-          <div className="pt-8 border-t border-white/20 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-2 rounded-lg">
-                <Lock className="w-5 h-5 text-green-200" />
+          <div style={{ paddingTop: '32px', borderTop: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '8px', borderRadius: '8px' }}>
+                <Lock style={{ width: '20px', height: '20px', color: '#bbf7d0' }} />
               </div>
-              <span className="text-green-200">Dados Seguros</span>
+              <span style={{ color: '#bbf7d0' }}>Dados Seguros</span>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-2 rounded-lg">
-                <RefreshCw className="w-5 h-5 text-green-200" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '8px', borderRadius: '8px' }}>
+                <RefreshCw style={{ width: '20px', height: '20px', color: '#bbf7d0' }} />
               </div>
-              <span className="text-green-200">Atualização Constante</span>
+              <span style={{ color: '#bbf7d0' }}>Atualização Constante</span>
             </div>
           </div>
 
           {/* Desenvolvido por */}
-          <p className="text-center text-green-300/60 text-sm mt-8">
+          <p style={{ textAlign: 'center', color: 'rgba(187, 247, 208, 0.6)', fontSize: '14px', marginTop: '32px' }}>
             Desenvolvido por DATA-RO Inteligência Territorial
           </p>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        @media (max-width: 1024px) {
+          div[style*="width: 50%"]:first-of-type {
+            width: 100% !important;
+          }
+          div[style*="width: 50%"]:last-of-type {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
