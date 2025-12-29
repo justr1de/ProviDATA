@@ -103,7 +103,9 @@ export default function HomePage() {
     cargo: '',
     email: '',
     telefone: '',
-    mensagem: ''
+    mensagem: '',
+    // Campo Honeypot para proteção anti-bot
+    email_confirm: '',
   });
   const [formStatus, setFormStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   
@@ -116,6 +118,18 @@ export default function HomePage() {
   const handleSubmitLead = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormStatus('loading');
+
+    // Validação Honeypot: Se o campo email_confirm estiver preenchido, é um bot.
+    if (formData.email_confirm) {
+      console.warn('Tentativa de submissão de bot detectada (Honeypot preenchido).');
+      setFormStatus('success'); // Simula sucesso para não dar dica ao bot
+      setFormData({ nome: '', cargo: '', email: '', telefone: '', mensagem: '', email_confirm: '' });
+      setTimeout(() => {
+        setShowContactForm(false);
+        setFormStatus('idle');
+      }, 3000);
+      return;
+    }
     
     try {
       const response = await fetch('/api/leads', {
@@ -1054,10 +1068,22 @@ export default function HomePage() {
                       fontSize: '15px',
                       outline: 'none'
                     }}
-                    placeholder="Seu nome"
-                  />
-                </div>
-                <div style={{ marginBottom: '20px' }}>
+                    placeholder="Seu nome                  required
+                />
+              </div>
+              {/* Campo Honeypot - Visível para bots, invisível para humanos */}
+              <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', opacity: 0, height: 0, width: 0, overflow: 'hidden' }}>
+                <label htmlFor="email_confirm">Não preencha este campo</label>
+                <input
+                  type="text"
+                  id="email_confirm"
+                  name="email_confirm"
+                  value={formData.email_confirm}
+                  onChange={handleChange}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </div> style={{ marginBottom: '20px' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#374151', fontSize: '14px' }}>
                     Cargo
                   </label>
