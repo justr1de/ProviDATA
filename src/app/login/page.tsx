@@ -54,8 +54,8 @@ export default function LoginPage() {
       <header className="fixed top-0 left-0 right-0 z-50 glass">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <Image src="/providata-logo-final.png" alt="ProviDATA" width={48} height={48} />
-            <span className="font-bold text-lg text-[var(--foreground)]">ProviDATA</span>
+            <Image src="/providata-logo-final.png" alt="ProviDATA" width={64} height={64} />
+            <span className="text-providata-gradient font-bold text-2xl">ProviDATA</span>
           </Link>
           <ThemeToggle />
         </div>
