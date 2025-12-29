@@ -69,3 +69,48 @@ input, textarea, select {
 .dark {
   color-scheme: dark;
 }
+
+
+:root {
+  --background: white;
+  --foreground: #020817;
+  --card: white;
+  --card-foreground: #020817;
+  --popover: white;
+  --popover-foreground: #020817;
+  --primary: #16a34a;
+  --primary-foreground: #f8fafc;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #16a34a;
+}
+
+.dark {
+  --background: #0B1120;
+  --foreground: #f8fafc;
+  --card: #111827;
+  --card-foreground: #f8fafc;
+  --popover: #111827;
+  --popover-foreground: #f8fafc;
+  --primary: #16a34a;
+  --primary-foreground: #f8fafc;
+  --secondary: #1f2937;
+  --secondary-foreground: #f8fafc;
+  --muted: #1f2937;
+  --muted-foreground: #9ca3af;
+  --accent: #1f2937;
+  --accent-foreground: #f8fafc;
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+  --border: #374151;
+  --input: #374151;
+  --ring: #16a34a;
+}

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Mail, Lock, FileText, ArrowRight, Eye, EyeOff } from 'lucide-react'
@@ -53,9 +54,7 @@ export default function LoginPage() {
       <header className="fixed top-0 left-0 right-0 z-50 glass">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center shadow-lg shadow-green-500/20">
-              <FileText className="w-5 h-5 text-white" />
-            </div>
+            <Image src="/providata-v3-clean.png" alt="ProviDATA" width={48} height={48} />
             <span className="font-bold text-lg text-[var(--foreground)]">ProviDATA</span>
           </Link>
           <ThemeToggle />
@@ -69,9 +68,7 @@ export default function LoginPage() {
           <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-8 shadow-xl">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-green-500/20">
-                <FileText className="w-7 h-7 text-white" />
-              </div>
+              <Image src="/providata-v3-clean.png" alt="ProviDATA" width={80} height={80} className="mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">
                 Bem-vindo de volta
               </h1>
