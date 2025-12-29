@@ -1107,7 +1107,7 @@ style={{
                     id="email_confirm"
                     name="email_confirm"
                     value={formData.email_confirm}
-                    onChange={handleChange}
+                    onChange={(e) => setFormData({ ...formData, email_confirm: e.target.value })}
                     tabIndex={-1}
                     autoComplete="off"
                   />
