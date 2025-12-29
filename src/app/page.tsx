@@ -1097,7 +1097,6 @@ style={{
                       outline: 'none'
                     }}
                     placeholder="Seu nome completo"
-                    required
                   />
                 </div>
                 {/* Campo Honeypot - Visível para bots, invisível para humanos */}
