@@ -223,7 +223,7 @@ export default function HomePage() {
 	              {/* Logo DATA-RO - Fundo removido (v3 - Quebra de Cache) */}
 	              <Link href="https://dataro-it.com.br" target="_blank" rel="noopener noreferrer">
 	                <Image 
-	                  src="/dataro-v3-clean.png" 
+	                  src="/dataro-logo-final.png" 
 	                  alt="DATA-RO" 
 	                  width={72} 
 	                  height={72} 
@@ -234,7 +234,7 @@ export default function HomePage() {
 	              {/* Logo ProviDATA - Aumentado e Fundo removido (v3 - Quebra de Cache) */}
 	              <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
 	                <Image 
-	                  src="/providata-v3-clean.png" 
+	                  src="/providata-logo-final.png" 
 	                  alt="ProviDATA" 
 	                  width={120} 
 	                  height={120} 
@@ -395,7 +395,7 @@ export default function HomePage() {
 	          }}>
 	            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginBottom: '16px' }}>
 	              <Image 
-	                src="/providata-v3-clean.png" 
+	                src="/providata-logo-final.png" 
 	                alt="ProviDATA" 
 	                width={200} 
 	                height={200} 
@@ -967,7 +967,7 @@ style={{
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', marginBottom: '16px' }}>
             <Link href="https://dataro-it.com.br" target="_blank" rel="noopener noreferrer">
               <Image 
-                src="/dataro-logo.jpeg" 
+                src="/dataro-logo-final.png" 
                 alt="DATA-RO" 
                 width={44} 
                 height={44} 
@@ -975,7 +975,7 @@ style={{
               />
             </Link>
             <Image 
-              src="/providata-logo.png" 
+              src="/providata-logo-final.png" 
               alt="ProviDATA" 
               width={44} 
               height={44} 

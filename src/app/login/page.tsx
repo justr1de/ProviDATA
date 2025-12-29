@@ -54,7 +54,7 @@ export default function LoginPage() {
       <header className="fixed top-0 left-0 right-0 z-50 glass">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
-            <Image src="/providata-v3-clean.png" alt="ProviDATA" width={48} height={48} />
+            <Image src="/providata-logo-final.png" alt="ProviDATA" width={48} height={48} />
             <span className="font-bold text-lg text-[var(--foreground)]">ProviDATA</span>
           </Link>
           <ThemeToggle />
@@ -68,7 +68,7 @@ export default function LoginPage() {
           <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-8 shadow-xl">
             {/* Header */}
             <div className="text-center mb-8">
-              <Image src="/providata-v3-clean.png" alt="ProviDATA" width={80} height={80} className="mx-auto mb-4" />
+              <Image src="/providata-logo-final.png" alt="ProviDATA" width={80} height={80} className="mx-auto mb-4" />
               <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">
                 Bem-vindo de volta
               </h1>
