@@ -19,7 +19,13 @@ import {
   Sun,
   Moon,
   X,
-  Phone
+  Phone,
+  Layers,
+  CreditCard,
+  Info,
+  PhoneCall,
+  LogIn,
+  Key
 } from 'lucide-react';
 
 const supabase = createBrowserClient(
@@ -60,6 +66,13 @@ const features = [
   },
 ];
 
+const navItems = [
+  { name: 'Recursos', icon: Layers, href: '#recursos' },
+  { name: 'Planos', icon: CreditCard, href: '#planos' },
+  { name: 'Sobre', icon: Info, href: '#sobre' },
+  { name: 'Contato', icon: PhoneCall, href: '#contato' },
+];
+
 const planoBasico = [
   'Até 3 usuários',
   'Providências ilimitadas',
@@ -75,6 +88,9 @@ const planoIlimitado = [
   'Notificações por e-mail',
   'Suporte prioritário',
 ];
+
+// Palavras para marca d'água
+const watermarkWords = ['Cidadão', 'Saúde', 'Educação', 'Segurança', 'Meio Ambiente', 'Infraestrutura', 'Transporte', 'Assistência Social'];
 
 export default function HomePage() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -127,7 +143,7 @@ export default function HomePage() {
       color: isDark ? '#f1f5f9' : '#1e293b'
     }}>
       
-      {/* HEADER */}
+      {/* HEADER com marca d'água */}
       <header style={{ 
         position: 'fixed', 
         top: 0, 
@@ -136,71 +152,108 @@ export default function HomePage() {
         zIndex: 50, 
         backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)',
         borderBottom: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
-        backdropFilter: 'blur(8px)'
+        backdropFilter: 'blur(8px)',
+        overflow: 'hidden'
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px' }}>
+        {/* Marca d'água no fundo do header */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '40px',
+          opacity: isDark ? 0.03 : 0.04,
+          pointerEvents: 'none',
+          overflow: 'hidden'
+        }}>
+          {watermarkWords.map((word, index) => (
+            <span 
+              key={index}
+              style={{
+                fontSize: '14px',
+                fontWeight: 700,
+                color: isDark ? '#ffffff' : '#16a34a',
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {word}
+            </span>
+          ))}
+        </div>
+
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '80px' }}>
             
-            {/* Logos */}
+            {/* Logos - Mesmo tamanho */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               {/* Logo DATA-RO */}
               <Link href="https://dataro-it.com.br" target="_blank" rel="noopener noreferrer">
                 <Image 
                   src="/dataro-logo.jpeg" 
                   alt="DATA-RO" 
-                  width={48} 
-                  height={48} 
-                  style={{ borderRadius: '8px' }}
+                  width={56} 
+                  height={56} 
+                  style={{ borderRadius: '10px' }}
                 />
               </Link>
               
-              {/* Logo ProviDATA */}
-              <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+              {/* Logo ProviDATA - Mesmo tamanho */}
+              <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
                 <Image 
                   src="/providata-logo.png" 
                   alt="ProviDATA" 
-                  width={48} 
-                  height={48} 
-                  style={{ borderRadius: '8px' }}
+                  width={56} 
+                  height={56} 
+                  style={{ borderRadius: '10px' }}
                 />
-                <span style={{ fontWeight: 700, fontSize: '20px', color: isDark ? '#f1f5f9' : '#1e293b' }}>ProviDATA</span>
+                <span style={{ fontWeight: 700, fontSize: '22px', color: isDark ? '#f1f5f9' : '#1e293b' }}>ProviDATA</span>
               </Link>
             </div>
 
-            {/* Nav - Botões em alto relevo minimalista */}
-            <nav style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {['Recursos', 'Planos', 'Sobre', 'Contato'].map((item) => (
+            {/* Nav - Botões com ícones e efeito hover */}
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {navItems.map((item) => (
                 <a 
-                  key={item}
-                  href={`#${item.toLowerCase()}`} 
+                  key={item.name}
+                  href={item.href} 
                   style={{ 
                     fontSize: '14px', 
                     fontWeight: 600,
                     color: isDark ? '#e2e8f0' : '#374151',
                     textDecoration: 'none',
-                    padding: '10px 18px',
-                    borderRadius: '8px',
+                    padding: '10px 16px',
+                    borderRadius: '10px',
                     backgroundColor: isDark ? '#1e293b' : '#f3f4f6',
                     border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
                     boxShadow: isDark 
-                      ? '0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)' 
-                      : '0 2px 4px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8)',
-                    transition: 'all 0.2s ease'
+                      ? '0 4px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.2)' 
+                      : '0 4px 6px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,0,0,0.05)',
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
                   }}
                 >
-                  {item}
+                  <item.icon style={{ width: '16px', height: '16px', color: '#16a34a' }} />
+                  {item.name}
                 </a>
               ))}
             </nav>
 
             {/* Actions */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              {/* Botão Entrar - Verde com letras brancas */}
+              {/* Botão Entrar - Verde com ícone de chave */}
               <Link 
                 href="/login" 
                 style={{ 
-                  padding: '10px 24px',
-                  borderRadius: '8px',
+                  padding: '12px 24px',
+                  borderRadius: '10px',
                   backgroundColor: '#16a34a',
                   color: 'white',
                   fontWeight: 700,
@@ -209,19 +262,20 @@ export default function HomePage() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  boxShadow: '0 2px 8px rgba(22, 163, 74, 0.3)'
+                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
                 }}
               >
+                <Key style={{ width: '18px', height: '18px' }} />
                 Entrar
               </Link>
               
-              {/* Botão Dia/Noite - Depois do Entrar */}
+              {/* Botão Dia/Noite */}
               <button
                 onClick={toggleTheme}
                 style={{ 
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '10px',
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '12px',
                   border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
                   backgroundColor: isDark ? '#1e293b' : '#f3f4f6',
                   color: isDark ? '#fbbf24' : '#64748b',
@@ -230,12 +284,12 @@ export default function HomePage() {
                   justifyContent: 'center',
                   cursor: 'pointer',
                   boxShadow: isDark 
-                    ? '0 2px 4px rgba(0,0,0,0.3)' 
-                    : '0 2px 4px rgba(0,0,0,0.05)'
+                    ? '0 4px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)' 
+                    : '0 4px 6px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)'
                 }}
                 title={isDark ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
               >
-                {isDark ? <Sun style={{ width: '22px', height: '22px' }} /> : <Moon style={{ width: '22px', height: '22px' }} />}
+                {isDark ? <Sun style={{ width: '24px', height: '24px' }} /> : <Moon style={{ width: '24px', height: '24px' }} />}
               </button>
             </div>
           </div>
@@ -243,44 +297,60 @@ export default function HomePage() {
       </header>
 
       {/* HERO */}
-      <section style={{ paddingTop: '180px', paddingBottom: '80px', paddingLeft: '24px', paddingRight: '24px' }}>
+      <section style={{ paddingTop: '200px', paddingBottom: '100px', paddingLeft: '24px', paddingRight: '24px' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
           
-          {/* Badge - Mais interessante */}
+          {/* Badge */}
           <div style={{ 
             display: 'inline-block', 
-            padding: '10px 20px', 
+            padding: '12px 24px', 
             borderRadius: '9999px', 
             backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
             color: isDark ? '#4ade80' : '#15803d',
-            fontSize: '14px',
+            fontSize: '15px',
             fontWeight: 600,
-            marginBottom: '32px',
+            marginBottom: '40px',
             border: `1px solid ${isDark ? 'rgba(34, 197, 94, 0.3)' : '#bbf7d0'}`
           }}>
             ✨ A solução completa para gabinetes parlamentares
           </div>
 
-          {/* Title - Sem "Gestão de Providências" */}
+          {/* Title com efeito de relevo */}
           <h1 style={{ 
-            fontSize: 'clamp(36px, 5vw, 60px)', 
+            fontSize: 'clamp(40px, 5vw, 64px)', 
             fontWeight: 800, 
             lineHeight: 1.1,
-            marginBottom: '24px',
-            color: isDark ? '#f1f5f9' : '#1e293b'
+            marginBottom: '28px',
           }}>
-            <span style={{ color: '#16a34a' }}>Plataforma para Gestão de</span>
-            <br />
-            <span style={{ color: '#16a34a' }}>Pedidos de Providência</span>
+            <span style={{ 
+              color: '#16a34a',
+              textShadow: isDark 
+                ? '0 2px 4px rgba(0,0,0,0.5), 0 4px 8px rgba(22, 163, 74, 0.3)' 
+                : '0 2px 4px rgba(0,0,0,0.1), 0 4px 8px rgba(22, 163, 74, 0.2)',
+              display: 'block'
+            }}>
+              Plataforma para Gestão de
+            </span>
+            <span style={{ 
+              color: '#ffffff',
+              textShadow: isDark 
+                ? '0 2px 0 #0f4a2a, 0 4px 8px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.1)' 
+                : '0 2px 0 #15803d, 0 4px 8px rgba(22, 163, 74, 0.4), 0 1px 0 rgba(255,255,255,0.3)',
+              WebkitTextStroke: '1px #15803d',
+              display: 'block',
+              marginTop: '8px'
+            }}>
+              Pedidos de Providência
+            </span>
           </h1>
 
           {/* Subtitle */}
           <p style={{ 
             fontSize: '20px', 
-            lineHeight: 1.6,
-            marginBottom: '40px',
+            lineHeight: 1.7,
+            marginBottom: '48px',
             maxWidth: '700px',
-            margin: '0 auto 40px auto',
+            margin: '0 auto 48px auto',
             color: isDark ? '#94a3b8' : '#64748b'
           }}>
             Organize as solicitações dos cidadãos de forma simples e transparente. 
@@ -294,42 +364,45 @@ export default function HomePage() {
             flexWrap: 'wrap',
             alignItems: 'center', 
             justifyContent: 'center', 
-            gap: '16px',
-            marginBottom: '64px'
+            gap: '20px',
+            marginBottom: '72px'
           }}>
             <Link 
               href="/demo"
               style={{ 
-                padding: '16px 32px', 
-                borderRadius: '10px', 
+                padding: '18px 36px', 
+                borderRadius: '12px', 
                 backgroundColor: '#16a34a',
                 color: 'white',
                 fontWeight: 700,
-                fontSize: '16px',
+                fontSize: '17px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '10px',
                 textDecoration: 'none',
-                boxShadow: '0 4px 14px rgba(22, 163, 74, 0.35)'
+                boxShadow: '0 6px 20px rgba(22, 163, 74, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
               }}
             >
               Acessar demonstração
-              <ArrowRight style={{ width: '20px', height: '20px' }} />
+              <ArrowRight style={{ width: '22px', height: '22px' }} />
             </Link>
             <button 
               onClick={() => setShowContactForm(true)}
               style={{ 
-                padding: '16px 32px', 
-                borderRadius: '10px', 
+                padding: '18px 36px', 
+                borderRadius: '12px', 
                 border: `2px solid ${isDark ? '#334155' : '#d1d5db'}`,
                 backgroundColor: isDark ? '#1e293b' : '#ffffff',
                 fontWeight: 700,
-                fontSize: '16px',
+                fontSize: '17px',
                 color: isDark ? '#f1f5f9' : '#1e293b',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '10px',
+                boxShadow: isDark 
+                  ? '0 4px 12px rgba(0,0,0,0.3)' 
+                  : '0 4px 12px rgba(0,0,0,0.08)'
               }}
             >
               Entrar em contato
@@ -341,22 +414,22 @@ export default function HomePage() {
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center', 
-            gap: '48px',
+            gap: '56px',
             flexWrap: 'wrap'
           }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#16a34a' }}>Gestão</div>
-              <div style={{ fontSize: '14px', marginTop: '4px', color: isDark ? '#94a3b8' : '#64748b' }}>Inteligente</div>
+              <div style={{ fontSize: '26px', fontWeight: 700, color: '#16a34a' }}>Gestão</div>
+              <div style={{ fontSize: '15px', marginTop: '6px', color: isDark ? '#94a3b8' : '#64748b' }}>Inteligente</div>
             </div>
-            <div style={{ width: '1px', height: '48px', backgroundColor: isDark ? '#334155' : '#d1d5db' }}></div>
+            <div style={{ width: '2px', height: '56px', backgroundColor: isDark ? '#334155' : '#d1d5db', borderRadius: '2px' }}></div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#16a34a' }}>Acompanhamento</div>
-              <div style={{ fontSize: '14px', marginTop: '4px', color: isDark ? '#94a3b8' : '#64748b' }}>em tempo real</div>
+              <div style={{ fontSize: '26px', fontWeight: 700, color: '#16a34a' }}>Acompanhamento</div>
+              <div style={{ fontSize: '15px', marginTop: '6px', color: isDark ? '#94a3b8' : '#64748b' }}>em tempo real</div>
             </div>
-            <div style={{ width: '1px', height: '48px', backgroundColor: isDark ? '#334155' : '#d1d5db' }}></div>
+            <div style={{ width: '2px', height: '56px', backgroundColor: isDark ? '#334155' : '#d1d5db', borderRadius: '2px' }}></div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#16a34a' }}>LGPD</div>
-              <div style={{ fontSize: '14px', marginTop: '4px', color: isDark ? '#94a3b8' : '#64748b' }}>Conforme</div>
+              <div style={{ fontSize: '26px', fontWeight: 700, color: '#16a34a' }}>LGPD</div>
+              <div style={{ fontSize: '15px', marginTop: '6px', color: isDark ? '#94a3b8' : '#64748b' }}>Conforme</div>
             </div>
           </div>
         </div>
@@ -364,22 +437,22 @@ export default function HomePage() {
 
       {/* RECURSOS */}
       <section id="recursos" style={{ 
-        padding: '80px 24px', 
+        padding: '100px 24px', 
         backgroundColor: isDark ? '#1e293b' : '#f9fafb' 
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           
-          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '72px' }}>
             <h2 style={{ 
-              fontSize: '36px', 
+              fontSize: '40px', 
               fontWeight: 700, 
-              marginBottom: '16px',
+              marginBottom: '20px',
               color: isDark ? '#f1f5f9' : '#1e293b'
             }}>
               Tudo que você precisa
             </h2>
             <p style={{ 
-              fontSize: '18px', 
+              fontSize: '19px', 
               maxWidth: '600px', 
               margin: '0 auto',
               color: isDark ? '#94a3b8' : '#64748b'
@@ -390,42 +463,45 @@ export default function HomePage() {
 
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
-            gap: '24px'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', 
+            gap: '28px'
           }}>
             {features.map((feature, index) => (
               <div 
                 key={index}
                 style={{ 
-                  padding: '32px',
-                  borderRadius: '16px',
+                  padding: '36px',
+                  borderRadius: '20px',
                   border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
-                  backgroundColor: isDark ? '#0f172a' : '#ffffff'
+                  backgroundColor: isDark ? '#0f172a' : '#ffffff',
+                  boxShadow: isDark 
+                    ? '0 4px 12px rgba(0,0,0,0.3)' 
+                    : '0 4px 12px rgba(0,0,0,0.05)'
                 }}
               >
                 <div style={{ 
-                  width: '56px', 
-                  height: '56px', 
-                  borderRadius: '12px', 
+                  width: '64px', 
+                  height: '64px', 
+                  borderRadius: '16px', 
                   backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: '24px'
+                  marginBottom: '28px'
                 }}>
-                  <feature.icon style={{ width: '28px', height: '28px', color: '#16a34a' }} />
+                  <feature.icon style={{ width: '32px', height: '32px', color: '#16a34a' }} />
                 </div>
                 <h3 style={{ 
-                  fontSize: '20px', 
+                  fontSize: '22px', 
                   fontWeight: 700, 
-                  marginBottom: '12px',
+                  marginBottom: '14px',
                   color: isDark ? '#f1f5f9' : '#1e293b'
                 }}>
                   {feature.title}
                 </h3>
                 <p style={{ 
                   fontSize: '16px', 
-                  lineHeight: 1.6,
+                  lineHeight: 1.7,
                   color: isDark ? '#94a3b8' : '#64748b'
                 }}>
                   {feature.description}
@@ -438,22 +514,22 @@ export default function HomePage() {
 
       {/* PLANOS */}
       <section id="planos" style={{ 
-        padding: '80px 24px',
+        padding: '100px 24px',
         backgroundColor: isDark ? '#0f172a' : '#ffffff'
       }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           
-          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '72px' }}>
             <h2 style={{ 
-              fontSize: '36px', 
+              fontSize: '40px', 
               fontWeight: 700, 
-              marginBottom: '16px',
+              marginBottom: '20px',
               color: isDark ? '#f1f5f9' : '#1e293b'
             }}>
               Planos e Preços
             </h2>
             <p style={{ 
-              fontSize: '18px', 
+              fontSize: '19px', 
               maxWidth: '600px', 
               margin: '0 auto',
               color: isDark ? '#94a3b8' : '#64748b'
@@ -464,142 +540,168 @@ export default function HomePage() {
 
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
             gap: '32px'
           }}>
-            
-            {/* Básico */}
+            {/* Plano Básico */}
             <div style={{ 
-              padding: '32px',
-              borderRadius: '16px',
+              padding: '40px',
+              borderRadius: '20px',
               border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
-              backgroundColor: isDark ? '#1e293b' : '#ffffff'
+              backgroundColor: isDark ? '#1e293b' : '#ffffff',
+              boxShadow: isDark 
+                ? '0 4px 12px rgba(0,0,0,0.3)' 
+                : '0 4px 12px rgba(0,0,0,0.05)'
             }}>
               <h3 style={{ 
-                fontSize: '24px', 
+                fontSize: '26px', 
                 fontWeight: 700, 
-                marginBottom: '8px',
+                marginBottom: '10px',
                 color: isDark ? '#f1f5f9' : '#1e293b'
-              }}>Básico</h3>
-              <p style={{ marginBottom: '24px', color: isDark ? '#94a3b8' : '#64748b' }}>Para gabinetes menores</p>
-              
-              <div style={{ fontSize: '36px', fontWeight: 700, color: '#16a34a', marginBottom: '32px' }}>Consulte</div>
-
-              <ul style={{ listStyle: 'none', padding: 0, marginBottom: '32px' }}>
+              }}>
+                Básico
+              </h3>
+              <p style={{ 
+                fontSize: '15px', 
+                marginBottom: '28px',
+                color: isDark ? '#94a3b8' : '#64748b'
+              }}>
+                Para gabinetes menores
+              </p>
+              <div style={{ 
+                fontSize: '42px', 
+                fontWeight: 700, 
+                marginBottom: '32px',
+                color: '#16a34a'
+              }}>
+                Consulte
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, marginBottom: '36px' }}>
                 {planoBasico.map((item, index) => (
-                  <li key={index} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                    <div style={{ 
-                      width: '20px', 
-                      height: '20px', 
-                      borderRadius: '50%', 
-                      backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <Check style={{ width: '12px', height: '12px', color: '#16a34a' }} />
-                    </div>
-                    <span style={{ color: isDark ? '#94a3b8' : '#64748b' }}>{item}</span>
+                  <li 
+                    key={index}
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '12px',
+                      marginBottom: '16px',
+                      color: isDark ? '#94a3b8' : '#64748b',
+                      fontSize: '16px'
+                    }}
+                  >
+                    <Check style={{ width: '22px', height: '22px', color: '#16a34a' }} />
+                    {item}
                   </li>
                 ))}
               </ul>
-
               <button 
                 onClick={() => setShowContactForm(true)}
                 style={{ 
+                  width: '100%',
+                  padding: '16px',
+                  borderRadius: '12px',
+                  border: `2px solid ${isDark ? '#334155' : '#d1d5db'}`,
+                  backgroundColor: 'transparent',
+                  fontWeight: 700,
+                  fontSize: '16px',
+                  color: isDark ? '#f1f5f9' : '#1e293b',
+                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '10px',
-                  border: `2px solid ${isDark ? '#334155' : '#d1d5db'}`,
-                  backgroundColor: 'transparent',
-                  fontWeight: 600,
-                  color: isDark ? '#f1f5f9' : '#1e293b',
-                  cursor: 'pointer'
+                  gap: '8px'
                 }}
               >
                 Solicitar proposta
-                <ArrowRight style={{ width: '16px', height: '16px' }} />
+                <ArrowRight style={{ width: '18px', height: '18px' }} />
               </button>
             </div>
 
-            {/* Ilimitado (antes Profissional) */}
+            {/* Plano Ilimitado */}
             <div style={{ 
-              padding: '32px',
-              borderRadius: '16px',
+              padding: '40px',
+              borderRadius: '20px',
               border: '2px solid #16a34a',
               backgroundColor: isDark ? '#1e293b' : '#ffffff',
-              position: 'relative'
+              position: 'relative',
+              boxShadow: '0 8px 24px rgba(22, 163, 74, 0.25)'
             }}>
               <div style={{ 
                 position: 'absolute',
-                top: '-12px',
+                top: '-14px',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                padding: '6px 20px',
+                padding: '8px 20px',
                 borderRadius: '9999px',
                 backgroundColor: '#16a34a',
                 color: 'white',
-                fontSize: '14px',
-                fontWeight: 600
+                fontSize: '13px',
+                fontWeight: 700
               }}>
                 Recomendado
               </div>
-              
               <h3 style={{ 
-                fontSize: '24px', 
+                fontSize: '26px', 
                 fontWeight: 700, 
-                marginBottom: '8px',
+                marginBottom: '10px',
                 color: isDark ? '#f1f5f9' : '#1e293b'
-              }}>Ilimitado</h3>
-              <p style={{ marginBottom: '24px', color: isDark ? '#94a3b8' : '#64748b' }}>Para gabinetes completos</p>
-              
-              <div style={{ fontSize: '36px', fontWeight: 700, color: '#16a34a', marginBottom: '32px' }}>Consulte</div>
-
-              <ul style={{ listStyle: 'none', padding: 0, marginBottom: '32px' }}>
+              }}>
+                Ilimitado
+              </h3>
+              <p style={{ 
+                fontSize: '15px', 
+                marginBottom: '28px',
+                color: isDark ? '#94a3b8' : '#64748b'
+              }}>
+                Para gabinetes completos
+              </p>
+              <div style={{ 
+                fontSize: '42px', 
+                fontWeight: 700, 
+                marginBottom: '32px',
+                color: '#16a34a'
+              }}>
+                Consulte
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, marginBottom: '36px' }}>
                 {planoIlimitado.map((item, index) => (
-                  <li key={index} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                    <div style={{ 
-                      width: '20px', 
-                      height: '20px', 
-                      borderRadius: '50%', 
-                      backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <Check style={{ width: '12px', height: '12px', color: '#16a34a' }} />
-                    </div>
-                    <span style={{ color: isDark ? '#94a3b8' : '#64748b' }}>{item}</span>
+                  <li 
+                    key={index}
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '12px',
+                      marginBottom: '16px',
+                      color: isDark ? '#94a3b8' : '#64748b',
+                      fontSize: '16px'
+                    }}
+                  >
+                    <Check style={{ width: '22px', height: '22px', color: '#16a34a' }} />
+                    {item}
                   </li>
                 ))}
               </ul>
-
               <button 
                 onClick={() => setShowContactForm(true)}
                 style={{ 
+                  width: '100%',
+                  padding: '16px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  backgroundColor: '#16a34a',
+                  fontWeight: 700,
+                  fontSize: '16px',
+                  color: 'white',
+                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '10px',
-                  backgroundColor: '#16a34a',
-                  border: 'none',
-                  color: 'white',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(22, 163, 74, 0.35)'
+                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.35)'
                 }}
               >
                 Solicitar proposta
-                <ArrowRight style={{ width: '16px', height: '16px' }} />
+                <ArrowRight style={{ width: '18px', height: '18px' }} />
               </button>
             </div>
           </div>
@@ -608,22 +710,22 @@ export default function HomePage() {
 
       {/* SOBRE */}
       <section id="sobre" style={{ 
-        padding: '80px 24px', 
+        padding: '100px 24px', 
         backgroundColor: isDark ? '#1e293b' : '#f9fafb' 
       }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ 
-            fontSize: '36px', 
+            fontSize: '40px', 
             fontWeight: 700, 
-            marginBottom: '24px',
+            marginBottom: '28px',
             color: isDark ? '#f1f5f9' : '#1e293b'
           }}>
             Sobre o Projeto
           </h2>
           <p style={{ 
-            fontSize: '18px', 
+            fontSize: '19px', 
             lineHeight: 1.8, 
-            marginBottom: '32px',
+            marginBottom: '36px',
             color: isDark ? '#94a3b8' : '#64748b'
           }}>
             O ProviDATA foi desenvolvido especialmente para atender às necessidades dos gabinetes 
@@ -631,7 +733,7 @@ export default function HomePage() {
             atendimento ao cidadão. Nossa plataforma permite que vereadores, deputados e senadores 
             gerenciem todas as demandas de forma organizada e profissional.
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
             <span style={{ color: isDark ? '#94a3b8' : '#64748b' }}>Desenvolvido por</span>
             <span style={{ fontWeight: 700, color: isDark ? '#f1f5f9' : '#1e293b' }}>DATA-RO INTELIGÊNCIA TERRITORIAL</span>
           </div>
@@ -640,37 +742,37 @@ export default function HomePage() {
 
       {/* CONTATO */}
       <section id="contato" style={{ 
-        padding: '80px 24px',
+        padding: '100px 24px',
         backgroundColor: isDark ? '#0f172a' : '#ffffff'
       }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
           
           <div style={{ 
-            width: '64px', 
-            height: '64px', 
-            borderRadius: '16px', 
+            width: '72px', 
+            height: '72px', 
+            borderRadius: '20px', 
             backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            margin: '0 auto 32px auto'
+            margin: '0 auto 36px auto'
           }}>
-            <Mail style={{ width: '32px', height: '32px', color: '#16a34a' }} />
+            <Mail style={{ width: '36px', height: '36px', color: '#16a34a' }} />
           </div>
           
           <h2 style={{ 
-            fontSize: '36px', 
+            fontSize: '40px', 
             fontWeight: 700, 
-            marginBottom: '16px',
+            marginBottom: '20px',
             color: isDark ? '#f1f5f9' : '#1e293b'
           }}>
             Entre em contato
           </h2>
           <p style={{ 
-            fontSize: '18px', 
-            marginBottom: '40px', 
+            fontSize: '19px', 
+            marginBottom: '48px', 
             maxWidth: '600px', 
-            margin: '0 auto 40px auto',
+            margin: '0 auto 48px auto',
             color: isDark ? '#94a3b8' : '#64748b'
           }}>
             Fale com nossa equipe comercial para conhecer melhor o sistema e receber uma proposta personalizada.
@@ -682,24 +784,25 @@ export default function HomePage() {
             flexWrap: 'wrap',
             alignItems: 'center', 
             justifyContent: 'center', 
-            gap: '16px'
+            gap: '20px'
           }}>
             <a 
               href="mailto:contato@dataro-it.com.br"
               style={{ 
-                padding: '16px 32px', 
-                borderRadius: '10px', 
+                padding: '18px 36px', 
+                borderRadius: '12px', 
                 backgroundColor: '#16a34a',
                 color: 'white',
                 fontWeight: 700,
+                fontSize: '16px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '10px',
                 textDecoration: 'none',
-                boxShadow: '0 4px 14px rgba(22, 163, 74, 0.35)'
+                boxShadow: '0 6px 20px rgba(22, 163, 74, 0.4)'
               }}
             >
-              <Mail style={{ width: '20px', height: '20px' }} />
+              <Mail style={{ width: '22px', height: '22px' }} />
               contato@dataro-it.com.br
             </a>
             <a 
@@ -707,19 +810,20 @@ export default function HomePage() {
               target="_blank"
               rel="noopener noreferrer"
               style={{ 
-                padding: '16px 32px', 
-                borderRadius: '10px', 
+                padding: '18px 36px', 
+                borderRadius: '12px', 
                 backgroundColor: '#25D366',
                 color: 'white',
                 fontWeight: 700,
+                fontSize: '16px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '10px',
                 textDecoration: 'none',
-                boxShadow: '0 4px 14px rgba(37, 211, 102, 0.35)'
+                boxShadow: '0 6px 20px rgba(37, 211, 102, 0.4)'
               }}
             >
-              <MessageCircle style={{ width: '20px', height: '20px' }} />
+              <MessageCircle style={{ width: '22px', height: '22px' }} />
               (69) 9 9908-9202
             </a>
           </div>
@@ -728,31 +832,31 @@ export default function HomePage() {
 
       {/* FOOTER */}
       <footer style={{ 
-        padding: '24px', 
+        padding: '28px 24px', 
         borderTop: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
         backgroundColor: isDark ? '#0f172a' : '#ffffff'
       }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <Link href="https://dataro-it.com.br" target="_blank" rel="noopener noreferrer">
               <Image 
                 src="/dataro-logo.jpeg" 
                 alt="DATA-RO" 
-                width={40} 
-                height={40} 
-                style={{ borderRadius: '8px' }}
+                width={44} 
+                height={44} 
+                style={{ borderRadius: '10px' }}
               />
             </Link>
             <Image 
               src="/providata-logo.png" 
               alt="ProviDATA" 
-              width={40} 
-              height={40} 
-              style={{ borderRadius: '8px' }}
+              width={44} 
+              height={44} 
+              style={{ borderRadius: '10px' }}
             />
             <span style={{ fontWeight: 700, color: isDark ? '#f1f5f9' : '#1e293b' }}>ProviDATA</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: isDark ? '#64748b' : '#94a3b8' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: isDark ? '#64748b' : '#94a3b8' }}>
             <span>Desenvolvido por</span>
             <a 
               href="https://dataro-it.com.br" 
@@ -785,9 +889,9 @@ export default function HomePage() {
         }}>
           <div style={{
             backgroundColor: isDark ? '#1e293b' : '#ffffff',
-            borderRadius: '16px',
-            padding: '32px',
-            maxWidth: '480px',
+            borderRadius: '20px',
+            padding: '40px',
+            maxWidth: '500px',
             width: '100%',
             position: 'relative',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
@@ -796,57 +900,59 @@ export default function HomePage() {
               onClick={() => setShowContactForm(false)}
               style={{
                 position: 'absolute',
-                top: '16px',
-                right: '16px',
-                background: 'none',
+                top: '20px',
+                right: '20px',
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
                 border: 'none',
+                backgroundColor: isDark ? '#334155' : '#f3f4f6',
+                color: isDark ? '#94a3b8' : '#64748b',
                 cursor: 'pointer',
-                color: isDark ? '#94a3b8' : '#64748b'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
-              <X style={{ width: '24px', height: '24px' }} />
+              <X style={{ width: '22px', height: '22px' }} />
             </button>
 
-            <h3 style={{ 
-              fontSize: '24px', 
-              fontWeight: 700, 
-              marginBottom: '8px',
+            <h3 style={{
+              fontSize: '28px',
+              fontWeight: 700,
+              marginBottom: '12px',
               color: isDark ? '#f1f5f9' : '#1e293b'
             }}>
-              Entrar em contato
+              Entre em contato
             </h3>
-            <p style={{ 
-              marginBottom: '24px', 
-              color: isDark ? '#94a3b8' : '#64748b',
-              fontSize: '14px'
+            <p style={{
+              fontSize: '15px',
+              marginBottom: '32px',
+              color: isDark ? '#94a3b8' : '#64748b'
             }}>
               Preencha o formulário abaixo e nossa equipe entrará em contato em breve.
             </p>
 
             {formStatus === 'success' ? (
               <div style={{
-                textAlign: 'center',
-                padding: '32px',
-                backgroundColor: isDark ? 'rgba(34, 197, 94, 0.1)' : '#dcfce7',
-                borderRadius: '12px'
+                padding: '24px',
+                borderRadius: '12px',
+                backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
+                textAlign: 'center'
               }}>
-                <Check style={{ width: '48px', height: '48px', color: '#16a34a', margin: '0 auto 16px' }} />
-                <p style={{ fontWeight: 600, color: '#16a34a' }}>Mensagem enviada com sucesso!</p>
-                <p style={{ fontSize: '14px', color: isDark ? '#94a3b8' : '#64748b', marginTop: '8px' }}>
-                  Nossa equipe entrará em contato em breve.
+                <Check style={{ width: '48px', height: '48px', color: '#16a34a', margin: '0 auto 16px auto' }} />
+                <p style={{ fontWeight: 600, color: '#16a34a', fontSize: '17px' }}>
+                  Mensagem enviada com sucesso!
+                </p>
+                <p style={{ color: isDark ? '#94a3b8' : '#64748b', marginTop: '8px' }}>
+                  Entraremos em contato em breve.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmitLead}>
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '6px', 
-                    fontSize: '14px', 
-                    fontWeight: 500,
-                    color: isDark ? '#e2e8f0' : '#374151'
-                  }}>
-                    Nome completo *
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#374151', fontSize: '14px' }}>
+                    Nome completo
                   </label>
                   <input
                     type="text"
@@ -855,27 +961,20 @@ export default function HomePage() {
                     onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                     style={{
                       width: '100%',
-                      padding: '12px 16px',
-                      borderRadius: '8px',
+                      padding: '14px 16px',
+                      borderRadius: '10px',
                       border: `1px solid ${isDark ? '#334155' : '#d1d5db'}`,
                       backgroundColor: isDark ? '#0f172a' : '#ffffff',
                       color: isDark ? '#f1f5f9' : '#1e293b',
-                      fontSize: '16px',
+                      fontSize: '15px',
                       outline: 'none'
                     }}
                     placeholder="Seu nome"
                   />
                 </div>
-
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '6px', 
-                    fontSize: '14px', 
-                    fontWeight: 500,
-                    color: isDark ? '#e2e8f0' : '#374151'
-                  }}>
-                    Cargo *
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#374151', fontSize: '14px' }}>
+                    Cargo
                   </label>
                   <input
                     type="text"
@@ -884,27 +983,20 @@ export default function HomePage() {
                     onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
                     style={{
                       width: '100%',
-                      padding: '12px 16px',
-                      borderRadius: '8px',
+                      padding: '14px 16px',
+                      borderRadius: '10px',
                       border: `1px solid ${isDark ? '#334155' : '#d1d5db'}`,
                       backgroundColor: isDark ? '#0f172a' : '#ffffff',
                       color: isDark ? '#f1f5f9' : '#1e293b',
-                      fontSize: '16px',
+                      fontSize: '15px',
                       outline: 'none'
                     }}
                     placeholder="Ex: Vereador, Assessor, etc."
                   />
                 </div>
-
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '6px', 
-                    fontSize: '14px', 
-                    fontWeight: 500,
-                    color: isDark ? '#e2e8f0' : '#374151'
-                  }}>
-                    E-mail *
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#374151', fontSize: '14px' }}>
+                    E-mail
                   </label>
                   <input
                     type="email"
@@ -913,27 +1005,20 @@ export default function HomePage() {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     style={{
                       width: '100%',
-                      padding: '12px 16px',
-                      borderRadius: '8px',
+                      padding: '14px 16px',
+                      borderRadius: '10px',
                       border: `1px solid ${isDark ? '#334155' : '#d1d5db'}`,
                       backgroundColor: isDark ? '#0f172a' : '#ffffff',
                       color: isDark ? '#f1f5f9' : '#1e293b',
-                      fontSize: '16px',
+                      fontSize: '15px',
                       outline: 'none'
                     }}
                     placeholder="seu@email.com"
                   />
                 </div>
-
-                <div style={{ marginBottom: '24px' }}>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '6px', 
-                    fontSize: '14px', 
-                    fontWeight: 500,
-                    color: isDark ? '#e2e8f0' : '#374151'
-                  }}>
-                    Telefone/WhatsApp *
+                <div style={{ marginBottom: '28px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#374151', fontSize: '14px' }}>
+                    Telefone / WhatsApp
                   </label>
                   <input
                     type="tel"
@@ -942,46 +1027,39 @@ export default function HomePage() {
                     onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
                     style={{
                       width: '100%',
-                      padding: '12px 16px',
-                      borderRadius: '8px',
+                      padding: '14px 16px',
+                      borderRadius: '10px',
                       border: `1px solid ${isDark ? '#334155' : '#d1d5db'}`,
                       backgroundColor: isDark ? '#0f172a' : '#ffffff',
                       color: isDark ? '#f1f5f9' : '#1e293b',
-                      fontSize: '16px',
+                      fontSize: '15px',
                       outline: 'none'
                     }}
                     placeholder="(00) 0 0000-0000"
                   />
                 </div>
-
                 <button
                   type="submit"
                   disabled={formStatus === 'loading'}
                   style={{
                     width: '100%',
-                    padding: '14px',
-                    borderRadius: '10px',
-                    backgroundColor: '#16a34a',
+                    padding: '16px',
+                    borderRadius: '12px',
                     border: 'none',
+                    backgroundColor: '#16a34a',
                     color: 'white',
                     fontWeight: 700,
                     fontSize: '16px',
                     cursor: formStatus === 'loading' ? 'not-allowed' : 'pointer',
                     opacity: formStatus === 'loading' ? 0.7 : 1,
-                    boxShadow: '0 4px 14px rgba(22, 163, 74, 0.35)'
+                    boxShadow: '0 4px 12px rgba(22, 163, 74, 0.35)'
                   }}
                 >
-                  {formStatus === 'loading' ? 'Enviando...' : 'Enviar'}
+                  {formStatus === 'loading' ? 'Enviando...' : 'Enviar mensagem'}
                 </button>
-
                 {formStatus === 'error' && (
-                  <p style={{ 
-                    marginTop: '16px', 
-                    color: '#ef4444', 
-                    fontSize: '14px', 
-                    textAlign: 'center' 
-                  }}>
-                    Ocorreu um erro. Tente novamente.
+                  <p style={{ color: '#ef4444', marginTop: '16px', textAlign: 'center', fontSize: '14px' }}>
+                    Erro ao enviar. Tente novamente.
                   </p>
                 )}
               </form>
