@@ -225,8 +225,8 @@ export default function HomePage() {
 	                <Image 
 	                  src="/dataro-logo-final.png" 
 	                  alt="DATA-RO" 
-width={48} 
-	                  height={48}
+width={64} 
+		                  height={64}
 style={{ objectFit: 'contain', borderRadius: '8px', backgroundColor: '#ffffff', padding: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
                 />
               </Link>
@@ -236,9 +236,9 @@ style={{ objectFit: 'contain', borderRadius: '8px', backgroundColor: '#ffffff', 
 	                <Image 
 	                  src="/providata-logo-final.png" 
 	                  alt="ProviDATA" 
-	                  width={48} 
-	                  height={48} 
-	                  style={{ objectFit: 'contain' }}
+width={64} 
+		                  height={64}
+	                  style={{ objectFit: 'contain', borderRadius: '8px', backgroundColor: '#ffffff', padding: '4px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
 	                />
 	                <span className="text-providata-gradient" style={{ fontWeight: 800, fontSize: '32px', letterSpacing: '-0.02em' }}>ProviDATA</span>
 	              </Link>
