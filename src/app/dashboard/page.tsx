@@ -10,23 +10,15 @@ import {
   FileText, 
   Clock, 
   CheckCircle2, 
-  AlertCircle,
   Plus,
   ArrowRight,
   BarChart3,
   PieChart,
-  Users,
-  Building2,
   Calendar,
   TrendingUp,
   Loader2,
-  ChevronDown,
   ChevronRight,
   Activity,
-  Target,
-  Layers,
-  Filter,
-  RefreshCw,
   X,
   Settings2,
   LayoutDashboard,
@@ -80,20 +72,13 @@ const statusLabels: Record<string, string> = {
   concluido: 'Concluída',
 }
 
-const priorityLabels: Record<string, string> = {
-  baixa: 'Baixa',
-  normal: 'Normal',
-  alta: 'Alta',
-  urgente: 'Urgente',
-}
-
 const chartTypes = [
   { id: 'pizza', name: 'Pizza', icon: PieChart },
   { id: 'barras', name: 'Barras', icon: BarChart3 },
   { id: 'colunas', name: 'Colunas', icon: Activity },
   { id: 'linha', name: 'Linha', icon: LineChart },
   { id: 'dispersao', name: 'Dispersão', icon: ScatterChart },
-  { id: 'calor', name: 'Mapa de Calor', icon: Flame },
+  { id: 'calor', name: 'Calor', icon: Flame },
 ]
 
 const dataFields = [
@@ -143,15 +128,15 @@ export default function DashboardPage() {
     
     setLoading(true)
     try {
-      const startDate = new Date(selectedYear, 0, 1).toISOString()
-      const endDate = new Date(selectedYear, 11, 31, 23, 59, 59).toISOString()
+      const startOfYear = new Date(selectedYear, 0, 1).toISOString()
+      const endOfYear = new Date(selectedYear, 11, 31, 23, 59, 59).toISOString()
 
       const { data: providencias } = await supabase
         .from('providencias')
         .select('status')
         .eq('tenant_id', tenant.id)
-        .gte('created_at', startDate)
-        .lte('created_at', endDate)
+        .gte('created_at', startOfYear)
+        .lte('created_at', endOfYear)
 
       if (providencias) {
         const newStats: Stats = {
@@ -228,519 +213,919 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        minHeight: '400px',
+        backgroundColor: '#f9fafb'
+      }}>
+        <Loader2 style={{ width: '32px', height: '32px', animation: 'spin 1s linear infinite', color: '#16a34a' }} />
       </div>
     )
   }
 
   return (
-    <div className="flex gap-8">
-      {/* Área Principal */}
-      <div className="flex-1 min-w-0">
-        {/* Header */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg shadow-green-500/20">
-                <LayoutDashboard className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
-                  Dashboard de Providências
-                </h1>
-                <p className="text-base text-gray-500 dark:text-gray-400 mt-1">
-                  Visão geral das demandas · {tenant?.parlamentar_name || 'Gabinete'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="px-5 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent font-medium"
-              >
-                <option value={2025}>2025</option>
-                <option value={2024}>2024</option>
-              </select>
-              <Link href="/dashboard/providencias/nova">
-                <button className="flex items-center gap-2 px-5 py-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-green-600/20">
-                  <Plus className="w-5 h-5" />
-                  <span>Nova Providência</span>
-                </button>
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-          {/* Total */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <FileText className="w-7 h-7 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">Total</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Pendentes */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                <Clock className="w-7 h-7 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <p className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">{stats.pendentes}</p>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">Pendentes</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Em Andamento */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                <TrendingUp className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              <div>
-                <p className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">{stats.em_andamento}</p>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">Em Andamento</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Concluídas */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                <CheckCircle2 className="w-7 h-7 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <p className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">{stats.concluidas}</p>
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">Concluídas</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Taxa de Conclusão */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Taxa de Conclusão</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Providências concluídas vs total</p>
-            </div>
-            <span className="text-4xl font-bold text-green-600 dark:text-green-400">{taxaConclusao}%</span>
-          </div>
-          <div className="w-full h-5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500"
-              style={{ width: `${taxaConclusao}%` }}
-            />
-          </div>
-          <div className="flex justify-between mt-4 text-sm text-gray-500 dark:text-gray-400">
-            <span>Concluídas: {stats.concluidas}</span>
-            <span>Total: {stats.total}</span>
-          </div>
-        </div>
-
-        {/* Gráficos */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Providências por Status */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Providências por Status</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Distribuição atual</p>
-              </div>
-            </div>
-            <div className="space-y-5">
-              {chartData.map((item) => (
-                <div key={item.label} className="flex items-center gap-4">
-                  <span className="w-28 text-sm font-medium text-gray-600 dark:text-gray-400">{item.label}</span>
-                  <div className="flex-1 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
-                    <div 
-                      className="h-full rounded-lg transition-all duration-500"
-                      style={{ 
-                        width: `${(item.value / maxChartValue) * 100}%`,
-                        backgroundColor: item.color
-                      }}
-                    />
-                  </div>
-                  <span className="w-10 text-right text-sm font-bold text-gray-900 dark:text-white">{item.value}</span>
+    <div style={{ 
+      backgroundColor: '#f9fafb',
+      minHeight: '100vh',
+      padding: '24px'
+    }}>
+      <div style={{ display: 'flex', gap: '24px' }}>
+        {/* Área Principal */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Header */}
+          <div style={{ 
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            border: '1px solid #e5e7eb',
+            padding: '24px',
+            marginBottom: '24px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              flexWrap: 'wrap',
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              gap: '16px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
+                }}>
+                  <LayoutDashboard style={{ width: '24px', height: '24px', color: 'white' }} />
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Distribuição de Status */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                <PieChart className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Distribuição de Status</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Visão proporcional</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-center">
-              <div className="relative">
-                <svg width="200" height="200" viewBox="0 0 200 200">
-                  <circle
-                    cx="100"
-                    cy="100"
-                    r="80"
-                    fill="none"
-                    stroke="#22c55e"
-                    strokeWidth="24"
-                    strokeDasharray={`${(stats.concluidas / Math.max(stats.total, 1)) * 502} 502`}
-                    transform="rotate(-90 100 100)"
-                  />
-                  <circle
-                    cx="100"
-                    cy="100"
-                    r="80"
-                    fill="none"
-                    stroke="#6366f1"
-                    strokeWidth="24"
-                    strokeDasharray={`${(stats.em_andamento / Math.max(stats.total, 1)) * 502} 502`}
-                    strokeDashoffset={`-${(stats.concluidas / Math.max(stats.total, 1)) * 502}`}
-                    transform="rotate(-90 100 100)"
-                  />
-                  <circle
-                    cx="100"
-                    cy="100"
-                    r="80"
-                    fill="none"
-                    stroke="#f59e0b"
-                    strokeWidth="24"
-                    strokeDasharray={`${(stats.pendentes / Math.max(stats.total, 1)) * 502} 502`}
-                    strokeDashoffset={`-${((stats.concluidas + stats.em_andamento) / Math.max(stats.total, 1)) * 502}`}
-                    transform="rotate(-90 100 100)"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-4xl font-bold text-gray-900 dark:text-white">{stats.total}</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">Total</span>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4 mt-8">
-              {chartData.map((item) => (
-                <div key={item.label} className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">{item.label}</span>
-                  <span className="text-sm font-bold text-gray-900 dark:text-white ml-auto">{item.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Gráficos Personalizados */}
-        {customCharts.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            {customCharts.map((chart) => {
-              const ChartIcon = chartTypes.find(t => t.id === chart.type)?.icon || PieChart
-              return (
-                <div key={chart.id} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8">
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                        <ChartIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">{chart.title}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Gráfico de {chartTypes.find(t => t.id === chart.type)?.name}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveChart(chart.id)}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <div className="h-48 flex items-center justify-center bg-gray-50 dark:bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-                    <div className="text-center">
-                      <ChartIcon className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Gráfico será renderizado aqui</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{chart.xAxis} × {chart.yAxis}</p>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-
-        {/* Providências Recentes */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden mb-8">
-          <div className="flex items-center justify-between p-8 border-b border-gray-200 dark:border-gray-800">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Providências Recentes</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Últimas atualizações</p>
-              </div>
-            </div>
-            <Link href="/dashboard/providencias">
-              <button className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-semibold">
-                Ver Todas
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </Link>
-          </div>
-          
-          {recentProvidencias.length === 0 ? (
-            <div className="py-16 px-8 text-center">
-              <div className="w-20 h-20 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-6">
-                <FileText className="w-10 h-10 text-gray-400" />
-              </div>
-              <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Nenhuma providência cadastrada</h4>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 max-w-sm mx-auto">
-                Comece cadastrando a primeira providência do gabinete
-              </p>
-              <Link href="/dashboard/providencias/nova">
-                <button className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-green-600/20">
-                  <Plus className="w-5 h-5" />
-                  Nova Providência
-                </button>
-              </Link>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200 dark:divide-gray-800">
-              {recentProvidencias.map((providencia) => (
-                <Link
-                  key={providencia.id}
-                  href={`/dashboard/providencias/${providencia.id}`}
-                  className="block hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                >
-                  <div className="flex items-start gap-5 p-6">
-                    <div 
-                      className="w-2 h-16 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: statusColors[providencia.status] || '#6b7280' }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-3 mb-3">
-                        <span className="text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-lg">
-                          {providencia.numero_protocolo}
-                        </span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                          providencia.status === 'concluido' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
-                          providencia.status === 'pendente' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' :
-                          providencia.status === 'em_andamento' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' :
-                          'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-                        }`}>
-                          {statusLabels[providencia.status]}
-                        </span>
-                      </div>
-                      <h4 className="font-semibold text-gray-900 dark:text-white text-base line-clamp-1">
-                        {providencia.titulo}
-                      </h4>
-                      <div className="flex items-center gap-4 mt-3">
-                        <span className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                          <Calendar className="w-4 h-4" />
-                          {format(new Date(providencia.created_at), "dd/MM/yyyy", { locale: ptBR })}
-                        </span>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-6 h-6 text-gray-400 flex-shrink-0" />
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Footer Info */}
-        <div className="bg-gray-100 dark:bg-gray-800/50 rounded-2xl p-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-2">Sistema</p>
-              <p className="text-base font-bold text-gray-900 dark:text-white">ProviDATA</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-2">Gabinete</p>
-              <p className="text-base font-bold text-gray-900 dark:text-white truncate">{tenant?.parlamentar_name || 'Não definido'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-2">Período</p>
-              <p className="text-base font-bold text-gray-900 dark:text-white">2024 - 2025</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-2">Atualização</p>
-              <p className="text-base font-bold text-gray-900 dark:text-white">{format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Painel Lateral - Criador de Gráficos */}
-      {showChartBuilder && (
-        <div className="hidden xl:block w-96 flex-shrink-0">
-          <div className="sticky top-8">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-xl">
-              {/* Header do Painel */}
-              <div className="p-6 bg-gradient-to-r from-green-500 to-green-600">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                      <Settings2 className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-white">Criar Gráfico</h3>
-                      <p className="text-sm text-white/80">Personalize sua visualização</p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setShowChartBuilder(false)}
-                    className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-xl transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-6 space-y-6">
-                {/* Tipo de Gráfico */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
-                    Tipo de Gráfico
-                  </label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {chartTypes.map((type) => (
-                      <button
-                        key={type.id}
-                        onClick={() => setSelectedChartType(type.id)}
-                        className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                          selectedChartType === type.id
-                            ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                        }`}
-                      >
-                        <type.icon className={`w-6 h-6 ${
-                          selectedChartType === type.id
-                            ? 'text-green-600 dark:text-green-400'
-                            : 'text-gray-400'
-                        }`} />
-                        <span className={`text-xs font-semibold ${
-                          selectedChartType === type.id
-                            ? 'text-green-600 dark:text-green-400'
-                            : 'text-gray-600 dark:text-gray-400'
-                        }`}>{type.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Eixo X */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                    Eixo X (Categorias)
-                  </label>
-                  <select
-                    value={selectedXAxis}
-                    onChange={(e) => setSelectedXAxis(e.target.value)}
-                    className="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <optgroup label="Providências">
-                      {dataFields.filter(f => f.category === 'Providências').map(field => (
-                        <option key={field.id} value={field.id}>{field.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Cidadãos">
-                      {dataFields.filter(f => f.category === 'Cidadãos').map(field => (
-                        <option key={field.id} value={field.id}>{field.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Tempo">
-                      {dataFields.filter(f => f.category === 'Tempo').map(field => (
-                        <option key={field.id} value={field.id}>{field.name}</option>
-                      ))}
-                    </optgroup>
-                  </select>
-                </div>
-
-                {/* Eixo Y */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                    Eixo Y (Valores)
-                  </label>
-                  <select
-                    value={selectedYAxis}
-                    onChange={(e) => setSelectedYAxis(e.target.value)}
-                    className="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="quantidade">Quantidade</option>
-                    <option value="tempo_resolucao">Tempo de Resolução</option>
-                  </select>
-                </div>
-
-                {/* Período */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                    Período
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                {/* Botão Gerar */}
-                <button
-                  onClick={handleGenerateChart}
-                  disabled={generatingChart}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-sm font-bold rounded-xl transition-colors shadow-lg shadow-green-600/20"
-                >
-                  {generatingChart ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Gerando...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-5 h-5" />
-                      Gerar Gráfico
-                    </>
-                  )}
-                </button>
-
-                {/* Dica */}
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
-                  <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
-                    <strong>Dica:</strong> Combine diferentes campos para criar análises personalizadas. Os gráficos gerados aparecerão na área principal.
+                  <h1 style={{ 
+                    fontSize: '24px', 
+                    fontWeight: '700', 
+                    color: '#111827',
+                    margin: 0
+                  }}>
+                    Dashboard de Providências
+                  </h1>
+                  <p style={{ 
+                    fontSize: '14px', 
+                    color: '#6b7280',
+                    margin: '4px 0 0 0'
+                  }}>
+                    Visão geral das demandas · {tenant?.parlamentar_name || 'Gabinete'}
                   </p>
                 </div>
               </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  style={{
+                    padding: '10px 16px',
+                    fontSize: '14px',
+                    backgroundColor: '#f3f4f6',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontWeight: '500',
+                    color: '#374151',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value={2025}>2025</option>
+                  <option value={2024}>2024</option>
+                </select>
+                <Link href="/dashboard/providencias/nova">
+                  <button style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 20px',
+                    backgroundColor: '#16a34a',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
+                  }}>
+                    <Plus style={{ width: '18px', height: '18px' }} />
+                    Nova Providência
+                  </button>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Cards */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '16px',
+            marginBottom: '24px'
+          }}>
+            {/* Total */}
+            <div style={{ 
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              border: '1px solid #e5e7eb',
+              padding: '20px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  borderRadius: '12px',
+                  backgroundColor: '#dbeafe',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <FileText style={{ width: '24px', height: '24px', color: '#2563eb' }} />
+                </div>
+                <div>
+                  <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.total}</p>
+                  <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Total</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Pendentes */}
+            <div style={{ 
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              border: '1px solid #e5e7eb',
+              padding: '20px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  borderRadius: '12px',
+                  backgroundColor: '#fef3c7',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Clock style={{ width: '24px', height: '24px', color: '#d97706' }} />
+                </div>
+                <div>
+                  <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.pendentes}</p>
+                  <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Pendentes</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Em Andamento */}
+            <div style={{ 
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              border: '1px solid #e5e7eb',
+              padding: '20px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  borderRadius: '12px',
+                  backgroundColor: '#e0e7ff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <TrendingUp style={{ width: '24px', height: '24px', color: '#4f46e5' }} />
+                </div>
+                <div>
+                  <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.em_andamento}</p>
+                  <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Em Andamento</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Concluídas */}
+            <div style={{ 
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              border: '1px solid #e5e7eb',
+              padding: '20px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ 
+                  width: '48px', 
+                  height: '48px', 
+                  borderRadius: '12px',
+                  backgroundColor: '#dcfce7',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <CheckCircle2 style={{ width: '24px', height: '24px', color: '#16a34a' }} />
+                </div>
+                <div>
+                  <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.concluidas}</p>
+                  <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Concluídas</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Taxa de Conclusão */}
+          <div style={{ 
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            border: '1px solid #e5e7eb',
+            padding: '24px',
+            marginBottom: '24px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', margin: 0 }}>Taxa de Conclusão</h3>
+                <p style={{ fontSize: '14px', color: '#6b7280', margin: '4px 0 0 0' }}>Providências concluídas vs total</p>
+              </div>
+              <span style={{ fontSize: '32px', fontWeight: '700', color: '#16a34a' }}>{taxaConclusao}%</span>
+            </div>
+            <div style={{ 
+              width: '100%', 
+              height: '12px', 
+              backgroundColor: '#e5e7eb', 
+              borderRadius: '6px',
+              overflow: 'hidden'
+            }}>
+              <div style={{ 
+                height: '100%', 
+                background: 'linear-gradient(90deg, #16a34a 0%, #22c55e 100%)',
+                borderRadius: '6px',
+                width: `${taxaConclusao}%`,
+                transition: 'width 0.5s ease'
+              }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', fontSize: '14px', color: '#6b7280' }}>
+              <span>Concluídas: {stats.concluidas}</span>
+              <span>Total: {stats.total}</span>
+            </div>
+          </div>
+
+          {/* Gráficos */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '24px',
+            marginBottom: '24px'
+          }}>
+            {/* Providências por Status */}
+            <div style={{ 
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              border: '1px solid #e5e7eb',
+              padding: '24px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <div style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  borderRadius: '10px',
+                  backgroundColor: '#dbeafe',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <BarChart3 style={{ width: '20px', height: '20px', color: '#2563eb' }} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', margin: 0 }}>Providências por Status</h3>
+                  <p style={{ fontSize: '12px', color: '#6b7280', margin: '2px 0 0 0' }}>Distribuição atual</p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {chartData.map((item) => (
+                  <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ width: '100px', fontSize: '14px', fontWeight: '500', color: '#4b5563' }}>{item.label}</span>
+                    <div style={{ flex: 1, height: '24px', backgroundColor: '#f3f4f6', borderRadius: '6px', overflow: 'hidden' }}>
+                      <div style={{ 
+                        height: '100%', 
+                        borderRadius: '6px',
+                        width: `${(item.value / maxChartValue) * 100}%`,
+                        backgroundColor: item.color,
+                        transition: 'width 0.5s ease'
+                      }} />
+                    </div>
+                    <span style={{ width: '32px', textAlign: 'right', fontSize: '14px', fontWeight: '700', color: '#111827' }}>{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Distribuição de Status */}
+            <div style={{ 
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              border: '1px solid #e5e7eb',
+              padding: '24px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <div style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  borderRadius: '10px',
+                  backgroundColor: '#f3e8ff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <PieChart style={{ width: '20px', height: '20px', color: '#9333ea' }} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', margin: 0 }}>Distribuição de Status</h3>
+                  <p style={{ fontSize: '12px', color: '#6b7280', margin: '2px 0 0 0' }}>Visão proporcional</p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px 0' }}>
+                <div style={{ position: 'relative' }}>
+                  <svg width="160" height="160" viewBox="0 0 160 160">
+                    <circle cx="80" cy="80" r="60" fill="none" stroke="#22c55e" strokeWidth="20"
+                      strokeDasharray={`${(stats.concluidas / Math.max(stats.total, 1)) * 377} 377`}
+                      transform="rotate(-90 80 80)" />
+                    <circle cx="80" cy="80" r="60" fill="none" stroke="#6366f1" strokeWidth="20"
+                      strokeDasharray={`${(stats.em_andamento / Math.max(stats.total, 1)) * 377} 377`}
+                      strokeDashoffset={`-${(stats.concluidas / Math.max(stats.total, 1)) * 377}`}
+                      transform="rotate(-90 80 80)" />
+                    <circle cx="80" cy="80" r="60" fill="none" stroke="#f59e0b" strokeWidth="20"
+                      strokeDasharray={`${(stats.pendentes / Math.max(stats.total, 1)) * 377} 377`}
+                      strokeDashoffset={`-${((stats.concluidas + stats.em_andamento) / Math.max(stats.total, 1)) * 377}`}
+                      transform="rotate(-90 80 80)" />
+                  </svg>
+                  <div style={{ 
+                    position: 'absolute', 
+                    inset: 0, 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center' 
+                  }}>
+                    <span style={{ fontSize: '28px', fontWeight: '700', color: '#111827' }}>{stats.total}</span>
+                    <span style={{ fontSize: '12px', color: '#6b7280' }}>Total</span>
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginTop: '16px' }}>
+                {chartData.map((item) => (
+                  <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: item.color, flexShrink: 0 }} />
+                    <span style={{ fontSize: '12px', color: '#4b5563', flex: 1 }}>{item.label}</span>
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#111827' }}>{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Gráficos Personalizados */}
+          {customCharts.length > 0 && (
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '24px',
+              marginBottom: '24px'
+            }}>
+              {customCharts.map((chart) => {
+                const ChartIcon = chartTypes.find(t => t.id === chart.type)?.icon || PieChart
+                return (
+                  <div key={chart.id} style={{ 
+                    backgroundColor: '#ffffff',
+                    borderRadius: '16px',
+                    border: '1px solid #e5e7eb',
+                    padding: '24px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ 
+                          width: '40px', 
+                          height: '40px', 
+                          borderRadius: '10px',
+                          backgroundColor: '#dcfce7',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <ChartIcon style={{ width: '20px', height: '20px', color: '#16a34a' }} />
+                        </div>
+                        <div>
+                          <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', margin: 0 }}>{chart.title}</h3>
+                          <p style={{ fontSize: '12px', color: '#6b7280', margin: '2px 0 0 0' }}>
+                            Gráfico de {chartTypes.find(t => t.id === chart.type)?.name}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleRemoveChart(chart.id)}
+                        style={{
+                          padding: '8px',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          color: '#9ca3af'
+                        }}
+                      >
+                        <X style={{ width: '16px', height: '16px' }} />
+                      </button>
+                    </div>
+                    <div style={{ 
+                      height: '160px', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      backgroundColor: '#f9fafb',
+                      borderRadius: '12px',
+                      border: '2px dashed #e5e7eb'
+                    }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <ChartIcon style={{ width: '40px', height: '40px', color: '#d1d5db', margin: '0 auto 8px' }} />
+                        <p style={{ fontSize: '14px', color: '#6b7280' }}>Gráfico será renderizado aqui</p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Providências Recentes */}
+          <div style={{ 
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            overflow: 'hidden',
+            marginBottom: '24px'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              padding: '24px',
+              borderBottom: '1px solid #e5e7eb'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  borderRadius: '10px',
+                  backgroundColor: '#ffedd5',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Clock style={{ width: '20px', height: '20px', color: '#ea580c' }} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', margin: 0 }}>Providências Recentes</h3>
+                  <p style={{ fontSize: '12px', color: '#6b7280', margin: '2px 0 0 0' }}>Últimas atualizações</p>
+                </div>
+              </div>
+              <Link href="/dashboard/providencias">
+                <button style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '14px',
+                  color: '#16a34a',
+                  fontWeight: '600',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}>
+                  Ver Todas
+                  <ArrowRight style={{ width: '16px', height: '16px' }} />
+                </button>
+              </Link>
+            </div>
+            
+            {recentProvidencias.length === 0 ? (
+              <div style={{ padding: '48px 24px', textAlign: 'center' }}>
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  borderRadius: '16px',
+                  backgroundColor: '#f3f4f6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px'
+                }}>
+                  <FileText style={{ width: '32px', height: '32px', color: '#9ca3af' }} />
+                </div>
+                <h4 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', margin: '0 0 8px 0' }}>Nenhuma providência cadastrada</h4>
+                <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 24px 0', maxWidth: '300px', marginLeft: 'auto', marginRight: 'auto' }}>
+                  Comece cadastrando a primeira providência do gabinete
+                </p>
+                <Link href="/dashboard/providencias/nova">
+                  <button style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '12px 20px',
+                    backgroundColor: '#16a34a',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}>
+                    <Plus style={{ width: '18px', height: '18px' }} />
+                    Nova Providência
+                  </button>
+                </Link>
+              </div>
+            ) : (
+              <div>
+                {recentProvidencias.map((providencia, index) => (
+                  <Link
+                    key={providencia.id}
+                    href={`/dashboard/providencias/${providencia.id}`}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'flex-start', 
+                      gap: '16px',
+                      padding: '20px 24px',
+                      borderBottom: index < recentProvidencias.length - 1 ? '1px solid #e5e7eb' : 'none',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s'
+                    }}>
+                      <div style={{ 
+                        width: '6px', 
+                        height: '48px', 
+                        borderRadius: '3px',
+                        backgroundColor: statusColors[providencia.status] || '#6b7280',
+                        flexShrink: 0
+                      }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <span style={{ 
+                            fontSize: '12px', 
+                            fontFamily: 'monospace',
+                            color: '#6b7280',
+                            backgroundColor: '#f3f4f6',
+                            padding: '2px 8px',
+                            borderRadius: '4px'
+                          }}>
+                            {providencia.numero_protocolo}
+                          </span>
+                          <span style={{ 
+                            padding: '2px 10px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            borderRadius: '9999px',
+                            backgroundColor: providencia.status === 'concluido' ? '#dcfce7' :
+                              providencia.status === 'pendente' ? '#fef3c7' :
+                              providencia.status === 'em_andamento' ? '#e0e7ff' : '#f3f4f6',
+                            color: providencia.status === 'concluido' ? '#16a34a' :
+                              providencia.status === 'pendente' ? '#d97706' :
+                              providencia.status === 'em_andamento' ? '#4f46e5' : '#6b7280'
+                          }}>
+                            {statusLabels[providencia.status]}
+                          </span>
+                        </div>
+                        <h4 style={{ 
+                          fontSize: '14px', 
+                          fontWeight: '600', 
+                          color: '#111827',
+                          margin: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {providencia.titulo}
+                        </h4>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#6b7280' }}>
+                            <Calendar style={{ width: '14px', height: '14px' }} />
+                            {format(new Date(providencia.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                          </span>
+                        </div>
+                      </div>
+                      <ChevronRight style={{ width: '20px', height: '20px', color: '#9ca3af', flexShrink: 0 }} />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Footer Info */}
+          <div style={{ 
+            backgroundColor: '#f3f4f6',
+            borderRadius: '16px',
+            padding: '24px'
+          }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+              <div>
+                <p style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600', margin: '0 0 4px 0' }}>Sistema</p>
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#111827', margin: 0 }}>ProviDATA</p>
+              </div>
+              <div>
+                <p style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600', margin: '0 0 4px 0' }}>Gabinete</p>
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tenant?.parlamentar_name || 'Não definido'}</p>
+              </div>
+              <div>
+                <p style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600', margin: '0 0 4px 0' }}>Período</p>
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#111827', margin: 0 }}>2024 - 2025</p>
+              </div>
+              <div>
+                <p style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600', margin: '0 0 4px 0' }}>Atualização</p>
+                <p style={{ fontSize: '14px', fontWeight: '700', color: '#111827', margin: 0 }}>{format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
+              </div>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Painel Lateral - Criador de Gráficos */}
+        {showChartBuilder && (
+          <div style={{ width: '320px', flexShrink: 0 }}>
+            <div style={{ position: 'sticky', top: '24px' }}>
+              <div style={{ 
+                backgroundColor: '#ffffff',
+                borderRadius: '16px',
+                border: '1px solid #e5e7eb',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                overflow: 'hidden'
+              }}>
+                {/* Header do Painel */}
+                <div style={{ 
+                  padding: '20px',
+                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ 
+                        width: '40px', 
+                        height: '40px', 
+                        borderRadius: '10px',
+                        backgroundColor: 'rgba(255,255,255,0.2)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <Settings2 style={{ width: '20px', height: '20px', color: 'white' }} />
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'white', margin: 0 }}>Criar Gráfico</h3>
+                        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', margin: '2px 0 0 0' }}>Personalize sua visualização</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setShowChartBuilder(false)}
+                      style={{
+                        padding: '6px',
+                        backgroundColor: 'rgba(255,255,255,0.2)',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        color: 'white'
+                      }}
+                    >
+                      <X style={{ width: '16px', height: '16px' }} />
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ padding: '20px' }}>
+                  {/* Tipo de Gráfico */}
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ 
+                      display: 'block', 
+                      fontSize: '12px', 
+                      fontWeight: '600', 
+                      color: '#374151',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      marginBottom: '12px'
+                    }}>
+                      Tipo de Gráfico
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                      {chartTypes.map((type) => (
+                        <button
+                          key={type.id}
+                          onClick={() => setSelectedChartType(type.id)}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '12px 8px',
+                            borderRadius: '10px',
+                            border: selectedChartType === type.id ? '2px solid #16a34a' : '2px solid #e5e7eb',
+                            backgroundColor: selectedChartType === type.id ? '#f0fdf4' : '#ffffff',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <type.icon style={{ 
+                            width: '20px', 
+                            height: '20px', 
+                            color: selectedChartType === type.id ? '#16a34a' : '#9ca3af'
+                          }} />
+                          <span style={{ 
+                            fontSize: '11px', 
+                            fontWeight: '600',
+                            color: selectedChartType === type.id ? '#16a34a' : '#6b7280'
+                          }}>{type.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Eixo X */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ 
+                      display: 'block', 
+                      fontSize: '12px', 
+                      fontWeight: '600', 
+                      color: '#374151',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      marginBottom: '8px'
+                    }}>
+                      Eixo X (Categorias)
+                    </label>
+                    <select
+                      value={selectedXAxis}
+                      onChange={(e) => setSelectedXAxis(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        fontSize: '14px',
+                        backgroundColor: '#f9fafb',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        color: '#374151'
+                      }}
+                    >
+                      <optgroup label="Providências">
+                        {dataFields.filter(f => f.category === 'Providências').map(field => (
+                          <option key={field.id} value={field.id}>{field.name}</option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="Cidadãos">
+                        {dataFields.filter(f => f.category === 'Cidadãos').map(field => (
+                          <option key={field.id} value={field.id}>{field.name}</option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="Tempo">
+                        {dataFields.filter(f => f.category === 'Tempo').map(field => (
+                          <option key={field.id} value={field.id}>{field.name}</option>
+                        ))}
+                      </optgroup>
+                    </select>
+                  </div>
+
+                  {/* Eixo Y */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ 
+                      display: 'block', 
+                      fontSize: '12px', 
+                      fontWeight: '600', 
+                      color: '#374151',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      marginBottom: '8px'
+                    }}>
+                      Eixo Y (Valores)
+                    </label>
+                    <select
+                      value={selectedYAxis}
+                      onChange={(e) => setSelectedYAxis(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        fontSize: '14px',
+                        backgroundColor: '#f9fafb',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        color: '#374151'
+                      }}
+                    >
+                      <option value="quantidade">Quantidade</option>
+                      <option value="tempo_resolucao">Tempo de Resolução</option>
+                    </select>
+                  </div>
+
+                  {/* Período */}
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ 
+                      display: 'block', 
+                      fontSize: '12px', 
+                      fontWeight: '600', 
+                      color: '#374151',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      marginBottom: '8px'
+                    }}>
+                      Período
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          fontSize: '14px',
+                          backgroundColor: '#f9fafb',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          color: '#374151'
+                        }}
+                      />
+                      <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          fontSize: '14px',
+                          backgroundColor: '#f9fafb',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          color: '#374151'
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Botão Gerar */}
+                  <button
+                    onClick={handleGenerateChart}
+                    disabled={generatingChart}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      padding: '12px 20px',
+                      backgroundColor: generatingChart ? '#86efac' : '#16a34a',
+                      color: 'white',
+                      fontSize: '14px',
+                      fontWeight: '700',
+                      borderRadius: '10px',
+                      border: 'none',
+                      cursor: generatingChart ? 'not-allowed' : 'pointer',
+                      marginBottom: '16px'
+                    }}
+                  >
+                    {generatingChart ? (
+                      <>
+                        <Loader2 style={{ width: '18px', height: '18px', animation: 'spin 1s linear infinite' }} />
+                        Gerando...
+                      </>
+                    ) : (
+                      <>
+                        <Plus style={{ width: '18px', height: '18px' }} />
+                        Gerar Gráfico
+                      </>
+                    )}
+                  </button>
+
+                  {/* Dica */}
+                  <div style={{ 
+                    backgroundColor: '#eff6ff',
+                    borderRadius: '10px',
+                    padding: '14px'
+                  }}>
+                    <p style={{ fontSize: '12px', color: '#1d4ed8', lineHeight: '1.5', margin: 0 }}>
+                      <strong>Dica:</strong> Combine diferentes campos para criar análises personalizadas. Os gráficos gerados aparecerão na área principal.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
