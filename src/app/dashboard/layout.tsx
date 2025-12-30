@@ -148,6 +148,7 @@ export default function DashboardLayout({
 
       {/* Sidebar */}
       <aside 
+        className="sidebar-themed"
         style={{
           position: 'fixed',
           top: 0,
@@ -157,8 +158,8 @@ export default function DashboardLayout({
           width: `${SIDEBAR_WIDTH}px`,
           transform: (isDesktop || sidebarOpen) ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform 0.3s ease, background-color 0.3s ease',
-          backgroundColor: 'var(--sidebar-bg)',
-          borderRight: '1px solid var(--sidebar-border)',
+          borderRightWidth: '1px',
+          borderRightStyle: 'solid',
           display: 'flex',
           flexDirection: 'column'
         }}
@@ -176,7 +177,7 @@ export default function DashboardLayout({
               backgroundColor: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              color: 'var(--sidebar-muted)'
+              color: 'inherit'
             }}
           >
             <X style={{ width: '24px', height: '24px' }} />
@@ -184,7 +185,7 @@ export default function DashboardLayout({
         )}
 
         {/* Logo */}
-        <div style={{ padding: '20px', borderBottom: '1px solid var(--sidebar-border)' }}>
+        <div style={{ padding: '20px', borderBottom: '1px solid' }}>
           <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
             <div style={{
               width: '44px',
@@ -205,16 +206,16 @@ export default function DashboardLayout({
                 style={{ objectFit: 'contain' }}
               />
             </div>
-            <span style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--sidebar-foreground)' }}>ProviDATA</span>
+            <span className="sidebar-text" style={{ fontSize: '20px', fontWeight: 'bold' }}>ProviDATA</span>
           </Link>
         </div>
 
         {/* Tenant Info */}
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--sidebar-border)', backgroundColor: 'var(--sidebar-accent)' }}>
-          <p style={{ fontSize: '15px', fontWeight: '600', color: 'var(--sidebar-foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '4px' }}>
+        <div className="sidebar-accent" style={{ padding: '16px 20px', borderBottom: '1px solid' }}>
+          <p className="sidebar-text" style={{ fontSize: '15px', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '4px' }}>
             {tenant?.parlamentar_name || 'Carregando...'}
           </p>
-          <p style={{ fontSize: '13px', color: 'var(--sidebar-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <p className="sidebar-muted" style={{ fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {tenant?.cargo?.replace('_', ' ') || 'deputado estadual'}
           </p>
         </div>
@@ -240,13 +241,13 @@ export default function DashboardLayout({
                     fontWeight: active ? '600' : '500',
                     textDecoration: 'none',
                     backgroundColor: active ? customPrimaryColor : 'transparent',
-                    color: active ? 'white' : 'var(--sidebar-foreground)',
+                    color: active ? 'white' : 'inherit',
                     transition: 'all 0.2s ease',
                     boxShadow: active ? '0 2px 8px rgba(22, 163, 74, 0.3)' : 'none'
                   }}
                   onMouseEnter={(e) => {
                     if (!active) {
-                      e.currentTarget.style.backgroundColor = 'var(--sidebar-hover)'
+                      e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)'
                     }
                   }}
                   onMouseLeave={(e) => {
@@ -264,7 +265,7 @@ export default function DashboardLayout({
         </nav>
 
         {/* Bottom Navigation */}
-        <div style={{ padding: '16px', borderTop: '1px solid var(--sidebar-border)' }}>
+        <div style={{ padding: '16px', borderTop: '1px solid' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {bottomNavigation.map((item) => {
               const Icon = item.icon
@@ -284,13 +285,13 @@ export default function DashboardLayout({
                     fontWeight: active ? '600' : '500',
                     textDecoration: 'none',
                     backgroundColor: active ? customPrimaryColor : 'transparent',
-                    color: active ? 'white' : 'var(--sidebar-foreground)',
+                    color: active ? 'white' : 'inherit',
                     transition: 'all 0.2s ease',
                     boxShadow: active ? '0 2px 8px rgba(22, 163, 74, 0.3)' : 'none'
                   }}
                   onMouseEnter={(e) => {
                     if (!active) {
-                      e.currentTarget.style.backgroundColor = 'var(--sidebar-hover)'
+                      e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)'
                     }
                   }}
                   onMouseLeave={(e) => {
@@ -308,12 +309,13 @@ export default function DashboardLayout({
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '16px 20px', borderTop: '1px solid var(--sidebar-border)', backgroundColor: 'var(--sidebar-accent)' }}>
+        <div className="sidebar-accent" style={{ padding: '16px 20px', borderTop: '1px solid' }}>
           <a 
             href="https://dataro-it.com.br" 
             target="_blank" 
             rel="noopener noreferrer"
-            style={{ fontSize: '12px', color: 'var(--sidebar-muted)', textDecoration: 'none' }}
+            className="sidebar-muted"
+            style={{ fontSize: '12px', textDecoration: 'none' }}
           >
             DATA-RO Inteligência Territorial
           </a>

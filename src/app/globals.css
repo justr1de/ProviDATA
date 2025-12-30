@@ -390,3 +390,48 @@ input, textarea, select {
 .dashboard-sidebar.open {
   transform: translateX(0);
 }
+
+/* ========================================
+   SIDEBAR COM SUPORTE A TEMA
+   ======================================== */
+.sidebar-themed {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.sidebar-themed .sidebar-text {
+  color: #1e293b;
+}
+
+.sidebar-themed .sidebar-muted {
+  color: #64748b;
+}
+
+.sidebar-themed .sidebar-hover:hover {
+  background-color: #e2e8f0;
+}
+
+.sidebar-themed .sidebar-accent {
+  background-color: #f1f5f9;
+}
+
+.dark .sidebar-themed {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.dark .sidebar-themed .sidebar-text {
+  color: #f1f5f9;
+}
+
+.dark .sidebar-themed .sidebar-muted {
+  color: #94a3b8;
+}
+
+.dark .sidebar-themed .sidebar-hover:hover {
+  background-color: #334155;
+}
+
+.dark .sidebar-themed .sidebar-accent {
+  background-color: #0f172a;
+}
