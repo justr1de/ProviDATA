@@ -234,7 +234,7 @@ export default function DashboardLayout({
           padding: '16px 20px'
         }}>
           <p className="sidebar-tenant-name" style={{ 
-            fontSize: '15px', 
+            fontSize: '12px', 
             fontWeight: '600', 
             overflow: 'hidden', 
             textOverflow: 'ellipsis', 
