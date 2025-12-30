@@ -234,11 +234,12 @@ export default function DashboardLayout({
           padding: '16px 20px'
         }}>
           <p className="sidebar-tenant-name" style={{ 
-            fontSize: '12px', 
+            fontSize: '11px', 
             fontWeight: '600', 
-            overflow: 'hidden', 
-            textOverflow: 'ellipsis', 
-            whiteSpace: 'nowrap', 
+            overflow: 'visible', 
+            whiteSpace: 'normal', 
+            wordWrap: 'break-word',
+            lineHeight: '1.4',
             marginBottom: '4px',
             margin: 0
           }}>
