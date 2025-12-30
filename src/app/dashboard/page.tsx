@@ -148,53 +148,27 @@ export default function DashboardPage() {
   const maxValue = Math.max(...statusData.map(d => d.value), 1)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
+    <div className="w-full max-w-full overflow-x-hidden flex flex-col gap-6">
       {/* Header */}
-      <div style={{ 
-        display: 'flex', 
-        flexWrap: 'wrap',
-        alignItems: 'center', 
-        justifyContent: 'space-between', 
-        gap: '16px',
-        paddingBottom: '16px',
-        borderBottom: '1px solid var(--border)'
-      }}>
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[var(--border)]">
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--foreground)', margin: 0 }}>
+          <h1 className="text-xl md:text-2xl font-bold text-[var(--foreground)]">
             Dashboard de Providências
           </h1>
-          <p style={{ fontSize: '14px', color: 'var(--muted-foreground)', marginTop: '4px' }}>
+          <p className="text-sm text-[var(--muted-foreground)] mt-1">
             Visão geral das demandas do gabinete · {tenant?.parlamentar_name || 'Gabinete'}
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <select style={{ 
-            padding: '8px 16px', 
-            fontSize: '14px', 
-            backgroundColor: 'var(--background)', 
-            border: '1px solid var(--border)', 
-            borderRadius: '8px',
-            color: 'var(--foreground)'
-          }}>
+        <div className="flex items-center gap-3">
+          <select className="px-3 py-2 text-sm bg-[var(--background)] border border-[var(--border)] rounded-lg text-[var(--foreground)]">
             <option>2025</option>
             <option>2024</option>
           </select>
           <Link href="/dashboard/providencias/nova">
-            <button style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px', 
-              padding: '8px 16px', 
-              backgroundColor: '#16a34a', 
-              color: 'white', 
-              fontSize: '14px', 
-              fontWeight: '500', 
-              borderRadius: '8px', 
-              border: 'none',
-              cursor: 'pointer'
-            }}>
-              <Plus style={{ width: '16px', height: '16px' }} />
-              Nova Providência
+            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Nova Providência</span>
+              <span className="sm:hidden">Nova</span>
             </button>
           </Link>
         </div>
@@ -203,152 +177,86 @@ export default function DashboardPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {/* Total de Providências */}
-        <div style={{ 
-          backgroundColor: 'var(--background)', 
-          borderRadius: '12px', 
-          border: '1px solid var(--border)', 
-          padding: '20px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">
               Total de Providências
             </span>
-            <div style={{ 
-              width: '40px', 
-              height: '40px', 
-              borderRadius: '8px', 
-              backgroundColor: 'rgba(59, 130, 246, 0.1)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center' 
-            }}>
-              <FileText style={{ width: '20px', height: '20px', color: '#3b82f6' }} />
+            <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-blue-500" />
             </div>
           </div>
-          <p style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--foreground)', margin: 0 }}>
+          <p className="text-3xl font-bold text-[var(--foreground)]">
             {stats?.total_providencias?.toLocaleString() || 0}
           </p>
-          <p style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '4px' }}>Cadastradas no sistema</p>
+          <p className="text-xs text-[var(--muted-foreground)] mt-1">Cadastradas no sistema</p>
         </div>
 
         {/* Pendentes */}
-        <div style={{ 
-          backgroundColor: 'var(--background)', 
-          borderRadius: '12px', 
-          border: '1px solid var(--border)', 
-          padding: '20px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">
               Pendentes
             </span>
-            <div style={{ 
-              width: '40px', 
-              height: '40px', 
-              borderRadius: '8px', 
-              backgroundColor: 'rgba(245, 158, 11, 0.1)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center' 
-            }}>
-              <Clock style={{ width: '20px', height: '20px', color: '#f59e0b' }} />
+            <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+              <Clock className="w-5 h-5 text-amber-500" />
             </div>
           </div>
-          <p style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--foreground)', margin: 0 }}>
+          <p className="text-3xl font-bold text-[var(--foreground)]">
             {stats?.pendentes || 0}
           </p>
-          <p style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '4px' }}>Aguardando análise</p>
+          <p className="text-xs text-[var(--muted-foreground)] mt-1">Aguardando análise</p>
         </div>
 
         {/* Em Andamento */}
-        <div style={{ 
-          backgroundColor: 'var(--background)', 
-          borderRadius: '12px', 
-          border: '1px solid var(--border)', 
-          padding: '20px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">
               Em Andamento
             </span>
-            <div style={{ 
-              width: '40px', 
-              height: '40px', 
-              borderRadius: '8px', 
-              backgroundColor: 'rgba(168, 85, 247, 0.1)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center' 
-            }}>
-              <TrendingUp style={{ width: '20px', height: '20px', color: '#a855f7' }} />
+            <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-purple-500" />
             </div>
           </div>
-          <p style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--foreground)', margin: 0 }}>
+          <p className="text-3xl font-bold text-[var(--foreground)]">
             {(stats?.em_analise || 0) + (stats?.encaminhadas || 0) + (stats?.em_andamento || 0)}
           </p>
-          <p style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '4px' }}>Em processamento</p>
+          <p className="text-xs text-[var(--muted-foreground)] mt-1">Em processamento</p>
         </div>
 
         {/* Concluídas */}
-        <div style={{ 
-          backgroundColor: 'var(--background)', 
-          borderRadius: '12px', 
-          border: '1px solid var(--border)', 
-          padding: '20px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-            <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">
               Concluídas
             </span>
-            <div style={{ 
-              width: '40px', 
-              height: '40px', 
-              borderRadius: '8px', 
-              backgroundColor: 'rgba(34, 197, 94, 0.1)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center' 
-            }}>
-              <CheckCircle2 style={{ width: '20px', height: '20px', color: '#22c55e' }} />
+            <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5 text-green-500" />
             </div>
           </div>
-          <p style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--foreground)', margin: 0 }}>
+          <p className="text-3xl font-bold text-[var(--foreground)]">
             {stats?.concluidas || 0}
           </p>
-          <p style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '4px' }}>Finalizadas com sucesso</p>
+          <p className="text-xs text-[var(--muted-foreground)] mt-1">Finalizadas com sucesso</p>
         </div>
       </div>
 
       {/* Taxa de Conclusão */}
-      <div style={{ 
-        backgroundColor: 'var(--background)', 
-        borderRadius: '12px', 
-        border: '1px solid var(--border)', 
-        padding: '20px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+      <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--foreground)', margin: 0 }}>Taxa de Conclusão</h3>
-            <p style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '2px' }}>Providências concluídas vs total</p>
+            <h3 className="text-sm font-semibold text-[var(--foreground)]">Taxa de Conclusão</h3>
+            <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Providências concluídas vs total</p>
           </div>
-          <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#22c55e' }}>{taxaConclusao}%</span>
+          <span className="text-2xl font-bold text-green-500">{taxaConclusao}%</span>
         </div>
-        <div style={{ 
-          width: '100%', 
-          height: '12px', 
-          backgroundColor: 'var(--muted)', 
-          borderRadius: '6px', 
-          overflow: 'hidden' 
-        }}>
-          <div style={{ 
-            height: '100%', 
-            width: `${taxaConclusao}%`, 
-            background: 'linear-gradient(to right, #22c55e, #16a34a)', 
-            borderRadius: '6px',
-            transition: 'width 0.5s ease'
-          }} />
+        <div className="w-full h-3 bg-[var(--muted)] rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500"
+            style={{ width: `${taxaConclusao}%` }}
+          />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: 'var(--muted-foreground)' }}>
+        <div className="flex justify-between mt-2 text-xs text-[var(--muted-foreground)]">
           <span>Concluídas: {concluidas}</span>
           <span>Total: {totalProvidencias}</span>
         </div>
