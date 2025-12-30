@@ -130,33 +130,35 @@ input, textarea, select {
 
 /* Dashboard Stats Grid */
 .stats-grid {
-  display: grid !important;
-  grid-template-columns: repeat(4, 1fr) !important;
-  gap: 16px !important;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1280px) {
   .stats-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 640px) {
   .stats-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 /* Charts Grid */
 .charts-grid {
-  display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
-  gap: 24px !important;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  width: 100%;
 }
 
 @media (max-width: 900px) {
   .charts-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

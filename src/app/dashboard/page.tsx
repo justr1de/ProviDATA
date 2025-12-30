@@ -148,7 +148,7 @@ export default function DashboardPage() {
   const maxValue = Math.max(...statusData.map(d => d.value), 1)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', maxWidth: '100%', overflowX: 'hidden' }}>
       {/* Header */}
       <div style={{ 
         display: 'flex', 
@@ -201,14 +201,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(4, 1fr)', 
-        gap: '16px',
-        minWidth: 0
-      }}
-      className="stats-grid"
-      >
+      <div className="stats-grid">
         {/* Total de Providências */}
         <div style={{ 
           backgroundColor: 'var(--background)', 
