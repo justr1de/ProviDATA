@@ -47,7 +47,7 @@ export default function DashboardLayout({
   const pathname = usePathname()
   const supabase = createClient()
   
-  const { user, tenant, setUser, setTenant, clearAuth } = useAuthStore()
+  const { user, tenant, setUser, setTenant, reset } = useAuthStore()
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -78,7 +78,7 @@ export default function DashboardLayout({
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    clearAuth()
+    reset()
     router.push('/login')
   }
 
@@ -126,7 +126,7 @@ export default function DashboardLayout({
               {tenant?.parlamentar_name || 'Carregando...'}
             </p>
             <p className="text-xs text-gray-400 truncate">
-              {tenant?.tipo_mandato || 'Deputado(a)'} · {tenant?.uf || 'RO'}
+              {tenant?.cargo?.replace('_', ' ') || 'Deputado(a)'} · {tenant?.uf || 'RO'}
             </p>
           </div>
 
@@ -234,7 +234,7 @@ export default function DashboardLayout({
                     <User className="w-4 h-4 text-white" />
                   </div>
                   <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-200">
-                    {user?.name?.split(' ')[0] || 'Usuário'}
+                    {user?.nome?.split(' ')[0] || 'Usuário'}
                   </span>
                   <ChevronDown className="w-4 h-4 text-gray-500" />
                 </button>
@@ -248,7 +248,7 @@ export default function DashboardLayout({
                     <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
                       <div className="p-3 border-b border-gray-200 dark:border-gray-700">
                         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {user?.name || 'Usuário'}
+                          {user?.nome || 'Usuário'}
                         </p>
                         <p className="text-xs text-gray-500 truncate">
                           {user?.email}

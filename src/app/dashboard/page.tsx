@@ -133,7 +133,7 @@ export default function DashboardPage() {
         .limit(5)
 
       if (recent) {
-        setRecentProvidencias(recent as Providencia[])
+        setRecentProvidencias(recent as unknown as Providencia[])
       }
     } catch (error) {
       console.error('Erro ao carregar dados:', error)

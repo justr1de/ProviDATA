@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -59,7 +59,7 @@ const ufOptions = [
   { value: 'TO', label: 'TO' },
 ]
 
-export default function NovoCidadaoPage() {
+function NovoCidadaoForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     nome: '',
@@ -402,5 +402,13 @@ export default function NovoCidadaoPage() {
         </div>
       </form>
     </div>
+  )
+}
+
+export default function NovoCidadaoPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-64">Carregando...</div>}>
+      <NovoCidadaoForm />
+    </Suspense>
   )
 }

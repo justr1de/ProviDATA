@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -62,7 +62,7 @@ const priorityLabels: Record<string, string> = {
 
 const ITEMS_PER_PAGE = 10
 
-export default function ProvidenciasPage() {
+function ProvidenciasContent() {
   const [providencias, setProvidencias] = useState<Providencia[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -326,5 +326,14 @@ export default function ProvidenciasPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+
+export default function ProvidenciasPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-64">Carregando...</div>}>
+      <ProvidenciasContent />
+    </Suspense>
   )
 }
