@@ -638,13 +638,7 @@ export default function DashboardPage() {
               marginBottom: '16px'
             }}>
               {/* Total */}
-              <div style={{ 
-                
-                borderRadius: '16px',
-                
-                padding: '20px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-              }}>
+              <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ 
                     width: '48px', 
@@ -666,13 +660,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Pendentes */}
-              <div style={{ 
-                
-                borderRadius: '16px',
-                
-                padding: '20px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-              }}>
+              <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ 
                     width: '48px', 
@@ -694,13 +682,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Em Andamento */}
-              <div style={{ 
-                
-                borderRadius: '16px',
-                
-                padding: '20px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-              }}>
+              <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ 
                     width: '48px', 
@@ -722,13 +704,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Concluídas */}
-              <div style={{ 
-                
-                borderRadius: '16px',
-                
-                padding: '20px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-              }}>
+              <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ 
                     width: '48px', 
@@ -757,13 +733,7 @@ export default function DashboardPage() {
               gap: '16px'
             }}>
               {/* Urgentes */}
-              <div style={{ 
-                
-                borderRadius: '16px',
-                
-                padding: '20px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-              }}>
+              <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ 
                     width: '48px', 
@@ -785,13 +755,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Em Análise */}
-              <div style={{ 
-                
-                borderRadius: '16px',
-                
-                padding: '20px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-              }}>
+              <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ 
                     width: '48px', 
@@ -813,13 +777,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Encaminhadas */}
-              <div style={{ 
-                
-                borderRadius: '16px',
-                
-                padding: '20px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-              }}>
+              <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ 
                     width: '48px', 
@@ -843,14 +801,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Taxa de Conclusão */}
-          <div id="taxa-conclusao" style={{ 
-            
-            borderRadius: '16px',
-            
-            padding: '24px',
-            marginBottom: '24px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-          }}>
+          <div id="taxa-conclusao" className="taxa-card" style={{ marginBottom: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>Taxa de Conclusão</h3>
