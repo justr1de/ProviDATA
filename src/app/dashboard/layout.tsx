@@ -511,7 +511,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main style={{ flex: 1, padding: isDesktop ? '28px' : '16px', paddingBottom: '32px' }}>
+        <main style={{ flex: 1, padding: isDesktop ? '32px' : '20px', paddingBottom: '40px' }}>
           {children}
         </main>
       </div>
