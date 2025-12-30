@@ -350,10 +350,13 @@ export default function DashboardPage() {
 
   const maxChartValue = Math.max(...chartData.map(d => d.value), 1)
 
-  // Cores para loading (antes de isDark estar disponível)
-  if (loading) {
+  // Cores para loading ou antes de montar
+  if (loading || !mounted) {
+    // Tentar detectar tema do localStorage para evitar flash
+    const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('providata-theme') : null
+    const initialBg = savedTheme === 'dark' ? '#0f172a' : '#f9fafb'
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', backgroundColor: '#f9fafb' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: initialBg }}>
         <Loader2 style={{ width: '32px', height: '32px', animation: 'spin 1s linear infinite', color: '#16a34a' }} />
       </div>
     )
