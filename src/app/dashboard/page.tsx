@@ -151,7 +151,34 @@ const tourSteps: TourStep[] = [
 
 export default function DashboardPage() {
   const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
+  const [localTheme, setLocalTheme] = useState<string>('light')
+  
+  // Sincronizar com o tema global
+  useEffect(() => {
+    setLocalTheme(resolvedTheme)
+  }, [resolvedTheme])
+  
+  // Também observar mudanças na classe do HTML
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          const isDarkMode = document.documentElement.classList.contains('dark')
+          setLocalTheme(isDarkMode ? 'dark' : 'light')
+        }
+      })
+    })
+    
+    observer.observe(document.documentElement, { attributes: true })
+    
+    // Verificar estado inicial
+    const isDarkMode = document.documentElement.classList.contains('dark')
+    setLocalTheme(isDarkMode ? 'dark' : 'light')
+    
+    return () => observer.disconnect()
+  }, [])
+  
+  const isDark = localTheme === 'dark'
   
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<Stats>({
