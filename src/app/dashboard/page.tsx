@@ -165,18 +165,18 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 px-1">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
             Dashboard de Providências
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
             Visão geral das demandas do gabinete · {tenant?.parlamentar_name}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 md:gap-3">
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
@@ -185,65 +185,64 @@ export default function DashboardPage() {
             <option value={2025}>2025</option>
             <option value={2024}>2024</option>
           </select>
-          <Link href="/dashboard/providencias/nova">
-            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
+          <Link href="/dashboard/providencias/nova" className="flex-1 sm:flex-none">
+            <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Nova Providência</span>
-              <span className="sm:hidden">Nova</span>
+              <span>Nova Providência</span>
             </button>
           </Link>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {/* Total */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+              <FileText className="w-4 h-4 md:w-5 md:h-5 text-blue-600 dark:text-blue-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+            <div className="min-w-0">
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
             </div>
           </div>
         </div>
 
         {/* Pendentes */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-              <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+              <Clock className="w-4 h-4 md:w-5 md:h-5 text-amber-600 dark:text-amber-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.pendentes}</p>
+            <div className="min-w-0">
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{stats.pendentes}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">Pendentes</p>
             </div>
           </div>
         </div>
 
         {/* Em Andamento */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-indigo-600 dark:text-indigo-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.em_andamento}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Em Andamento</p>
+            <div className="min-w-0">
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{stats.em_andamento}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Em Andamento</p>
             </div>
           </div>
         </div>
 
         {/* Concluídas */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-3 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+              <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-green-600 dark:text-green-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.concluidas}</p>
+            <div className="min-w-0">
+              <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{stats.concluidas}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">Concluídas</p>
             </div>
           </div>
@@ -251,13 +250,13 @@ export default function DashboardPage() {
       </div>
 
       {/* Taxa de Conclusão */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-3 md:p-4">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">Taxa de Conclusão</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400">Providências concluídas vs total</p>
           </div>
-          <span className="text-2xl font-bold text-green-600 dark:text-green-400">{taxaConclusao}%</span>
+          <span className="text-xl md:text-2xl font-bold text-green-600 dark:text-green-400">{taxaConclusao}%</span>
         </div>
         <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
           <div 
@@ -272,9 +271,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Bar Chart */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-3 md:p-4">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="w-5 h-5 text-gray-400" />
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">Providências por Status</h3>
@@ -283,8 +282,8 @@ export default function DashboardPage() {
             {chartData.map((item) => (
               <div key={item.label}>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-gray-600 dark:text-gray-300">{item.label}</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-white">{item.value}</span>
+                  <span className="text-xs md:text-sm text-gray-600 dark:text-gray-300">{item.label}</span>
+                  <span className="text-xs md:text-sm font-medium text-gray-900 dark:text-white">{item.value}</span>
                 </div>
                 <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div 
@@ -301,20 +300,20 @@ export default function DashboardPage() {
         </div>
 
         {/* Pie Chart (simplified) */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-3 md:p-4">
           <div className="flex items-center gap-2 mb-4">
             <PieChart className="w-5 h-5 text-gray-400" />
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">Distribuição de Status</h3>
           </div>
           <div className="flex items-center justify-center py-4">
-            <div className="relative w-32 h-32">
+            <div className="relative w-28 h-28 md:w-32 md:h-32">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+                  <p className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
                 </div>
               </div>
-              <svg className="w-full h-full transform -rotate-90">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 128 128">
                 <circle
                   cx="64"
                   cy="64"
@@ -339,14 +338,14 @@ export default function DashboardPage() {
               </svg>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2 mt-4">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-4">
             {chartData.map((item) => (
               <div key={item.label} className="flex items-center gap-2">
                 <div 
-                  className="w-3 h-3 rounded-full"
+                  className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="text-xs text-gray-600 dark:text-gray-300">{item.label}</span>
+                <span className="text-xs text-gray-600 dark:text-gray-300 truncate">{item.label}</span>
                 <span className="text-xs font-medium text-gray-900 dark:text-white ml-auto">{item.value}</span>
               </div>
             ))}
@@ -356,26 +355,27 @@ export default function DashboardPage() {
 
       {/* Recent Providencias */}
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between p-3 md:p-4 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-gray-400" />
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">Providências Recentes</h3>
           </div>
           <Link href="/dashboard/providencias">
-            <button className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium">
-              Ver Todas
+            <button className="flex items-center gap-1 text-xs md:text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium">
+              <span className="hidden sm:inline">Ver Todas</span>
+              <span className="sm:hidden">Ver</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </Link>
         </div>
         
         {recentProvidencias.length === 0 ? (
-          <div className="py-12 px-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
-              <FileText className="w-8 h-8 text-gray-400" />
+          <div className="py-8 md:py-12 px-4 text-center">
+            <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-6 h-6 md:w-8 md:h-8 text-gray-400" />
             </div>
-            <h4 className="font-medium text-gray-900 dark:text-white mb-2">Nenhuma providência cadastrada</h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            <h4 className="font-medium text-gray-900 dark:text-white mb-2 text-sm md:text-base">Nenhuma providência cadastrada</h4>
+            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mb-4">
               Comece cadastrando a primeira providência do gabinete
             </p>
             <Link href="/dashboard/providencias/nova">
@@ -393,15 +393,23 @@ export default function DashboardPage() {
                 href={`/dashboard/providencias/${providencia.id}`}
                 className="block hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
               >
-                <div className="flex items-center gap-4 p-4">
+                <div className="flex items-start gap-3 p-3 md:p-4">
                   <div 
-                    className="w-1 h-12 rounded-full flex-shrink-0"
+                    className="w-1 h-10 md:h-12 rounded-full flex-shrink-0 mt-1"
                     style={{ backgroundColor: statusColors[providencia.status] || '#6b7280' }}
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
                       <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
                         {providencia.numero_protocolo}
+                      </span>
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                        providencia.status === 'concluido' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
+                        providencia.status === 'pendente' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' :
+                        providencia.status === 'em_andamento' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' :
+                        'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                      }`}>
+                        {statusLabels[providencia.status]}
                       </span>
                       <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                         providencia.prioridade === 'urgente' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' :
@@ -412,38 +420,15 @@ export default function DashboardPage() {
                         {priorityLabels[providencia.prioridade]}
                       </span>
                     </div>
-                    <h4 className="font-medium text-gray-900 dark:text-white truncate">
+                    <h4 className="font-medium text-gray-900 dark:text-white text-sm md:text-base line-clamp-1">
                       {providencia.titulo}
                     </h4>
-                    <div className="flex items-center gap-3 mt-1">
-                      {providencia.cidadao && (
-                        <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                          <Users className="w-3 h-3" />
-                          {providencia.cidadao.nome}
-                        </span>
-                      )}
-                      {providencia.orgao_destino && (
-                        <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                          <Building2 className="w-3 h-3" />
-                          {providencia.orgao_destino.sigla || providencia.orgao_destino.nome}
-                        </span>
-                      )}
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                       <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                         <Calendar className="w-3 h-3" />
                         {format(new Date(providencia.created_at), "dd/MM/yyyy", { locale: ptBR })}
                       </span>
                     </div>
-                  </div>
-                  <div className="hidden sm:flex items-center gap-3">
-                    <span className={`px-3 py-1 text-xs font-medium rounded-lg ${
-                      providencia.status === 'concluido' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
-                      providencia.status === 'pendente' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' :
-                      providencia.status === 'em_andamento' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' :
-                      'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-                    }`}>
-                      {statusLabels[providencia.status]}
-                    </span>
-                    <ArrowRight className="w-4 h-4 text-gray-400" />
                   </div>
                 </div>
               </Link>
@@ -453,23 +438,23 @@ export default function DashboardPage() {
       </div>
 
       {/* Footer Info */}
-      <div className="bg-gray-100 dark:bg-gray-800/50 rounded-xl p-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="bg-gray-100 dark:bg-gray-800/50 rounded-xl p-3 md:p-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Sistema</p>
-            <p className="text-sm font-medium text-gray-900 dark:text-white">ProviDATA</p>
+            <p className="text-xs md:text-sm font-medium text-gray-900 dark:text-white">ProviDATA</p>
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Gabinete</p>
-            <p className="text-sm font-medium text-gray-900 dark:text-white">{tenant?.parlamentar_name || 'Não definido'}</p>
+            <p className="text-xs md:text-sm font-medium text-gray-900 dark:text-white truncate">{tenant?.parlamentar_name || 'Não definido'}</p>
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Período</p>
-            <p className="text-sm font-medium text-gray-900 dark:text-white">2024 - 2025</p>
+            <p className="text-xs md:text-sm font-medium text-gray-900 dark:text-white">2024 - 2025</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Última Atualização</p>
-            <p className="text-sm font-medium text-gray-900 dark:text-white">{format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Atualização</p>
+            <p className="text-xs md:text-sm font-medium text-gray-900 dark:text-white">{format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
           </div>
         </div>
       </div>

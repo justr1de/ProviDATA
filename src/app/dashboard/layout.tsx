@@ -344,7 +344,7 @@ export default function DashboardLayout({
             backdropFilter: 'blur(8px)'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '68px', padding: '0 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px', padding: isDesktop ? '0 24px' : '0 12px' }}>
             {/* Mobile menu button */}
             {!isDesktop && (
               <button
@@ -366,7 +366,7 @@ export default function DashboardLayout({
             {isDesktop && <div />}
 
             {/* Right side */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isDesktop ? '16px' : '8px' }}>
               <ThemeToggle />
               
               {/* Notifications */}
@@ -412,9 +412,11 @@ export default function DashboardLayout({
                   }}>
                     <User style={{ width: '18px', height: '18px', color: 'white' }} />
                   </div>
-                  <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--foreground)' }}>
-                    {user?.nome?.split(' ')[0] || 'Usuário'}
-                  </span>
+                  {isDesktop && (
+                    <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--foreground)' }}>
+                      {user?.nome?.split(' ')[0] || 'Usuário'}
+                    </span>
+                  )}
                   <ChevronDown style={{ width: '18px', height: '18px', color: 'var(--foreground-muted)' }} />
                 </button>
 
@@ -509,7 +511,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main style={{ flex: 1, padding: isDesktop ? '28px' : '20px' }}>
+        <main style={{ flex: 1, padding: isDesktop ? '28px' : '16px', paddingBottom: '32px' }}>
           {children}
         </main>
       </div>
