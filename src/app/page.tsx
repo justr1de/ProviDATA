@@ -1,4 +1,5 @@
-'use client'
+'use client';
+// Build v4 - Valores removidos dos planos, grid 3x2
 
 import Link from 'next/link';
 import Image from 'next/image';
