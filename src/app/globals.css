@@ -16,6 +16,20 @@
   background-color: #0f172a !important;
 }
 
+/* Forçar cores no modo escuro para todos os elementos do dashboard */
+.dark .dashboard-page > div,
+.dark .dashboard-page > div > div,
+.dark .dashboard-page > div > div > div {
+  --card-bg: #1e293b;
+}
+
+/* Sobrescrever estilos inline com !important via CSS custom properties */
+html.dark {
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --background: #0f172a;
+}
+
 .dashboard-card {
   background-color: #ffffff !important;
   border: 1px solid #e5e7eb !important;

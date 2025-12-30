@@ -178,6 +178,47 @@ export default function DashboardPage() {
       setIsDark(resolvedTheme === 'dark')
     }
   }, [resolvedTheme, mounted])
+
+  // Aplicar cores dinamicamente quando o tema mudar
+  useEffect(() => {
+    if (!mounted) return
+    
+    const applyThemeColors = () => {
+      const isDarkMode = document.documentElement.classList.contains('dark')
+      const dashboardPage = document.querySelector('.dashboard-page')
+      if (!dashboardPage) return
+      
+      // Cores do tema
+      const bgColor = isDarkMode ? '#0f172a' : '#f9fafb'
+      const cardColor = isDarkMode ? '#1e293b' : '#ffffff'
+      const borderColor = isDarkMode ? '#475569' : '#e5e7eb'
+      const textColor = isDarkMode ? '#f1f5f9' : '#111827'
+      const textMuted = isDarkMode ? '#94a3b8' : '#6b7280'
+      
+      // Aplicar ao container principal
+      ;(dashboardPage as HTMLElement).style.backgroundColor = bgColor
+      
+      // Aplicar a todos os elementos com fundo branco ou var(--card)
+      const elements = dashboardPage.querySelectorAll('div[style*="background"]')
+      elements.forEach((el) => {
+        const htmlEl = el as HTMLElement
+        const bg = htmlEl.style.backgroundColor
+        if (bg === 'white' || bg === 'rgb(255, 255, 255)' || bg === 'var(--card)' || bg === '#ffffff') {
+          htmlEl.style.backgroundColor = cardColor
+          htmlEl.style.borderColor = borderColor
+        }
+      })
+    }
+    
+    // Aplicar imediatamente
+    applyThemeColors()
+    
+    // Reaplicar quando o tema mudar
+    const observer = new MutationObserver(applyThemeColors)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    
+    return () => observer.disconnect()
+  }, [mounted, isDark])
   
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<Stats>({
