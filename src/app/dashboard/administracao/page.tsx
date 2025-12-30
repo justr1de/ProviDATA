@@ -72,12 +72,12 @@ export default function AdministracaoPage() {
   }
 
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="max-w-[1400px] mx-auto px-1 md:px-2">
       {/* Header */}
       <div style={{ marginBottom: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
           <Shield style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
-          <h1 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)' }}>
+          <h1 className="text-xl md:text-2xl lg:text-[28px] font-bold" style={{ color: 'var(--foreground)' }}>
             Administração
           </h1>
         </div>
@@ -87,13 +87,7 @@ export default function AdministracaoPage() {
       </div>
 
       {/* Tabs */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '8px', 
-        marginBottom: '32px',
-        borderBottom: '1px solid var(--border)',
-        paddingBottom: '0'
-      }}>
+      <div className="flex flex-wrap gap-2 mb-6 md:mb-8 border-b border-[var(--border)] pb-0 overflow-x-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon
           const isActive = activeTab === tab.id
@@ -126,12 +120,7 @@ export default function AdministracaoPage() {
       </div>
 
       {/* Content */}
-      <div style={{
-        padding: '28px',
-        borderRadius: '16px',
-        backgroundColor: 'var(--card)',
-        border: '1px solid var(--border)'
-      }}>
+      <div className="p-4 md:p-6 lg:p-7 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
         {activeTab === 'usuarios' && (
           <div>
             {/* Users Header */}

@@ -134,7 +134,7 @@ export default function ConfiguracoesPage() {
   }
 
   const cardHeaderStyle: React.CSSProperties = {
-    padding: '20px 24px',
+    padding: '16px',
     borderBottom: '1px solid var(--border)',
     display: 'flex',
     alignItems: 'center',
@@ -142,7 +142,7 @@ export default function ConfiguracoesPage() {
   }
 
   const cardContentStyle: React.CSSProperties = {
-    padding: '24px'
+    padding: '16px'
   }
 
   const inputStyle: React.CSSProperties = {
@@ -195,16 +195,16 @@ export default function ConfiguracoesPage() {
   }
 
   return (
-    <div style={{ padding: '0 8px', maxWidth: '900px', margin: '0 auto' }}>
+    <div className="px-1 md:px-2 max-w-[900px] mx-auto">
       {/* Header */}
       <div style={{ marginBottom: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
           <Settings style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
-          <h1 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)' }}>
+          <h1 className="text-xl md:text-2xl lg:text-[28px] font-bold" style={{ color: 'var(--foreground)' }}>
             Configurações
           </h1>
         </div>
-        <p style={{ fontSize: '16px', color: 'var(--foreground-muted)' }}>
+        <p className="text-sm md:text-base" style={{ color: 'var(--foreground-muted)' }}>
           Gerencie as configurações do seu gabinete
         </p>
       </div>
