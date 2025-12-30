@@ -618,10 +618,9 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div style={{ 
+          <div className="features-grid" style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-            gap: '24px' 
+            gap: '24px'
           }}>
             {features.map((feature, index) => (
               <div 
@@ -631,7 +630,10 @@ export default function HomePage() {
                   borderRadius: '20px',
                   backgroundColor: isDark ? '#1e293b' : '#ffffff',
                   border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
-                  boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.05)'
+                  boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.05)',
+                  minHeight: '200px',
+                  display: 'flex',
+                  flexDirection: 'column'
                 }}
               >
                 <div style={{ 
@@ -647,7 +649,7 @@ export default function HomePage() {
                   <feature.icon style={{ width: '28px', height: '28px', color: '#16a34a' }} />
                 </div>
                 <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>{feature.title}</h3>
-                <p style={{ fontSize: '15px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.6 }}>{feature.description}</p>
+                <p style={{ fontSize: '15px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.6, flex: 1 }}>{feature.description}</p>
               </div>
             ))}
           </div>
@@ -682,8 +684,7 @@ export default function HomePage() {
               <h3 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Básico</h3>
               <p style={{ fontSize: '14px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '24px' }}>Para gabinetes menores</p>
               <div style={{ marginBottom: '24px' }}>
-                <span style={{ fontSize: '40px', fontWeight: 800, color: '#16a34a' }}>R$ 297</span>
-                <span style={{ fontSize: '16px', color: isDark ? '#94a3b8' : '#64748b' }}>/mês</span>
+                <span style={{ fontSize: '24px', fontWeight: 700, color: '#16a34a' }}>Consulte</span>
               </div>
               <ul style={{ listStyle: 'none', padding: 0, marginBottom: '24px' }}>
                 {planoBasico.map((item, index) => (
@@ -737,8 +738,7 @@ export default function HomePage() {
               <h3 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Ilimitado</h3>
               <p style={{ fontSize: '14px', opacity: 0.9, marginBottom: '24px' }}>Para gabinetes de qualquer porte</p>
               <div style={{ marginBottom: '24px' }}>
-                <span style={{ fontSize: '40px', fontWeight: 800 }}>R$ 497</span>
-                <span style={{ fontSize: '16px', opacity: 0.9 }}>/mês</span>
+                <span style={{ fontSize: '24px', fontWeight: 700 }}>Consulte</span>
               </div>
               <ul style={{ listStyle: 'none', padding: 0, marginBottom: '24px' }}>
                 {planoIlimitado.map((item, index) => (
