@@ -168,23 +168,42 @@ export default function HomePage() {
       color: isDark ? '#f1f5f9' : '#1e293b',
       position: 'relative'
     }}>
-      {/* Mapa do Brasil como marca d'água de fundo */}
+      {/* Mapa do Brasil como marca d'água de fundo com cores DATA-RO */}
       <div style={{
         position: 'fixed',
-        top: '96px', // Abaixo do header
+        top: '96px',
         left: '50%',
         transform: 'translateX(-50%)',
-        width: '100%',
-        height: 'calc(100vh - 96px)',
-        backgroundImage: 'url(/brazil-map.png)',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center center',
-        backgroundSize: 'contain',
-        opacity: isDark ? 0.03 : 0.05,
+        width: '120%',
+        height: 'calc(100vh - 50px)',
         pointerEvents: 'none',
         zIndex: 0,
-        filter: isDark ? 'invert(1) brightness(2)' : 'none'
-      }} />
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        {/* Camada do mapa com gradiente colorido */}
+        <div style={{
+          width: '100%',
+          height: '100%',
+          backgroundImage: 'url(/brazil-map.png)',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center center',
+          backgroundSize: 'contain',
+          opacity: isDark ? 0.06 : 0.08,
+          maskImage: 'url(/brazil-map.png)',
+          maskRepeat: 'no-repeat',
+          maskPosition: 'center center',
+          maskSize: 'contain',
+          WebkitMaskImage: 'url(/brazil-map.png)',
+          WebkitMaskRepeat: 'no-repeat',
+          WebkitMaskPosition: 'center center',
+          WebkitMaskSize: 'contain',
+          background: isDark 
+            ? 'linear-gradient(180deg, #FFD700 0%, #22c55e 40%, #16a34a 60%, #2563eb 100%)'
+            : 'linear-gradient(180deg, #FFD700 0%, #22c55e 40%, #16a34a 60%, #1e40af 100%)'
+        } as React.CSSProperties} />
+      </div>
       
       {/* HEADER com marca d'água espalhada */}
       <header style={{ 
