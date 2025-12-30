@@ -204,25 +204,27 @@ export default function DashboardLayout({
           </button>
         )}
 
-        {/* Logo ProviDATA - Sem fundo branco, preenche o espaço */}
+        {/* Logo ProviDATA - Preenche todo o espaço sem fundo branco */}
         <div style={{ 
-          padding: '20px', 
+          padding: '12px 16px', 
           borderBottom: '1px solid rgba(255,255,255,0.1)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          minHeight: '100px'
         }}>
-          <Link href="/dashboard" style={{ display: 'block', textDecoration: 'none', width: '100%' }}>
+          <Link href="/dashboard" style={{ display: 'block', textDecoration: 'none', width: '100%', height: '100%' }}>
             <Image
               src="/providata-logo-final.png"
               alt="ProviDATA"
-              width={240}
-              height={70}
+              width={280}
+              height={90}
               style={{ 
                 width: '100%',
                 height: 'auto',
+                maxHeight: '90px',
                 objectFit: 'contain',
-                filter: 'drop-shadow(0 2px 8px rgba(22, 163, 74, 0.3))'
+                filter: 'drop-shadow(0 4px 12px rgba(22, 163, 74, 0.4)) brightness(1.1)'
               }}
               priority
             />
@@ -383,7 +385,7 @@ export default function DashboardLayout({
           )}
         </div>
 
-        {/* Footer - Logo DATA-RO visível, sem quebra de linha */}
+        {/* Footer - Logo DATA-RO visível, sem fundo branco */}
         <div style={{ 
           padding: '16px 20px', 
           borderTop: '1px solid rgba(255,255,255,0.1)',
@@ -403,34 +405,26 @@ export default function DashboardLayout({
               whiteSpace: 'nowrap'
             }}
           >
-            <div style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '6px',
-              backgroundColor: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'hidden',
-              flexShrink: 0
-            }}>
-              <Image
-                src="/dataro-logo.png"
-                alt="DATA-RO"
-                width={20}
-                height={20}
-                style={{ objectFit: 'contain' }}
-              />
-            </div>
+            <Image
+              src="/dataro-logo-final.png"
+              alt="DATA-RO"
+              width={32}
+              height={32}
+              style={{ 
+                objectFit: 'contain',
+                filter: 'brightness(1.2)',
+                flexShrink: 0
+              }}
+            />
             <span style={{ 
               fontSize: '11px', 
-              color: 'rgba(255,255,255,0.6)',
+              color: 'rgba(255,255,255,0.7)',
               fontWeight: '500',
               whiteSpace: 'nowrap'
             }}>
               DATA-RO Inteligência Territorial
             </span>
-            <Copyright style={{ width: '12px', height: '12px', color: 'rgba(255,255,255,0.4)', flexShrink: 0 }} />
+            <Copyright style={{ width: '12px', height: '12px', color: 'rgba(255,255,255,0.5)', flexShrink: 0 }} />
           </a>
         </div>
       </aside>
@@ -625,20 +619,23 @@ export default function DashboardLayout({
 
         {/* Page content */}
         <main style={{ flex: 1, padding: isDesktop ? '32px' : '20px', paddingBottom: '40px' }}>
-          {/* Cabeçalho Global - ProviDATA */}
+          {/* Cabeçalho Global - ProviDATA - CENTRALIZADO */}
           <div style={{
             marginBottom: '24px',
             paddingBottom: '16px',
-            borderBottom: '1px solid var(--border)'
+            borderBottom: '1px solid var(--border)',
+            textAlign: 'center'
           }}>
             <h1 style={{
-              fontSize: isDesktop ? '24px' : '18px',
+              fontSize: isDesktop ? '24px' : '16px',
               fontWeight: '700',
               color: 'var(--foreground)',
               margin: 0,
               display: 'flex',
               alignItems: 'center',
-              gap: '12px'
+              justifyContent: 'center',
+              gap: '12px',
+              flexWrap: 'wrap'
             }}>
               <span style={{
                 background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
