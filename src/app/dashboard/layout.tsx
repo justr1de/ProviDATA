@@ -43,11 +43,22 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
   
   const { user, tenant, setUser, setTenant, clearAuth } = useAuthStore()
+
+  // Detectar largura da tela para aplicar margin-left corretamente
+  useEffect(() => {
+    const checkWidth = () => {
+      setIsDesktop(window.innerWidth >= 768)
+    }
+    checkWidth()
+    window.addEventListener('resize', checkWidth)
+    return () => window.removeEventListener('resize', checkWidth)
+  }, [])
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -203,7 +214,10 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main content wrapper */}
-      <div className="md:ml-64 min-h-screen flex flex-col">
+      <div 
+        className="min-h-screen flex flex-col"
+        style={{ marginLeft: isDesktop ? '256px' : '0' }}
+      >
         {/* Header */}
         <header className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center justify-between h-16 px-4">
