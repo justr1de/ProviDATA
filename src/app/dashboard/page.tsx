@@ -201,7 +201,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="stats-grid">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {/* Total de Providências */}
         <div style={{ 
           backgroundColor: 'var(--background)', 
@@ -451,7 +451,7 @@ export default function DashboardPage() {
       )}
 
       {/* Charts Row */}
-      <div style={{ display: 'grid', gap: '24px' }} className="charts-grid">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Gráfico de Barras */}
         <div style={{ 
           backgroundColor: 'var(--background)', 
