@@ -350,28 +350,17 @@ export default function DashboardPage() {
 
   const maxChartValue = Math.max(...chartData.map(d => d.value), 1)
 
-  // Cores para loading ou antes de montar
-  if (loading || !mounted) {
-    // Tentar detectar tema do localStorage para evitar flash
-    const savedTheme = typeof window !== 'undefined' ? localStorage.getItem('providata-theme') : null
-    const initialBg = savedTheme === 'dark' ? '#0f172a' : '#f9fafb'
+  // Loading state
+  if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: initialBg }}>
+      <div className="dashboard-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Loader2 style={{ width: '32px', height: '32px', animation: 'spin 1s linear infinite', color: '#16a34a' }} />
       </div>
     )
   }
 
-  // Cores baseadas no tema
-  const bgColor = isDark ? '#0f172a' : '#f9fafb'
-  const cardBg = isDark ? '#1e293b' : '#ffffff'
-  const textColor = isDark ? '#f1f5f9' : '#111827'
-  const textMuted = isDark ? '#94a3b8' : '#6b7280'
-  const borderColor = isDark ? '#475569' : '#e5e7eb'
-  const mutedBg = isDark ? '#334155' : '#f1f5f9'
-
   return (
-    <div style={{ backgroundColor: bgColor, minHeight: '100vh', padding: '24px' }}>
+    <div className="dashboard-page">
       {/* Tour Overlay */}
       {showTour && (
         <div style={{

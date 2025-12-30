@@ -5,13 +5,57 @@
   background-color: var(--background) !important;
 }
 
-/* Forçar fundo escuro no dashboard */
-.dark .dashboard-content {
+/* Estilos do Dashboard que respondem ao tema */
+.dashboard-page {
+  background-color: #f9fafb !important;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.dark .dashboard-page {
   background-color: #0f172a !important;
 }
 
-.dashboard-content {
-  background-color: #f9fafb;
+.dashboard-card {
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.dark .dashboard-card {
+  background-color: #1e293b !important;
+  border: 1px solid #475569 !important;
+}
+
+.dashboard-text {
+  color: #111827 !important;
+}
+
+.dark .dashboard-text {
+  color: #f1f5f9 !important;
+}
+
+.dashboard-text-muted {
+  color: #6b7280 !important;
+}
+
+.dark .dashboard-text-muted {
+  color: #94a3b8 !important;
+}
+
+.dashboard-muted-bg {
+  background-color: #f1f5f9 !important;
+}
+
+.dark .dashboard-muted-bg {
+  background-color: #334155 !important;
+}
+
+.dashboard-border {
+  border-color: #e5e7eb !important;
+}
+
+.dark .dashboard-border {
+  border-color: #475569 !important;
 }
 
 .bg-card {
