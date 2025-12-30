@@ -20,9 +20,10 @@ import {
 import { toast } from 'sonner'
 
 // Tipos para o Google Maps
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
   interface Window {
-    google: typeof google
+    google: any
     initMap: () => void
   }
 }
@@ -68,9 +69,9 @@ export default function MapaCalorPage() {
   })
   
   const mapRef = useRef<HTMLDivElement>(null)
-  const mapInstanceRef = useRef<google.maps.Map | null>(null)
-  const heatmapRef = useRef<google.maps.visualization.HeatmapLayer | null>(null)
-  const markersRef = useRef<google.maps.Marker[]>([])
+  const mapInstanceRef = useRef<any>(null)
+  const heatmapRef = useRef<any>(null)
+  const markersRef = useRef<any[]>([])
   
   const { tenant } = useAuthStore()
   const supabase = createClient()
@@ -215,7 +216,7 @@ export default function MapaCalorPage() {
 
     // Se tiver providências com coordenadas, centralizar nelas
     if (providencias.length > 0) {
-      const bounds = new google.maps.LatLngBounds()
+      const bounds = new window.google.maps.LatLngBounds()
       providencias.forEach(p => {
         bounds.extend({ lat: p.latitude, lng: p.longitude })
       })
@@ -224,7 +225,7 @@ export default function MapaCalorPage() {
       centerLng = center.lng()
     }
 
-    const map = new google.maps.Map(mapRef.current, {
+    const map = new window.google.maps.Map(mapRef.current, {
       center: { lat: centerLat, lng: centerLng },
       zoom: zoom,
       mapTypeId: 'roadmap',
@@ -237,8 +238,8 @@ export default function MapaCalorPage() {
       ],
       mapTypeControl: true,
       mapTypeControlOptions: {
-        style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-        position: google.maps.ControlPosition.TOP_RIGHT
+        style: window.google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+        position: window.google.maps.ControlPosition.TOP_RIGHT
       },
       fullscreenControl: true,
       streetViewControl: false
@@ -249,11 +250,11 @@ export default function MapaCalorPage() {
     // Criar heatmap layer
     if (providencias.length > 0) {
       const heatmapData = providencias.map(p => ({
-        location: new google.maps.LatLng(p.latitude, p.longitude),
+        location: new window.google.maps.LatLng(p.latitude, p.longitude),
         weight: p.prioridade === 'urgente' ? 4 : p.prioridade === 'alta' ? 3 : p.prioridade === 'media' ? 2 : 1
       }))
 
-      const heatmap = new google.maps.visualization.HeatmapLayer({
+      const heatmap = new window.google.maps.visualization.HeatmapLayer({
         data: heatmapData,
         map: map,
         radius: 30,
@@ -306,7 +307,7 @@ export default function MapaCalorPage() {
     // Atualizar heatmap
     if (heatmapRef.current) {
       const heatmapData = filtradas.map(p => ({
-        location: new google.maps.LatLng(p.latitude, p.longitude),
+        location: new window.google.maps.LatLng(p.latitude, p.longitude),
         weight: p.prioridade === 'urgente' ? 4 : p.prioridade === 'alta' ? 3 : p.prioridade === 'media' ? 2 : 1
       }))
 
@@ -315,12 +316,12 @@ export default function MapaCalorPage() {
 
     // Adicionar marcadores
     filtradas.forEach(p => {
-      const marker = new google.maps.Marker({
+      const marker = new window.google.maps.Marker({
         position: { lat: p.latitude, lng: p.longitude },
         map: mapInstanceRef.current!,
         title: p.titulo,
         icon: {
-          path: google.maps.SymbolPath.CIRCLE,
+          path: window.google.maps.SymbolPath.CIRCLE,
           scale: 8,
           fillColor: getStatusColor(p.status),
           fillOpacity: 0.8,
@@ -329,7 +330,7 @@ export default function MapaCalorPage() {
         }
       })
 
-      const infoWindow = new google.maps.InfoWindow({
+      const infoWindow = new window.google.maps.InfoWindow({
         content: `
           <div style="padding: 8px; max-width: 300px;">
             <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">${p.titulo}</h3>
@@ -360,7 +361,7 @@ export default function MapaCalorPage() {
 
     // Ajustar bounds se tiver providências
     if (filtradas.length > 0) {
-      const bounds = new google.maps.LatLngBounds()
+      const bounds = new window.google.maps.LatLngBounds()
       filtradas.forEach(p => {
         bounds.extend({ lat: p.latitude, lng: p.longitude })
       })
@@ -414,9 +415,9 @@ export default function MapaCalorPage() {
       endereco += ', Brasil'
 
       try {
-        const geocoder = new google.maps.Geocoder()
-        const result = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
-          geocoder.geocode({ address: endereco }, (results, status) => {
+        const geocoder = new window.google.maps.Geocoder()
+        const result = await new Promise<any>((resolve, reject) => {
+          geocoder.geocode({ address: endereco }, (results: any, status: any) => {
             if (status === 'OK' && results) {
               resolve(results)
             } else {
