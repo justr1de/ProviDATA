@@ -264,46 +264,23 @@ export default function DashboardPage() {
 
       {/* Alertas */}
       {((stats?.atrasadas || 0) > 0 || (stats?.urgentes || 0) > 0) && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {(stats?.urgentes || 0) > 0 && (
-            <div style={{ 
-              backgroundColor: 'rgba(239, 68, 68, 0.05)', 
-              borderRadius: '12px', 
-              border: '1px solid rgba(239, 68, 68, 0.2)', 
-              padding: '20px' 
-            }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-                <div style={{ 
-                  width: '40px', 
-                  height: '40px', 
-                  borderRadius: '8px', 
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <AlertTriangle style={{ width: '20px', height: '20px', color: '#dc2626' }} />
+            <div className="bg-red-500/5 rounded-xl border border-red-500/20 p-5">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ fontWeight: '600', color: '#991b1b', margin: 0 }}>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-red-900 dark:text-red-400">
                     {stats?.urgentes} Providência(s) Urgente(s)
                   </h4>
-                  <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '4px' }}>
+                  <p className="text-sm text-red-600 mt-1">
                     Requerem atenção imediata
                   </p>
                 </div>
                 <Link href="/dashboard/providencias?prioridade=urgente">
-                  <button style={{ 
-                    padding: '6px 12px', 
-                    fontSize: '14px', 
-                    fontWeight: '500', 
-                    color: '#b91c1c', 
-                    border: '1px solid rgba(185, 28, 28, 0.3)', 
-                    borderRadius: '8px', 
-                    backgroundColor: 'transparent',
-                    cursor: 'pointer'
-                  }}>
+                  <button className="px-3 py-1.5 text-sm font-medium text-red-700 border border-red-700/30 rounded-lg hover:bg-red-500/10 transition-colors">
                     Ver
                   </button>
                 </Link>
@@ -311,44 +288,21 @@ export default function DashboardPage() {
             </div>
           )}
           {(stats?.atrasadas || 0) > 0 && (
-            <div style={{ 
-              backgroundColor: 'rgba(249, 115, 22, 0.05)', 
-              borderRadius: '12px', 
-              border: '1px solid rgba(249, 115, 22, 0.2)', 
-              padding: '20px' 
-            }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-                <div style={{ 
-                  width: '40px', 
-                  height: '40px', 
-                  borderRadius: '8px', 
-                  backgroundColor: 'rgba(249, 115, 22, 0.1)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <Clock style={{ width: '20px', height: '20px', color: '#ea580c' }} />
+            <div className="bg-orange-500/5 rounded-xl border border-orange-500/20 p-5">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5 text-orange-600" />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ fontWeight: '600', color: '#9a3412', margin: 0 }}>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-orange-900 dark:text-orange-400">
                     {stats?.atrasadas} Providência(s) Atrasada(s)
                   </h4>
-                  <p style={{ fontSize: '14px', color: '#ea580c', marginTop: '4px' }}>
+                  <p className="text-sm text-orange-600 mt-1">
                     Prazo vencido, verificar situação
                   </p>
                 </div>
                 <Link href="/dashboard/providencias?status=atrasadas">
-                  <button style={{ 
-                    padding: '6px 12px', 
-                    fontSize: '14px', 
-                    fontWeight: '500', 
-                    color: '#c2410c', 
-                    border: '1px solid rgba(194, 65, 12, 0.3)', 
-                    borderRadius: '8px', 
-                    backgroundColor: 'transparent',
-                    cursor: 'pointer'
-                  }}>
+                  <button className="px-3 py-1.5 text-sm font-medium text-orange-700 border border-orange-700/30 rounded-lg hover:bg-orange-500/10 transition-colors">
                     Ver
                   </button>
                 </Link>
@@ -361,37 +315,26 @@ export default function DashboardPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Gráfico de Barras */}
-        <div style={{ 
-          backgroundColor: 'var(--background)', 
-          borderRadius: '12px', 
-          border: '1px solid var(--border)', 
-          padding: '24px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
-            <BarChart3 style={{ width: '20px', height: '20px', color: 'var(--muted-foreground)' }} />
-            <h3 style={{ fontWeight: '600', color: 'var(--foreground)', margin: 0 }}>Providências por Status</h3>
+        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <BarChart3 className="w-5 h-5 text-[var(--muted-foreground)]" />
+            <h3 className="font-semibold text-[var(--foreground)]">Providências por Status</h3>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="flex flex-col gap-4">
             {statusData.map((item, index) => (
               <div key={index}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '14px', color: 'var(--foreground)' }}>{item.label}</span>
-                  <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)' }}>{item.value}</span>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-[var(--foreground)]">{item.label}</span>
+                  <span className="text-sm font-medium text-[var(--foreground)]">{item.value}</span>
                 </div>
-                <div style={{ 
-                  width: '100%', 
-                  height: '10px', 
-                  backgroundColor: 'var(--muted)', 
-                  borderRadius: '5px', 
-                  overflow: 'hidden' 
-                }}>
-                  <div style={{ 
-                    height: '100%', 
-                    width: `${(item.value / maxValue) * 100}%`, 
-                    backgroundColor: item.color, 
-                    borderRadius: '5px',
-                    transition: 'width 0.5s ease'
-                  }} />
+                <div className="w-full h-2.5 bg-[var(--muted)] rounded-full overflow-hidden">
+                  <div 
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ 
+                      width: `${(item.value / maxValue) * 100}%`, 
+                      backgroundColor: item.color 
+                    }} 
+                  />
                 </div>
               </div>
             ))}
@@ -399,19 +342,14 @@ export default function DashboardPage() {
         </div>
 
         {/* Gráfico de Pizza */}
-        <div style={{ 
-          backgroundColor: 'var(--background)', 
-          borderRadius: '12px', 
-          border: '1px solid var(--border)', 
-          padding: '24px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
-            <PieChart style={{ width: '20px', height: '20px', color: 'var(--muted-foreground)' }} />
-            <h3 style={{ fontWeight: '600', color: 'var(--foreground)', margin: 0 }}>Distribuição de Status</h3>
+        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <PieChart className="w-5 h-5 text-[var(--muted-foreground)]" />
+            <h3 className="font-semibold text-[var(--foreground)]">Distribuição de Status</h3>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ position: 'relative', width: '180px', height: '180px' }}>
-              <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
+          <div className="flex items-center justify-center">
+            <div className="relative w-44 h-44">
+              <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
                 {(() => {
                   const total = statusData.reduce((acc, item) => acc + item.value, 0) || 1
                   let currentAngle = 0
@@ -435,34 +373,28 @@ export default function DashboardPage() {
                         key={index}
                         d={`M 50 50 L ${x1} ${y1} A 40 40 0 ${largeArc} 1 ${x2} ${y2} Z`}
                         fill={item.color}
-                        style={{ cursor: 'pointer', transition: 'opacity 0.2s' }}
+                        className="cursor-pointer transition-opacity hover:opacity-80"
                       />
                     )
                   })
                 })()}
                 <circle cx="50" cy="50" r="25" fill="var(--background)" />
               </svg>
-              <div style={{ 
-                position: 'absolute', 
-                inset: 0, 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center' 
-              }}>
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--foreground)', margin: 0 }}>{totalProvidencias}</p>
-                  <p style={{ fontSize: '12px', color: 'var(--muted-foreground)' }}>Total</p>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-[var(--foreground)]">{totalProvidencias}</p>
+                  <p className="text-xs text-[var(--muted-foreground)]">Total</p>
                 </div>
               </div>
             </div>
           </div>
           {/* Legenda */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '24px' }}>
+          <div className="grid grid-cols-2 gap-2 mt-6">
             {statusData.map((item, index) => (
-              <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: item.color }} />
-                <span style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>{item.label}</span>
-                <span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--foreground)', marginLeft: 'auto' }}>{item.value}</span>
+              <div key={index} className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                <span className="text-xs text-[var(--muted-foreground)]">{item.label}</span>
+                <span className="text-xs font-medium text-[var(--foreground)] ml-auto">{item.value}</span>
               </div>
             ))}
           </div>
@@ -470,169 +402,95 @@ export default function DashboardPage() {
       </div>
 
       {/* Providências Recentes */}
-      <div style={{ 
-        backgroundColor: 'var(--background)', 
-        borderRadius: '12px', 
-        border: '1px solid var(--border)'
-      }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          padding: '20px 24px', 
-          borderBottom: '1px solid var(--border)' 
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FileText style={{ width: '20px', height: '20px', color: 'var(--muted-foreground)' }} />
-            <h3 style={{ fontWeight: '600', color: 'var(--foreground)', margin: 0 }}>Providências Recentes</h3>
+      <div className="bg-[var(--background)] rounded-xl border border-[var(--border)]">
+        <div className="flex items-center justify-between p-5 sm:px-6 border-b border-[var(--border)]">
+          <div className="flex items-center gap-2">
+            <FileText className="w-5 h-5 text-[var(--muted-foreground)]" />
+            <h3 className="font-semibold text-[var(--foreground)]">Providências Recentes</h3>
           </div>
           <Link href="/dashboard/providencias">
-            <button style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '4px', 
-              fontSize: '14px', 
-              color: '#16a34a', 
-              fontWeight: '500', 
-              background: 'none', 
-              border: 'none',
-              cursor: 'pointer'
-            }}>
+            <button className="flex items-center gap-1 text-sm text-green-600 font-medium hover:text-green-700 transition-colors">
               Ver Todas
-              <ArrowRight style={{ width: '16px', height: '16px' }} />
+              <ArrowRight className="w-4 h-4" />
             </button>
           </Link>
         </div>
         
         {recentProvidencias.length === 0 ? (
-          <div style={{ padding: '48px 24px', textAlign: 'center' }}>
-            <div style={{ 
-              width: '64px', 
-              height: '64px', 
-              borderRadius: '50%', 
-              backgroundColor: 'var(--muted)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              margin: '0 auto 16px' 
-            }}>
-              <FileText style={{ width: '32px', height: '32px', color: 'var(--muted-foreground)' }} />
+          <div className="py-12 px-6 text-center">
+            <div className="w-16 h-16 rounded-full bg-[var(--muted)] flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-8 h-8 text-[var(--muted-foreground)]" />
             </div>
-            <h4 style={{ fontWeight: '500', color: 'var(--foreground)', marginBottom: '8px' }}>Nenhuma providência cadastrada</h4>
-            <p style={{ fontSize: '14px', color: 'var(--muted-foreground)', marginBottom: '16px' }}>
+            <h4 className="font-medium text-[var(--foreground)] mb-2">Nenhuma providência cadastrada</h4>
+            <p className="text-sm text-[var(--muted-foreground)] mb-4">
               Comece cadastrando a primeira providência do gabinete
             </p>
             <Link href="/dashboard/providencias/nova">
-              <button style={{ 
-                display: 'inline-flex', 
-                alignItems: 'center', 
-                gap: '8px', 
-                padding: '8px 16px', 
-                backgroundColor: '#16a34a', 
-                color: 'white', 
-                fontSize: '14px', 
-                fontWeight: '500', 
-                borderRadius: '8px', 
-                border: 'none',
-                cursor: 'pointer'
-              }}>
-                <Plus style={{ width: '16px', height: '16px' }} />
+              <button className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
+                <Plus className="w-4 h-4" />
                 Nova Providência
               </button>
             </Link>
           </div>
         ) : (
-          <div>
-            {recentProvidencias.map((providencia, index) => (
+          <div className="divide-y divide-[var(--border)]">
+            {recentProvidencias.map((providencia) => (
               <Link
                 key={providencia.id}
                 href={`/dashboard/providencias/${providencia.id}`}
-                style={{ textDecoration: 'none' }}
+                className="block hover:bg-[var(--muted)]/50 transition-colors"
               >
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '16px', 
-                  padding: '16px 24px',
-                  borderBottom: index < recentProvidencias.length - 1 ? '1px solid var(--border)' : 'none',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s'
-                }}>
-                  <div style={{ 
-                    width: '4px', 
-                    height: '48px', 
-                    borderRadius: '2px', 
-                    backgroundColor: statusColors[providencia.status]?.replace('bg-', '') || '#6b7280'
-                  }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--muted-foreground)' }}>
+                <div className="flex items-center gap-4 p-4 sm:px-6">
+                  <div 
+                    className="w-1 h-12 rounded-sm shrink-0"
+                    style={{ backgroundColor: statusColors[providencia.status]?.replace('bg-', '') || '#6b7280' }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className="text-xs font-mono text-[var(--muted-foreground)]">
                         {providencia.numero_protocolo}
                       </span>
-                      <span style={{ 
-                        padding: '2px 8px', 
-                        fontSize: '11px', 
-                        fontWeight: '500', 
-                        borderRadius: '9999px',
-                        backgroundColor: priorityColors[providencia.prioridade]?.includes('gray') ? 'rgba(107, 114, 128, 0.1)' :
-                                        priorityColors[providencia.prioridade]?.includes('blue') ? 'rgba(59, 130, 246, 0.1)' :
-                                        priorityColors[providencia.prioridade]?.includes('orange') ? 'rgba(249, 115, 22, 0.1)' :
-                                        'rgba(239, 68, 68, 0.1)',
-                        color: priorityColors[providencia.prioridade]?.includes('gray') ? '#4b5563' :
-                               priorityColors[providencia.prioridade]?.includes('blue') ? '#2563eb' :
-                               priorityColors[providencia.prioridade]?.includes('orange') ? '#ea580c' :
-                               '#dc2626'
-                      }}>
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                        priorityColors[providencia.prioridade]?.includes('gray') ? 'bg-gray-500/10 text-gray-600' :
+                        priorityColors[providencia.prioridade]?.includes('blue') ? 'bg-blue-500/10 text-blue-600' :
+                        priorityColors[providencia.prioridade]?.includes('orange') ? 'bg-orange-500/10 text-orange-600' :
+                        'bg-red-500/10 text-red-600'
+                      }`}>
                         {priorityLabels[providencia.prioridade]}
                       </span>
                     </div>
-                    <h4 style={{ 
-                      fontWeight: '500', 
-                      color: 'var(--foreground)', 
-                      margin: 0,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}>
+                    <h4 className="font-medium text-[var(--foreground)] truncate">
                       {providencia.titulo}
                     </h4>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
+                    <div className="flex flex-wrap items-center gap-3 mt-1">
                       {providencia.cidadao && (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--muted-foreground)' }}>
-                          <Users style={{ width: '12px', height: '12px' }} />
+                        <span className="flex items-center gap-1 text-xs text-[var(--muted-foreground)]">
+                          <Users className="w-3 h-3" />
                           {providencia.cidadao.nome}
                         </span>
                       )}
                       {providencia.orgao_destino && (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--muted-foreground)' }}>
-                          <Building2 style={{ width: '12px', height: '12px' }} />
+                        <span className="flex items-center gap-1 text-xs text-[var(--muted-foreground)]">
+                          <Building2 className="w-3 h-3" />
                           {providencia.orgao_destino.sigla || providencia.orgao_destino.nome}
                         </span>
                       )}
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--muted-foreground)' }}>
-                        <Calendar style={{ width: '12px', height: '12px' }} />
+                      <span className="flex items-center gap-1 text-xs text-[var(--muted-foreground)]">
+                        <Calendar className="w-3 h-3" />
                         {format(new Date(providencia.created_at), "dd/MM/yyyy", { locale: ptBR })}
                       </span>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ 
-                      padding: '4px 12px', 
-                      fontSize: '12px', 
-                      fontWeight: '500', 
-                      borderRadius: '8px',
-                      backgroundColor: providencia.status === 'concluido' ? 'rgba(34, 197, 94, 0.1)' :
-                                      providencia.status === 'pendente' ? 'rgba(245, 158, 11, 0.1)' :
-                                      providencia.status === 'em_andamento' ? 'rgba(99, 102, 241, 0.1)' :
-                                      'rgba(107, 114, 128, 0.1)',
-                      color: providencia.status === 'concluido' ? '#16a34a' :
-                             providencia.status === 'pendente' ? '#d97706' :
-                             providencia.status === 'em_andamento' ? '#4f46e5' :
-                             '#4b5563'
-                    }}>
+                  <div className="hidden sm:flex items-center gap-3">
+                    <span className={`px-3 py-1 text-xs font-medium rounded-lg ${
+                      providencia.status === 'concluido' ? 'bg-green-500/10 text-green-600' :
+                      providencia.status === 'pendente' ? 'bg-amber-500/10 text-amber-600' :
+                      providencia.status === 'em_andamento' ? 'bg-indigo-500/10 text-indigo-600' :
+                      'bg-gray-500/10 text-gray-600'
+                    }`}>
                       {statusLabels[providencia.status]}
                     </span>
-                    <ArrowRight style={{ width: '16px', height: '16px', color: 'var(--muted-foreground)' }} />
+                    <ArrowRight className="w-4 h-4 text-[var(--muted-foreground)]" />
                   </div>
                 </div>
               </Link>
@@ -642,27 +500,23 @@ export default function DashboardPage() {
       </div>
 
       {/* Fonte dos Dados */}
-      <div style={{ 
-        backgroundColor: 'var(--muted)', 
-        borderRadius: '12px', 
-        padding: '16px 24px'
-      }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
+      <div className="bg-[var(--muted)] rounded-xl p-4 sm:px-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div>
-            <p style={{ fontSize: '11px', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Sistema</p>
-            <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)', margin: 0 }}>ProviDATA</p>
+            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide mb-1">Sistema</p>
+            <p className="text-sm font-medium text-[var(--foreground)]">ProviDATA</p>
           </div>
           <div>
-            <p style={{ fontSize: '11px', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Gabinete</p>
-            <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)', margin: 0 }}>{tenant?.parlamentar_name || 'Não definido'}</p>
+            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide mb-1">Gabinete</p>
+            <p className="text-sm font-medium text-[var(--foreground)]">{tenant?.parlamentar_name || 'Não definido'}</p>
           </div>
           <div>
-            <p style={{ fontSize: '11px', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Período</p>
-            <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)', margin: 0 }}>2024 - 2025</p>
+            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide mb-1">Período</p>
+            <p className="text-sm font-medium text-[var(--foreground)]">2024 - 2025</p>
           </div>
           <div>
-            <p style={{ fontSize: '11px', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Última Atualização</p>
-            <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)', margin: 0 }}>{format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide mb-1">Última Atualização</p>
+            <p className="text-sm font-medium text-[var(--foreground)]">{format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
           </div>
         </div>
       </div>
