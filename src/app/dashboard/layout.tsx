@@ -167,8 +167,9 @@ export default function DashboardLayout({
         />
       )}
 
-      {/* Sidebar - Sempre escura */}
+      {/* Sidebar - Tema responsivo */}
       <aside 
+        className="sidebar-theme"
         style={{
           position: 'fixed',
           top: 0,
@@ -178,10 +179,8 @@ export default function DashboardLayout({
           width: `${SIDEBAR_WIDTH}px`,
           transform: (isDesktop || sidebarOpen) ? 'translateX(0)' : 'translateX(-100%)',
           transition: 'transform 0.3s ease',
-          borderRight: '1px solid rgba(255,255,255,0.1)',
           display: 'flex',
-          flexDirection: 'column',
-          background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)'
+          flexDirection: 'column'
         }}
       >
         {/* Close button for mobile */}
@@ -205,9 +204,8 @@ export default function DashboardLayout({
         )}
 
         {/* Logo ProviDATA - Preenche todo o espaço sem fundo branco */}
-        <div style={{ 
+        <div className="sidebar-section" style={{ 
           padding: '12px 16px', 
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -232,15 +230,12 @@ export default function DashboardLayout({
         </div>
 
         {/* Tenant Info */}
-        <div style={{ 
-          padding: '16px 20px', 
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
-          background: 'rgba(22, 163, 74, 0.1)'
+        <div className="sidebar-tenant" style={{ 
+          padding: '16px 20px'
         }}>
-          <p style={{ 
+          <p className="sidebar-tenant-name" style={{ 
             fontSize: '15px', 
             fontWeight: '600', 
-            color: 'white',
             overflow: 'hidden', 
             textOverflow: 'ellipsis', 
             whiteSpace: 'nowrap', 
@@ -249,9 +244,8 @@ export default function DashboardLayout({
           }}>
             {tenant?.parlamentar_name || 'Carregando...'}
           </p>
-          <p style={{ 
+          <p className="sidebar-tenant-cargo" style={{ 
             fontSize: '13px', 
-            color: 'rgba(255,255,255,0.6)',
             overflow: 'hidden', 
             textOverflow: 'ellipsis', 
             whiteSpace: 'nowrap',
@@ -272,7 +266,7 @@ export default function DashboardLayout({
                   key={item.name}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`nav-button ${active ? 'active' : ''}`}
+                  className={`sidebar-nav-item ${active ? 'active' : ''}`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -282,21 +276,19 @@ export default function DashboardLayout({
                     fontSize: '15px',
                     fontWeight: active ? '600' : '500',
                     textDecoration: 'none',
-                    backgroundColor: active ? customPrimaryColor : 'rgba(255,255,255,0.05)',
-                    color: 'white',
-                    transition: 'all 0.3s ease',
-                    border: active ? 'none' : '1px solid rgba(255,255,255,0.1)'
+                    backgroundColor: active ? customPrimaryColor : undefined,
+                    transition: 'all 0.3s ease'
                   }}
                 >
-                  <div style={{
+                  <div className="sidebar-nav-icon" style={{
                     width: '36px',
                     height: '36px',
                     borderRadius: '10px',
-                    backgroundColor: active ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    transition: 'all 0.3s ease'
+                    transition: 'all 0.3s ease',
+                    backgroundColor: active ? 'rgba(255,255,255,0.2)' : undefined
                   }}>
                     <Icon style={{ width: '20px', height: '20px' }} />
                   </div>
@@ -308,12 +300,12 @@ export default function DashboardLayout({
         </nav>
 
         {/* Admin Section - Escondível */}
-        <div style={{ 
-          padding: '0 16px 16px', 
-          borderTop: '1px solid rgba(255,255,255,0.1)'
+        <div className="sidebar-admin-section" style={{ 
+          padding: '0 16px 16px'
         }}>
           <button
             onClick={() => setAdminExpanded(!adminExpanded)}
+            className="sidebar-admin-button"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -326,9 +318,6 @@ export default function DashboardLayout({
               fontWeight: '600',
               textTransform: 'uppercase',
               letterSpacing: '0.05em',
-              backgroundColor: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'rgba(255,255,255,0.7)',
               cursor: 'pointer',
               transition: 'all 0.3s ease'
             }}
@@ -361,7 +350,7 @@ export default function DashboardLayout({
                     key={item.name}
                     href={item.href}
                     onClick={() => setSidebarOpen(false)}
-                    className={`nav-button ${active ? 'active' : ''}`}
+                    className={`sidebar-nav-item ${active ? 'active' : ''}`}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -372,7 +361,6 @@ export default function DashboardLayout({
                       fontWeight: active ? '600' : '500',
                       textDecoration: 'none',
                       backgroundColor: active ? customPrimaryColor : 'transparent',
-                      color: 'white',
                       transition: 'all 0.3s ease'
                     }}
                   >
@@ -385,10 +373,9 @@ export default function DashboardLayout({
           )}
         </div>
 
-        {/* Footer - Logo DATA-RO visível, sem fundo branco - v2 */}
-        <div style={{ 
+        {/* Footer - Logo DATA-RO visível */}
+        <div className="sidebar-footer" style={{ 
           padding: '16px 20px', 
-          borderTop: '1px solid rgba(255,255,255,0.1)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
@@ -397,6 +384,7 @@ export default function DashboardLayout({
             href="https://dataro-it.com.br" 
             target="_blank" 
             rel="noopener noreferrer"
+            className="sidebar-footer-link"
             style={{ 
               display: 'flex',
               alignItems: 'center',
@@ -412,19 +400,17 @@ export default function DashboardLayout({
               height={32}
               style={{ 
                 objectFit: 'contain',
-                filter: 'brightness(1.2)',
                 flexShrink: 0
               }}
             />
-            <span style={{ 
+            <span className="sidebar-footer-text" style={{ 
               fontSize: '11px', 
-              color: 'rgba(255,255,255,0.7)',
               fontWeight: '500',
               whiteSpace: 'nowrap'
             }}>
               DATA-RO Inteligência Territorial
             </span>
-            <Copyright style={{ width: '12px', height: '12px', color: 'rgba(255,255,255,0.5)', flexShrink: 0 }} />
+            <Copyright className="sidebar-footer-icon" style={{ width: '12px', height: '12px', flexShrink: 0 }} />
           </a>
         </div>
       </aside>

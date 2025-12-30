@@ -598,3 +598,158 @@ input, textarea, select {
   border: 1px solid #475569 !important;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
+
+
+/* ========================================
+   SIDEBAR - TEMA RESPONSIVO
+   ======================================== */
+
+/* Sidebar container - Modo Claro */
+.sidebar-theme {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border-right: 1px solid #e2e8f0;
+}
+
+/* Sidebar container - Modo Escuro */
+.dark .sidebar-theme {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Seções da sidebar */
+.sidebar-section {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.dark .sidebar-section {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Tenant Info */
+.sidebar-tenant {
+  border-bottom: 1px solid #e2e8f0;
+  background: rgba(22, 163, 74, 0.05);
+}
+
+.dark .sidebar-tenant {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  background: rgba(22, 163, 74, 0.1);
+}
+
+.sidebar-tenant-name {
+  color: #1e293b;
+}
+
+.dark .sidebar-tenant-name {
+  color: white;
+}
+
+.sidebar-tenant-cargo {
+  color: #64748b;
+}
+
+.dark .sidebar-tenant-cargo {
+  color: rgba(255,255,255,0.6);
+}
+
+/* Itens de navegação */
+.sidebar-nav-item {
+  color: #334155;
+  background-color: rgba(0,0,0,0.03);
+  border: 1px solid #e2e8f0;
+}
+
+.sidebar-nav-item:hover {
+  background-color: rgba(22, 163, 74, 0.1) !important;
+  border-color: #16a34a;
+}
+
+.dark .sidebar-nav-item {
+  color: white;
+  background-color: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.dark .sidebar-nav-item:hover {
+  background-color: rgba(22, 163, 74, 0.2) !important;
+  border-color: rgba(22, 163, 74, 0.5);
+}
+
+.sidebar-nav-item.active {
+  color: white !important;
+  border: none !important;
+}
+
+/* Ícone de navegação */
+.sidebar-nav-icon {
+  background-color: rgba(0,0,0,0.05);
+}
+
+.dark .sidebar-nav-icon {
+  background-color: rgba(255,255,255,0.1);
+}
+
+/* Admin Section */
+.sidebar-admin-section {
+  border-top: 1px solid #e2e8f0;
+}
+
+.dark .sidebar-admin-section {
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-admin-button {
+  background-color: rgba(0,0,0,0.03);
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.sidebar-admin-button:hover {
+  background-color: rgba(22, 163, 74, 0.1);
+  border-color: #16a34a;
+}
+
+.dark .sidebar-admin-button {
+  background-color: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7);
+}
+
+.dark .sidebar-admin-button:hover {
+  background-color: rgba(22, 163, 74, 0.2);
+  border-color: rgba(22, 163, 74, 0.5);
+}
+
+/* Footer */
+.sidebar-footer {
+  border-top: 1px solid #e2e8f0;
+}
+
+.dark .sidebar-footer {
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-footer-text {
+  color: #64748b;
+}
+
+.dark .sidebar-footer-text {
+  color: rgba(255,255,255,0.7);
+}
+
+.sidebar-footer-icon {
+  color: #94a3b8;
+}
+
+.dark .sidebar-footer-icon {
+  color: rgba(255,255,255,0.5);
+}
+
+/* Close button mobile */
+.sidebar-theme button[style*="position: absolute"] {
+  color: #334155;
+}
+
+.dark .sidebar-theme button[style*="position: absolute"] {
+  color: white;
+}
