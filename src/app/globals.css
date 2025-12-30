@@ -58,6 +58,20 @@
   border-color: #475569 !important;
 }
 
+:root {
+  --muted-bg: #f1f5f9;
+  --border-color: #e5e7eb;
+  --text-color: #111827;
+  --text-muted: #6b7280;
+}
+
+.dark {
+  --muted-bg: #334155;
+  --border-color: #475569;
+  --text-color: #f1f5f9;
+  --text-muted: #94a3b8;
+}
+
 .bg-card {
   background-color: var(--card) !important;
 }
