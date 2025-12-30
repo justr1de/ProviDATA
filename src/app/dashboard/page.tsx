@@ -1094,10 +1094,10 @@ export default function DashboardPage() {
                         justifyContent: 'center',
                         backgroundColor: 'var(--card)',
                         borderRadius: '8px',
-                        bborder: '2px solid var(--border)'
+                        border: '2px solid var(--border)'
                       }}>
                         <div style={{ textAlign: 'center' }}>
-                          <ChartIcon style={{ width: '32px', height: '32px', color: borderColor, margin: '0 auto 8px' }} />
+                          <ChartIcon style={{ width: '32px', height: '32px', color: 'var(--text-muted)', margin: '0 auto 8px' }} />
                           <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Gráfico será renderizado aqui</p>
                         </div>
                       </div>
@@ -1118,7 +1118,7 @@ export default function DashboardPage() {
                 border: '1px dashed var(--border)'
               }}>
                 <div style={{ textAlign: 'center' }}>
-                  <Plus style={{ width: '40px', height: '40px', color: borderColor, margin: '0 auto 12px' }} />
+                  <Plus style={{ width: '40px', height: '40px', color: 'var(--text-muted)', margin: '0 auto 12px' }} />
                   <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: 0 }}>
                     Use o painel "Criar Gráfico" para adicionar visualizações personalizadas
                   </p>
@@ -1608,7 +1608,7 @@ export default function DashboardPage() {
                     backgroundColor: 'var(--muted-bg)',
                     borderRadius: '10px',
                     padding: '4px',
-                    border: `1px solid ${borderColor}`
+                    border: '1px solid var(--border)'
                   }}>
                     <input
                       type="text"
@@ -1656,7 +1656,7 @@ export default function DashboardPage() {
                     backgroundColor: '#faf5ff',
                     borderRadius: '10px',
                     padding: '14px',
-                    border: `1px solid ${borderColor}`
+                    border: '1px solid var(--border)'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                       <Zap style={{ width: '16px', height: '16px', color: '#7c3aed', flexShrink: 0, marginTop: '2px' }} />

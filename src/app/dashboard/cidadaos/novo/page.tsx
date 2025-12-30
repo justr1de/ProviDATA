@@ -170,235 +170,480 @@ function NovoCidadaoForm() {
     }
   }
 
+  // Estilos para cards com espaçamento profissional
+  const cardStyle = {
+    backgroundColor: 'var(--card)',
+    border: '1px solid var(--border)',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    marginBottom: '24px',
+  }
+
+  const cardHeaderStyle = {
+    padding: '20px 24px',
+    borderBottom: '1px solid var(--border)',
+    backgroundColor: 'var(--muted-bg)',
+  }
+
+  const cardContentStyle = {
+    padding: '24px',
+  }
+
+  const sectionTitleStyle = {
+    fontSize: '16px',
+    fontWeight: '600' as const,
+    color: 'var(--text-color)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    margin: 0,
+  }
+
+  const iconContainerStyle = {
+    width: '36px',
+    height: '36px',
+    borderRadius: '10px',
+    backgroundColor: '#dcfce7',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+
+  const gridStyle = (cols: number) => ({
+    display: 'grid',
+    gridTemplateColumns: `repeat(${cols}, 1fr)`,
+    gap: '20px',
+    marginBottom: '20px',
+  })
+
+  const inputGroupStyle = {
+    marginBottom: '20px',
+  }
+
+  const labelStyle = {
+    display: 'block',
+    fontSize: '14px',
+    fontWeight: '500' as const,
+    color: 'var(--text-color)',
+    marginBottom: '8px',
+  }
+
+  const inputStyle = {
+    width: '100%',
+    padding: '12px 16px',
+    fontSize: '14px',
+    border: '1px solid var(--border)',
+    borderRadius: '10px',
+    backgroundColor: 'var(--card)',
+    color: 'var(--text-color)',
+    outline: 'none',
+    transition: 'border-color 0.2s, box-shadow 0.2s',
+  }
+
+  const selectStyle = {
+    ...inputStyle,
+    appearance: 'none' as const,
+    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+    backgroundPosition: 'right 12px center',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: '20px',
+    paddingRight: '40px',
+  }
+
+  const textareaStyle = {
+    ...inputStyle,
+    minHeight: '120px',
+    resize: 'vertical' as const,
+  }
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 24px' }}>
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '16px', 
+        marginBottom: '32px',
+        paddingBottom: '24px',
+        borderBottom: '1px solid var(--border)'
+      }}>
         <Link href="/dashboard/cidadaos">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
+          <button style={{
+            width: '44px',
+            height: '44px',
+            borderRadius: '12px',
+            border: '1px solid var(--border)',
+            backgroundColor: 'var(--card)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}>
+            <ArrowLeft style={{ width: '20px', height: '20px', color: 'var(--text-color)' }} />
+          </button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">Novo Cidadão</h1>
-          <p className="text-[var(--muted-foreground)]">
+          <h1 style={{ 
+            fontSize: '28px', 
+            fontWeight: '700', 
+            color: 'var(--text-color)',
+            margin: '0 0 4px 0'
+          }}>
+            Novo Cidadão
+          </h1>
+          <p style={{ 
+            fontSize: '15px', 
+            color: 'var(--text-muted)',
+            margin: 0
+          }}>
             Cadastre um novo cidadão no sistema
           </p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit}>
         {/* Dados Pessoais */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <User className="w-5 h-5" />
+        <div style={cardStyle}>
+          <div style={cardHeaderStyle}>
+            <h2 style={sectionTitleStyle}>
+              <div style={iconContainerStyle}>
+                <User style={{ width: '18px', height: '18px', color: '#16a34a' }} />
+              </div>
               Dados Pessoais
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Input
-              name="nome"
-              label="Nome Completo *"
-              placeholder="Nome completo do cidadão"
-              value={formData.nome}
-              onChange={handleChange}
-              required
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Input
-                name="cpf"
-                label="CPF"
-                placeholder="000.000.000-00"
-                value={formData.cpf}
-                onChange={(e) => setFormData({ ...formData, cpf: formatCPF(e.target.value) })}
-                maxLength={14}
-              />
-              
-              <Input
-                name="rg"
-                label="RG"
-                placeholder="Número do RG"
-                value={formData.rg}
+            </h2>
+          </div>
+          <div style={cardContentStyle}>
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Nome Completo *</label>
+              <input
+                type="text"
+                name="nome"
+                placeholder="Nome completo do cidadão"
+                value={formData.nome}
                 onChange={handleChange}
-              />
-
-              <Input
-                type="date"
-                name="data_nascimento"
-                label="Data de Nascimento"
-                value={formData.data_nascimento}
-                onChange={handleChange}
+                required
+                style={inputStyle}
               />
             </div>
 
-            <Select
-              name="genero"
-              label="Gênero"
-              options={generoOptions}
-              value={formData.genero}
-              onChange={handleChange}
-            />
-          </CardContent>
-        </Card>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '20px' }}>
+              <div>
+                <label style={labelStyle}>CPF</label>
+                <input
+                  type="text"
+                  name="cpf"
+                  placeholder="000.000.000-00"
+                  value={formData.cpf}
+                  onChange={(e) => setFormData({ ...formData, cpf: formatCPF(e.target.value) })}
+                  maxLength={14}
+                  style={inputStyle}
+                />
+              </div>
+              
+              <div>
+                <label style={labelStyle}>RG</label>
+                <input
+                  type="text"
+                  name="rg"
+                  placeholder="Número do RG"
+                  value={formData.rg}
+                  onChange={handleChange}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div>
+                <label style={labelStyle}>Data de Nascimento</label>
+                <input
+                  type="date"
+                  name="data_nascimento"
+                  value={formData.data_nascimento}
+                  onChange={handleChange}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+
+            <div style={{ maxWidth: '300px' }}>
+              <label style={labelStyle}>Gênero</label>
+              <select
+                name="genero"
+                value={formData.genero}
+                onChange={handleChange}
+                style={selectStyle}
+              >
+                {generoOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
 
         {/* Contato */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Phone className="w-5 h-5" />
+        <div style={cardStyle}>
+          <div style={cardHeaderStyle}>
+            <h2 style={sectionTitleStyle}>
+              <div style={{...iconContainerStyle, backgroundColor: '#dbeafe'}}>
+                <Phone style={{ width: '18px', height: '18px', color: '#2563eb' }} />
+              </div>
               Contato
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Input
-              type="email"
-              name="email"
-              label="E-mail"
-              placeholder="email@exemplo.com"
-              value={formData.email}
-              onChange={handleChange}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                name="telefone"
-                label="Telefone"
-                placeholder="(00) 0000-0000"
-                value={formData.telefone}
-                onChange={(e) => setFormData({ ...formData, telefone: formatPhone(e.target.value) })}
-                maxLength={15}
-              />
-              
-              <Input
-                name="celular"
-                label="Celular"
-                placeholder="(00) 00000-0000"
-                value={formData.celular}
-                onChange={(e) => setFormData({ ...formData, celular: formatPhone(e.target.value) })}
-                maxLength={15}
+            </h2>
+          </div>
+          <div style={cardContentStyle}>
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>E-mail</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="email@exemplo.com"
+                value={formData.email}
+                onChange={handleChange}
+                style={inputStyle}
               />
             </div>
-          </CardContent>
-        </Card>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+              <div>
+                <label style={labelStyle}>Telefone</label>
+                <input
+                  type="text"
+                  name="telefone"
+                  placeholder="(00) 0000-0000"
+                  value={formData.telefone}
+                  onChange={(e) => setFormData({ ...formData, telefone: formatPhone(e.target.value) })}
+                  maxLength={15}
+                  style={inputStyle}
+                />
+              </div>
+              
+              <div>
+                <label style={labelStyle}>Celular</label>
+                <input
+                  type="text"
+                  name="celular"
+                  placeholder="(00) 00000-0000"
+                  value={formData.celular}
+                  onChange={(e) => setFormData({ ...formData, celular: formatPhone(e.target.value) })}
+                  maxLength={15}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Endereço */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <MapPin className="w-5 h-5" />
+        <div style={cardStyle}>
+          <div style={cardHeaderStyle}>
+            <h2 style={sectionTitleStyle}>
+              <div style={{...iconContainerStyle, backgroundColor: '#fef3c7'}}>
+                <MapPin style={{ width: '18px', height: '18px', color: '#d97706' }} />
+              </div>
               Endereço
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Input
+            </h2>
+          </div>
+          <div style={cardContentStyle}>
+            <div style={{ maxWidth: '200px', marginBottom: '20px' }}>
+              <label style={labelStyle}>CEP</label>
+              <input
+                type="text"
                 name="cep"
-                label="CEP"
                 placeholder="00000-000"
                 value={formData.cep}
                 onChange={(e) => setFormData({ ...formData, cep: formatCEP(e.target.value) })}
                 maxLength={9}
+                style={inputStyle}
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-3">
-                <Input
+            <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '20px', marginBottom: '20px' }}>
+              <div>
+                <label style={labelStyle}>Endereço</label>
+                <input
+                  type="text"
                   name="endereco"
-                  label="Endereço"
                   placeholder="Rua, Avenida, etc."
                   value={formData.endereco}
                   onChange={handleChange}
+                  style={inputStyle}
                 />
               </div>
-              <Input
-                name="numero"
-                label="Número"
-                placeholder="Nº"
-                value={formData.numero}
-                onChange={handleChange}
-              />
+              <div>
+                <label style={labelStyle}>Número</label>
+                <input
+                  type="text"
+                  name="numero"
+                  placeholder="Nº"
+                  value={formData.numero}
+                  onChange={handleChange}
+                  style={inputStyle}
+                />
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                name="complemento"
-                label="Complemento"
-                placeholder="Apto, Bloco, etc."
-                value={formData.complemento}
-                onChange={handleChange}
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '20px' }}>
+              <div>
+                <label style={labelStyle}>Complemento</label>
+                <input
+                  type="text"
+                  name="complemento"
+                  placeholder="Apto, Bloco, etc."
+                  value={formData.complemento}
+                  onChange={handleChange}
+                  style={inputStyle}
+                />
+              </div>
               
-              <Input
-                name="bairro"
-                label="Bairro"
-                placeholder="Nome do bairro"
-                value={formData.bairro}
-                onChange={handleChange}
-              />
+              <div>
+                <label style={labelStyle}>Bairro</label>
+                <input
+                  type="text"
+                  name="bairro"
+                  placeholder="Nome do bairro"
+                  value={formData.bairro}
+                  onChange={handleChange}
+                  style={inputStyle}
+                />
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-2">
-                <Input
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+              <div>
+                <label style={labelStyle}>Cidade</label>
+                <input
+                  type="text"
                   name="cidade"
-                  label="Cidade"
                   placeholder="Nome da cidade"
                   value={formData.cidade}
                   onChange={handleChange}
+                  style={inputStyle}
                 />
               </div>
-              <Select
-                name="uf"
-                label="UF"
-                options={ufOptions}
-                value={formData.uf}
-                onChange={handleChange}
-              />
+              <div>
+                <label style={labelStyle}>UF</label>
+                <select
+                  name="uf"
+                  value={formData.uf}
+                  onChange={handleChange}
+                  style={selectStyle}
+                >
+                  {ufOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Observações */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Observações</CardTitle>
-            <CardDescription>
+        <div style={cardStyle}>
+          <div style={cardHeaderStyle}>
+            <h2 style={sectionTitleStyle}>
+              <div style={{...iconContainerStyle, backgroundColor: '#f3e8ff'}}>
+                <Info style={{ width: '18px', height: '18px', color: '#7c3aed' }} />
+              </div>
+              Observações
+            </h2>
+            <p style={{ 
+              fontSize: '13px', 
+              color: 'var(--text-muted)', 
+              margin: '8px 0 0 46px' 
+            }}>
               Informações adicionais sobre o cidadão
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Textarea
+            </p>
+          </div>
+          <div style={cardContentStyle}>
+            <textarea
               name="observacoes"
               placeholder="Observações gerais..."
               value={formData.observacoes}
               onChange={handleChange}
+              style={textareaStyle}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* LGPD Notice */}
-        <div className="flex items-start gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
-          <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-blue-800 dark:text-blue-200">
+        <div style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '14px',
+          padding: '18px 20px',
+          borderRadius: '12px',
+          backgroundColor: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          marginBottom: '28px',
+        }}>
+          <Info style={{ 
+            width: '20px', 
+            height: '20px', 
+            color: '#2563eb', 
+            flexShrink: 0, 
+            marginTop: '2px' 
+          }} />
+          <p style={{ 
+            fontSize: '14px', 
+            color: '#1e40af', 
+            lineHeight: '1.6',
+            margin: 0
+          }}>
             Os dados pessoais coletados serão tratados de acordo com a Lei Geral de Proteção de Dados (LGPD) 
             e utilizados exclusivamente para o registro e acompanhamento de providências parlamentares.
           </p>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-4">
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          gap: '16px',
+          paddingTop: '8px',
+          paddingBottom: '40px',
+        }}>
           <Link href="/dashboard/cidadaos">
-            <Button type="button" variant="outline">
+            <button
+              type="button"
+              style={{
+                padding: '12px 24px',
+                fontSize: '14px',
+                fontWeight: '600',
+                borderRadius: '10px',
+                border: '1px solid var(--border)',
+                backgroundColor: 'var(--card)',
+                color: 'var(--text-color)',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
               Cancelar
-            </Button>
+            </button>
           </Link>
-          <Button type="submit" isLoading={isLoading}>
-            <Save className="w-4 h-4" />
-            Cadastrar Cidadão
-          </Button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 28px',
+              fontSize: '14px',
+              fontWeight: '600',
+              borderRadius: '10px',
+              border: 'none',
+              backgroundColor: '#16a34a',
+              color: 'white',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              opacity: isLoading ? 0.7 : 1,
+              transition: 'all 0.2s',
+            }}
+          >
+            <Save style={{ width: '18px', height: '18px' }} />
+            {isLoading ? 'Cadastrando...' : 'Cadastrar Cidadão'}
+          </button>
         </div>
       </form>
     </div>
@@ -407,7 +652,17 @@ function NovoCidadaoForm() {
 
 export default function NovoCidadaoPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-64">Carregando...</div>}>
+    <Suspense fallback={
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        height: '400px',
+        color: 'var(--text-muted)'
+      }}>
+        Carregando...
+      </div>
+    }>
       <NovoCidadaoForm />
     </Suspense>
   )
