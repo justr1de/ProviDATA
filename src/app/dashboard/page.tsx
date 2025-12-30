@@ -352,7 +352,7 @@ export default function DashboardPage() {
           justifyContent: 'center'
         }}>
           <div style={{
-            backgroundColor: 'white',
+            backgroundColor: 'var(--card)',
             borderRadius: '20px',
             padding: '32px',
             maxWidth: '500px',
@@ -411,7 +411,7 @@ export default function DashboardPage() {
                   fontWeight: '600',
                   borderRadius: '10px',
                   border: '1px solid var(--border)',
-                  backgroundColor: 'white',
+                  backgroundColor: 'var(--card)',
                   color: 'var(--foreground-muted)',
                   cursor: 'pointer'
                 }}
@@ -427,8 +427,8 @@ export default function DashboardPage() {
                     fontWeight: '600',
                     borderRadius: '10px',
                     border: '1px solid var(--border)',
-                    backgroundColor: 'white',
-                    color: '#374151',
+                    backgroundColor: 'var(--card)',
+                    color: 'var(--foreground-secondary)',
                     cursor: 'pointer'
                   }}
                 >
@@ -519,7 +519,7 @@ export default function DashboardPage() {
                     borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: '500',
-                    color: '#374151',
+                    color: 'var(--foreground-secondary)',
                     cursor: 'pointer'
                   }}
                 >
@@ -536,7 +536,7 @@ export default function DashboardPage() {
                     border: '1px solid var(--border)',
                     borderRadius: '8px',
                     fontWeight: '500',
-                    color: '#374151',
+                    color: 'var(--foreground-secondary)',
                     cursor: 'pointer'
                   }}
                 >
@@ -799,7 +799,7 @@ export default function DashboardPage() {
             <div style={{ 
               width: '100%', 
               height: '12px', 
-              backgroundColor: '#e5e7eb', 
+              backgroundColor: 'var(--border)', 
               borderRadius: '6px',
               overflow: 'hidden'
             }}>
@@ -896,7 +896,7 @@ export default function DashboardPage() {
                   {chartData.map((item) => (
                     <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <span style={{ width: '90px', fontSize: '13px', fontWeight: '500', color: 'var(--foreground-secondary)' }}>{item.label}</span>
-                      <div style={{ flex: 1, height: '20px', backgroundColor: '#e5e7eb', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ flex: 1, height: '20px', backgroundColor: 'var(--border)', borderRadius: '4px', overflow: 'hidden' }}>
                         <div style={{ 
                           height: '100%', 
                           borderRadius: '4px',
@@ -981,7 +981,7 @@ export default function DashboardPage() {
                 gridTemplateColumns: 'repeat(2, 1fr)',
                 gap: '24px',
                 paddingTop: '24px',
-                borderTop: '1px dashed #d1d5db'
+                borderTop: '1px dashed var(--border)'
               }}>
                 {customCharts.map((chart) => {
                   const ChartIcon = chartTypes.find(t => t.id === chart.type)?.icon || PieChart
@@ -1030,12 +1030,12 @@ export default function DashboardPage() {
                         display: 'flex', 
                         alignItems: 'center', 
                         justifyContent: 'center',
-                        backgroundColor: 'white',
+                        backgroundColor: 'var(--card)',
                         borderRadius: '8px',
                         bborder: '2px solid var(--border)'
                       }}>
                         <div style={{ textAlign: 'center' }}>
-                          <ChartIcon style={{ width: '32px', height: '32px', color: '#d1d5db', margin: '0 auto 8px' }} />
+                          <ChartIcon style={{ width: '32px', height: '32px', color: 'var(--border)', margin: '0 auto 8px' }} />
                           <p style={{ fontSize: '12px', color: 'var(--foreground-muted)' }}>Gráfico será renderizado aqui</p>
                         </div>
                       </div>
@@ -1053,10 +1053,10 @@ export default function DashboardPage() {
                 justifyContent: 'center',
                 padding: '40px',
                 marginTop: '24px',
-                borderTop: '1px dashed #d1d5db'
+                border: '1px dashed var(--border)'
               }}>
                 <div style={{ textAlign: 'center' }}>
-                  <Plus style={{ width: '40px', height: '40px', color: '#d1d5db', margin: '0 auto 12px' }} />
+                  <Plus style={{ width: '40px', height: '40px', color: 'var(--border)', margin: '0 auto 12px' }} />
                   <p style={{ fontSize: '14px', color: 'var(--foreground-muted)', margin: 0 }}>
                     Use o painel "Criar Gráfico" para adicionar visualizações personalizadas
                   </p>
@@ -1274,7 +1274,7 @@ export default function DashboardPage() {
                     display: 'block', 
                     fontSize: '12px', 
                     fontWeight: '600', 
-                    color: '#374151',
+                    color: 'var(--foreground-secondary)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     marginBottom: '12px'
@@ -1320,7 +1320,7 @@ export default function DashboardPage() {
                     display: 'block', 
                     fontSize: '12px', 
                     fontWeight: '600', 
-                    color: '#374151',
+                    color: 'var(--foreground-secondary)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     marginBottom: '8px'
@@ -1337,7 +1337,7 @@ export default function DashboardPage() {
                       backgroundColor: 'var(--muted)',
                       border: '1px solid var(--border)',
                       borderRadius: '8px',
-                      color: '#374151'
+                      color: 'var(--foreground-secondary)'
                     }}
                   >
                     <optgroup label="Providências">
@@ -1364,7 +1364,7 @@ export default function DashboardPage() {
                     display: 'block', 
                     fontSize: '12px', 
                     fontWeight: '600', 
-                    color: '#374151',
+                    color: 'var(--foreground-secondary)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     marginBottom: '8px'
@@ -1381,7 +1381,7 @@ export default function DashboardPage() {
                       backgroundColor: 'var(--muted)',
                       border: '1px solid var(--border)',
                       borderRadius: '8px',
-                      color: '#374151'
+                      color: 'var(--foreground-secondary)'
                     }}
                   >
                     <option value="quantidade">Quantidade</option>
@@ -1395,7 +1395,7 @@ export default function DashboardPage() {
                     display: 'block', 
                     fontSize: '12px', 
                     fontWeight: '600', 
-                    color: '#374151',
+                    color: 'var(--foreground-secondary)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     marginBottom: '8px'
@@ -1414,7 +1414,7 @@ export default function DashboardPage() {
                         backgroundColor: 'var(--muted)',
                         border: '1px solid var(--border)',
                         borderRadius: '8px',
-                        color: '#374151'
+                        color: 'var(--foreground-secondary)'
                       }}
                     />
                     <input
@@ -1428,7 +1428,7 @@ export default function DashboardPage() {
                         backgroundColor: 'var(--muted)',
                         border: '1px solid var(--border)',
                         borderRadius: '8px',
-                        color: '#374151'
+                        color: 'var(--foreground-secondary)'
                       }}
                     />
                   </div>
@@ -1560,7 +1560,7 @@ export default function DashboardPage() {
                         backgroundColor: 'transparent',
                         border: 'none',
                         outline: 'none',
-                        color: '#374151'
+                        color: 'var(--foreground-secondary)'
                       }}
                       onKeyPress={(e) => e.key === 'Enter' && handleAiQuery()}
                     />
