@@ -119,12 +119,16 @@ export default function DashboardLayout({
     return pathname.startsWith(href)
   }
 
-  // Estilos CSS para efeito de brilho
+  // Estilos CSS para efeito de brilho e animação de spin
   const glowStyle = `
     @keyframes glow {
       0% { box-shadow: 0 0 5px rgba(22, 163, 74, 0.3); }
       50% { box-shadow: 0 0 20px rgba(22, 163, 74, 0.6), 0 0 30px rgba(22, 163, 74, 0.4); }
       100% { box-shadow: 0 0 5px rgba(22, 163, 74, 0.3); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
     .nav-button:hover:not(.active) {
       animation: glow 1.5s ease-in-out infinite;
@@ -163,9 +167,8 @@ export default function DashboardLayout({
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Sempre escura */}
       <aside 
-        className="sidebar-themed"
         style={{
           position: 'fixed',
           top: 0,
@@ -174,9 +177,8 @@ export default function DashboardLayout({
           height: '100%',
           width: `${SIDEBAR_WIDTH}px`,
           transform: (isDesktop || sidebarOpen) ? 'translateX(0)' : 'translateX(-100%)',
-          transition: 'transform 0.3s ease, background-color 0.3s ease',
-          borderRightWidth: '1px',
-          borderRightStyle: 'solid',
+          transition: 'transform 0.3s ease',
+          borderRight: '1px solid rgba(255,255,255,0.1)',
           display: 'flex',
           flexDirection: 'column',
           background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)'
@@ -202,23 +204,25 @@ export default function DashboardLayout({
           </button>
         )}
 
-        {/* Logo ProviDATA - Maior e sem caixa branca */}
+        {/* Logo ProviDATA - Sem fundo branco, preenche o espaço */}
         <div style={{ 
-          padding: '24px 20px', 
+          padding: '20px', 
           borderBottom: '1px solid rgba(255,255,255,0.1)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
-          <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+          <Link href="/dashboard" style={{ display: 'block', textDecoration: 'none', width: '100%' }}>
             <Image
               src="/providata-logo-final.png"
               alt="ProviDATA"
-              width={180}
-              height={60}
+              width={240}
+              height={70}
               style={{ 
+                width: '100%',
+                height: 'auto',
                 objectFit: 'contain',
-                filter: 'brightness(1.1) drop-shadow(0 2px 8px rgba(22, 163, 74, 0.3))'
+                filter: 'drop-shadow(0 2px 8px rgba(22, 163, 74, 0.3))'
               }}
               priority
             />
@@ -238,7 +242,8 @@ export default function DashboardLayout({
             overflow: 'hidden', 
             textOverflow: 'ellipsis', 
             whiteSpace: 'nowrap', 
-            marginBottom: '4px' 
+            marginBottom: '4px',
+            margin: 0
           }}>
             {tenant?.parlamentar_name || 'Carregando...'}
           </p>
@@ -247,7 +252,8 @@ export default function DashboardLayout({
             color: 'rgba(255,255,255,0.6)',
             overflow: 'hidden', 
             textOverflow: 'ellipsis', 
-            whiteSpace: 'nowrap' 
+            whiteSpace: 'nowrap',
+            margin: '4px 0 0 0'
           }}>
             {tenant?.cargo?.replace('_', ' ') || 'deputado estadual'}
           </p>
@@ -377,14 +383,13 @@ export default function DashboardLayout({
           )}
         </div>
 
-        {/* Footer - Logo DATA-RO centralizada com Copyright */}
+        {/* Footer - Logo DATA-RO visível, sem quebra de linha */}
         <div style={{ 
-          padding: '20px', 
+          padding: '16px 20px', 
           borderTop: '1px solid rgba(255,255,255,0.1)',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: '12px'
+          justifyContent: 'center'
         }}>
           <a 
             href="https://dataro-it.com.br" 
@@ -393,36 +398,39 @@ export default function DashboardLayout({
             style={{ 
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              textDecoration: 'none'
+              gap: '10px',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap'
             }}
           >
             <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
+              width: '28px',
+              height: '28px',
+              borderRadius: '6px',
               backgroundColor: 'white',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              flexShrink: 0
             }}>
               <Image
                 src="/dataro-logo.png"
                 alt="DATA-RO"
-                width={24}
-                height={24}
+                width={20}
+                height={20}
                 style={{ objectFit: 'contain' }}
               />
             </div>
             <span style={{ 
-              fontSize: '12px', 
+              fontSize: '11px', 
               color: 'rgba(255,255,255,0.6)',
-              fontWeight: '500'
+              fontWeight: '500',
+              whiteSpace: 'nowrap'
             }}>
               DATA-RO Inteligência Territorial
             </span>
-            <Copyright style={{ width: '14px', height: '14px', color: 'rgba(255,255,255,0.4)' }} />
+            <Copyright style={{ width: '12px', height: '12px', color: 'rgba(255,255,255,0.4)', flexShrink: 0 }} />
           </a>
         </div>
       </aside>
@@ -435,10 +443,10 @@ export default function DashboardLayout({
           display: 'flex',
           flexDirection: 'column',
           transition: 'margin-left 0.3s ease',
-          backgroundColor: customBgImage ? 'rgba(var(--background-rgb), 0.95)' : 'transparent'
+          backgroundColor: 'var(--background)'
         }}
       >
-        {/* Header */}
+        {/* Header - Cores padronizadas */}
         <header 
           style={{
             position: 'sticky',
@@ -544,10 +552,10 @@ export default function DashboardLayout({
                       overflow: 'hidden'
                     }}>
                       <div style={{ padding: '16px', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--muted)' }}>
-                        <p style={{ fontSize: '15px', fontWeight: '600', color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <p style={{ fontSize: '15px', fontWeight: '600', color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
                           {user?.nome || 'Usuário'}
                         </p>
-                        <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
+                        <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: '2px 0 0 0' }}>
                           {user?.email}
                         </p>
                       </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/store/auth-store'
 import { 
   Shield, 
   Users, 
@@ -14,7 +15,11 @@ import {
   Mail,
   CheckCircle,
   XCircle,
-  AlertTriangle
+  AlertTriangle,
+  X,
+  Loader2,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -33,12 +38,28 @@ const tabs = [
   { id: 'seguranca', name: 'Segurança', icon: Key },
 ]
 
+const roleOptions = [
+  { value: 'user', label: 'Usuário' },
+  { value: 'admin', label: 'Administrador' },
+  { value: 'super_admin', label: 'Super Admin' },
+]
+
 export default function AdministracaoPage() {
   const [activeTab, setActiveTab] = useState('usuarios')
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [showNewUserModal, setShowNewUserModal] = useState(false)
+  const [savingUser, setSavingUser] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  
+  // Form state
+  const [newUserName, setNewUserName] = useState('')
+  const [newUserEmail, setNewUserEmail] = useState('')
+  const [newUserPassword, setNewUserPassword] = useState('')
+  const [newUserRole, setNewUserRole] = useState('user')
+  
   const supabase = createClient()
+  const { tenant } = useAuthStore()
 
   useEffect(() => {
     loadUsers()
@@ -69,6 +90,88 @@ export default function AdministracaoPage() {
     } else {
       toast.error('Erro ao atualizar status do usuário')
     }
+  }
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!newUserName || !newUserEmail || !newUserPassword) {
+      toast.error('Preencha todos os campos obrigatórios')
+      return
+    }
+
+    if (newUserPassword.length < 6) {
+      toast.error('A senha deve ter no mínimo 6 caracteres')
+      return
+    }
+
+    setSavingUser(true)
+
+    try {
+      // Criar usuário no Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: newUserEmail,
+        password: newUserPassword,
+        options: {
+          data: {
+            nome: newUserName,
+          }
+        }
+      })
+
+      if (authError) {
+        console.error('Auth error:', authError)
+        if (authError.message.includes('already registered')) {
+          toast.error('Este e-mail já está cadastrado')
+        } else {
+          toast.error(`Erro ao criar usuário: ${authError.message}`)
+        }
+        setSavingUser(false)
+        return
+      }
+
+      if (authData.user) {
+        // Criar registro na tabela users
+        const { error: userError } = await supabase
+          .from('users')
+          .insert({
+            id: authData.user.id,
+            tenant_id: tenant?.id,
+            nome: newUserName,
+            email: newUserEmail,
+            role: newUserRole,
+            ativo: true
+          })
+
+        if (userError) {
+          console.error('User table error:', userError)
+          toast.error('Usuário criado no auth, mas houve erro ao salvar dados adicionais')
+        } else {
+          toast.success('Usuário criado com sucesso!')
+          setShowNewUserModal(false)
+          resetForm()
+          loadUsers()
+        }
+      }
+    } catch (error) {
+      console.error('Create user error:', error)
+      toast.error('Erro ao criar usuário')
+    } finally {
+      setSavingUser(false)
+    }
+  }
+
+  const resetForm = () => {
+    setNewUserName('')
+    setNewUserEmail('')
+    setNewUserPassword('')
+    setNewUserRole('user')
+    setShowPassword(false)
+  }
+
+  const closeModal = () => {
+    setShowNewUserModal(false)
+    resetForm()
   }
 
   return (
@@ -170,6 +273,7 @@ export default function AdministracaoPage() {
                   {loading ? (
                     <tr>
                       <td colSpan={5} style={{ padding: '40px', textAlign: 'center', color: 'var(--foreground-muted)' }}>
+                        <Loader2 style={{ width: '24px', height: '24px', animation: 'spin 1s linear infinite', margin: '0 auto 8px' }} />
                         Carregando usuários...
                       </td>
                     </tr>
@@ -213,12 +317,14 @@ export default function AdministracaoPage() {
                           <span style={{
                             padding: '6px 12px',
                             borderRadius: '6px',
-                            backgroundColor: user.role === 'superadmin' ? 'rgba(139, 92, 246, 0.1)' : 'var(--muted)',
-                            color: user.role === 'superadmin' ? '#8b5cf6' : 'var(--foreground)',
+                            backgroundColor: user.role === 'super_admin' ? 'rgba(139, 92, 246, 0.1)' : 
+                                           user.role === 'admin' ? 'rgba(59, 130, 246, 0.1)' : 'var(--muted)',
+                            color: user.role === 'super_admin' ? '#8b5cf6' : 
+                                   user.role === 'admin' ? '#3b82f6' : 'var(--foreground)',
                             fontSize: '13px',
                             fontWeight: '500'
                           }}>
-                            {user.role === 'superadmin' ? 'Super Admin' : user.role === 'admin' ? 'Administrador' : 'Usuário'}
+                            {user.role === 'super_admin' ? 'Super Admin' : user.role === 'admin' ? 'Administrador' : 'Usuário'}
                           </span>
                         </td>
                         <td style={{ padding: '16px', textAlign: 'center' }}>
@@ -304,7 +410,6 @@ export default function AdministracaoPage() {
             </h2>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* Security Options */}
               <div style={{
                 padding: '20px',
                 borderRadius: '12px',
@@ -399,6 +504,284 @@ export default function AdministracaoPage() {
           </div>
         )}
       </div>
+
+      {/* Modal Novo Usuário */}
+      {showNewUserModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 100,
+          padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: 'var(--card)',
+            borderRadius: '20px',
+            width: '100%',
+            maxWidth: '480px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            border: '1px solid var(--border)'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '24px',
+              borderBottom: '1px solid var(--border)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '12px',
+                  backgroundColor: 'var(--primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <UserPlus style={{ width: '22px', height: '22px', color: 'white' }} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>
+                    Novo Usuário
+                  </h2>
+                  <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', margin: 0 }}>
+                    Adicione um novo membro ao gabinete
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={closeModal}
+                style={{
+                  padding: '8px',
+                  borderRadius: '8px',
+                  backgroundColor: 'var(--muted)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--foreground-muted)'
+                }}
+              >
+                <X style={{ width: '20px', height: '20px' }} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleCreateUser}>
+              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* Nome */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: 'var(--foreground)',
+                    marginBottom: '8px'
+                  }}>
+                    Nome Completo *
+                  </label>
+                  <input
+                    type="text"
+                    value={newUserName}
+                    onChange={(e) => setNewUserName(e.target.value)}
+                    placeholder="Digite o nome completo"
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      fontSize: '15px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: 'var(--foreground)',
+                    marginBottom: '8px'
+                  }}>
+                    E-mail *
+                  </label>
+                  <input
+                    type="email"
+                    value={newUserEmail}
+                    onChange={(e) => setNewUserEmail(e.target.value)}
+                    placeholder="usuario@email.com"
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      fontSize: '15px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                {/* Senha */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: 'var(--foreground)',
+                    marginBottom: '8px'
+                  }}>
+                    Senha *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={newUserPassword}
+                      onChange={(e) => setNewUserPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      required
+                      minLength={6}
+                      style={{
+                        width: '100%',
+                        padding: '12px 48px 12px 16px',
+                        fontSize: '15px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--border)',
+                        backgroundColor: 'var(--background)',
+                        color: 'var(--foreground)',
+                        outline: 'none'
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        padding: '4px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: 'var(--foreground-muted)'
+                      }}
+                    >
+                      {showPassword ? <EyeOff style={{ width: '18px', height: '18px' }} /> : <Eye style={{ width: '18px', height: '18px' }} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Role */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: 'var(--foreground)',
+                    marginBottom: '8px'
+                  }}>
+                    Função
+                  </label>
+                  <select
+                    value={newUserRole}
+                    onChange={(e) => setNewUserRole(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      fontSize: '15px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {roleOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                padding: '20px 24px',
+                borderTop: '1px solid var(--border)',
+                backgroundColor: 'var(--muted)'
+              }}>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  disabled={savingUser}
+                  style={{
+                    flex: 1,
+                    padding: '12px 20px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    borderRadius: '10px',
+                    border: '1px solid var(--border)',
+                    backgroundColor: 'var(--background)',
+                    color: 'var(--foreground)',
+                    cursor: savingUser ? 'not-allowed' : 'pointer',
+                    opacity: savingUser ? 0.5 : 1
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingUser}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '12px 20px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    borderRadius: '10px',
+                    border: 'none',
+                    backgroundColor: 'var(--primary)',
+                    color: 'white',
+                    cursor: savingUser ? 'not-allowed' : 'pointer',
+                    opacity: savingUser ? 0.7 : 1
+                  }}
+                >
+                  {savingUser ? (
+                    <>
+                      <Loader2 style={{ width: '18px', height: '18px', animation: 'spin 1s linear infinite' }} />
+                      Criando...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus style={{ width: '18px', height: '18px' }} />
+                      Criar Usuário
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
