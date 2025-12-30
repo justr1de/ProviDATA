@@ -242,7 +242,7 @@ export default function DashboardLayout({
             marginBottom: '4px',
             margin: 0
           }}>
-            {tenant?.parlamentar_name || 'Carregando...'}
+            {tenant ? `Gabinete do ${(tenant.cargo?.replace('_', ' ') || 'deputado estadual').charAt(0).toUpperCase() + (tenant.cargo?.replace('_', ' ') || 'deputado estadual').slice(1)} ${tenant.parlamentar_name}` : 'Carregando...'}
           </p>
           <p className="sidebar-tenant-cargo" style={{ 
             fontSize: '13px', 
@@ -251,7 +251,10 @@ export default function DashboardLayout({
             whiteSpace: 'nowrap',
             margin: '4px 0 0 0'
           }}>
-            {tenant?.cargo?.replace('_', ' ') || 'deputado estadual'}
+            {(() => {
+              const cargo = tenant?.cargo?.replace('_', ' ') || 'deputado estadual';
+              return cargo.charAt(0).toUpperCase() + cargo.slice(1);
+            })()}
           </p>
         </div>
 
