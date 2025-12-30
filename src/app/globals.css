@@ -1,5 +1,26 @@
 @import "tailwindcss";
 
+/* Classes utilitárias para tema */
+.bg-background {
+  background-color: var(--background) !important;
+}
+
+.bg-card {
+  background-color: var(--card) !important;
+}
+
+.text-foreground {
+  color: var(--foreground) !important;
+}
+
+.text-foreground-muted {
+  color: var(--foreground-muted) !important;
+}
+
+.border-default {
+  border-color: var(--border) !important;
+}
+
 /* Reset básico */
 * {
   box-sizing: border-box;

@@ -335,11 +335,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div style={{ 
-      backgroundColor: 'var(--background)',
-      minHeight: '100vh',
-      padding: '24px'
-    }}>
+    <div className="min-h-screen p-6 bg-background">
       {/* Tour Overlay */}
       {showTour && (
         <div style={{
