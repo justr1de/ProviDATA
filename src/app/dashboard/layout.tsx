@@ -19,11 +19,12 @@ import {
   Menu,
   X,
   ChevronDown,
+  ChevronUp,
   User,
   FileBarChart,
   Shield,
   Palette,
-  ImageIcon
+  Copyright
 } from 'lucide-react'
 import { Toaster } from 'sonner'
 
@@ -38,7 +39,7 @@ const navigation = [
   { name: 'Relatórios', href: '/dashboard/relatorios', icon: FileBarChart },
 ]
 
-const bottomNavigation = [
+const adminNavigation = [
   { name: 'Notificações', href: '/dashboard/notificacoes', icon: Bell },
   { name: 'Administração', href: '/dashboard/administracao', icon: Shield },
   { name: 'Configurações', href: '/dashboard/configuracoes', icon: Settings },
@@ -51,6 +52,7 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [adminExpanded, setAdminExpanded] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
   const [customBgImage, setCustomBgImage] = useState<string | null>(null)
   const [customPrimaryColor, setCustomPrimaryColor] = useState('#16a34a')
@@ -60,7 +62,6 @@ export default function DashboardLayout({
   
   const { user, tenant, setUser, setTenant, reset } = useAuthStore()
 
-  // Detectar largura da tela
   useEffect(() => {
     const checkWidth = () => {
       setIsDesktop(window.innerWidth >= 768)
@@ -71,7 +72,6 @@ export default function DashboardLayout({
     return () => window.removeEventListener('resize', checkWidth)
   }, [])
 
-  // Carregar configurações de personalização
   useEffect(() => {
     const savedBgImage = localStorage.getItem('providata-bg-image')
     const savedPrimaryColor = localStorage.getItem('providata-primary-color')
@@ -119,6 +119,22 @@ export default function DashboardLayout({
     return pathname.startsWith(href)
   }
 
+  // Estilos CSS para efeito de brilho
+  const glowStyle = `
+    @keyframes glow {
+      0% { box-shadow: 0 0 5px rgba(22, 163, 74, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(22, 163, 74, 0.6), 0 0 30px rgba(22, 163, 74, 0.4); }
+      100% { box-shadow: 0 0 5px rgba(22, 163, 74, 0.3); }
+    }
+    .nav-button:hover:not(.active) {
+      animation: glow 1.5s ease-in-out infinite;
+      background: linear-gradient(135deg, rgba(22, 163, 74, 0.1) 0%, rgba(22, 163, 74, 0.2) 100%) !important;
+    }
+    .nav-button.active {
+      box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4);
+    }
+  `
+
   return (
     <div 
       style={{ 
@@ -130,6 +146,7 @@ export default function DashboardLayout({
         backgroundAttachment: 'fixed'
       }}
     >
+      <style>{glowStyle}</style>
       <Toaster position="top-right" richColors />
       
       {/* Mobile sidebar overlay */}
@@ -161,7 +178,8 @@ export default function DashboardLayout({
           borderRightWidth: '1px',
           borderRightStyle: 'solid',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)'
         }}
       >
         {/* Close button for mobile */}
@@ -177,52 +195,67 @@ export default function DashboardLayout({
               backgroundColor: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              color: 'inherit'
+              color: 'white'
             }}
           >
             <X style={{ width: '24px', height: '24px' }} />
           </button>
         )}
 
-        {/* Logo */}
-        <div style={{ padding: '20px', borderBottom: '1px solid' }}>
-          <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-            <div style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '12px',
-              backgroundColor: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'hidden',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-            }}>
-              <Image
-                src="/providata-logo-final.png"
-                alt="ProviDATA"
-                width={36}
-                height={36}
-                style={{ objectFit: 'contain' }}
-              />
-            </div>
-            <span className="sidebar-text" style={{ fontSize: '20px', fontWeight: 'bold' }}>ProviDATA</span>
+        {/* Logo ProviDATA - Maior e sem caixa branca */}
+        <div style={{ 
+          padding: '24px 20px', 
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+            <Image
+              src="/providata-logo-final.png"
+              alt="ProviDATA"
+              width={180}
+              height={60}
+              style={{ 
+                objectFit: 'contain',
+                filter: 'brightness(1.1) drop-shadow(0 2px 8px rgba(22, 163, 74, 0.3))'
+              }}
+              priority
+            />
           </Link>
         </div>
 
         {/* Tenant Info */}
-        <div className="sidebar-accent" style={{ padding: '16px 20px', borderBottom: '1px solid' }}>
-          <p className="sidebar-text" style={{ fontSize: '15px', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '4px' }}>
+        <div style={{ 
+          padding: '16px 20px', 
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          background: 'rgba(22, 163, 74, 0.1)'
+        }}>
+          <p style={{ 
+            fontSize: '15px', 
+            fontWeight: '600', 
+            color: 'white',
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis', 
+            whiteSpace: 'nowrap', 
+            marginBottom: '4px' 
+          }}>
             {tenant?.parlamentar_name || 'Carregando...'}
           </p>
-          <p className="sidebar-muted" style={{ fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <p style={{ 
+            fontSize: '13px', 
+            color: 'rgba(255,255,255,0.6)',
+            overflow: 'hidden', 
+            textOverflow: 'ellipsis', 
+            whiteSpace: 'nowrap' 
+          }}>
             {tenant?.cargo?.replace('_', ' ') || 'deputado estadual'}
           </p>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation - Botões com ícones e efeito de brilho */}
         <nav style={{ flex: 1, padding: '20px 16px', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {navigation.map((item) => {
               const Icon = item.icon
               const active = isActive(item.href)
@@ -231,32 +264,34 @@ export default function DashboardLayout({
                   key={item.name}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
+                  className={`nav-button ${active ? 'active' : ''}`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '14px',
-                    padding: '12px 16px',
-                    borderRadius: '10px',
+                    padding: '14px 18px',
+                    borderRadius: '12px',
                     fontSize: '15px',
                     fontWeight: active ? '600' : '500',
                     textDecoration: 'none',
-                    backgroundColor: active ? customPrimaryColor : 'transparent',
-                    color: active ? 'white' : 'inherit',
-                    transition: 'all 0.2s ease',
-                    boxShadow: active ? '0 2px 8px rgba(22, 163, 74, 0.3)' : 'none'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }
+                    backgroundColor: active ? customPrimaryColor : 'rgba(255,255,255,0.05)',
+                    color: 'white',
+                    transition: 'all 0.3s ease',
+                    border: active ? 'none' : '1px solid rgba(255,255,255,0.1)'
                   }}
                 >
-                  <Icon style={{ width: '22px', height: '22px', flexShrink: 0 }} />
+                  <div style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '10px',
+                    backgroundColor: active ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <Icon style={{ width: '20px', height: '20px' }} />
+                  </div>
                   <span>{item.name}</span>
                 </Link>
               )
@@ -264,60 +299,130 @@ export default function DashboardLayout({
           </div>
         </nav>
 
-        {/* Bottom Navigation */}
-        <div style={{ padding: '16px', borderTop: '1px solid' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {bottomNavigation.map((item) => {
-              const Icon = item.icon
-              const active = isActive(item.href)
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px',
-                    padding: '12px 16px',
-                    borderRadius: '10px',
-                    fontSize: '15px',
-                    fontWeight: active ? '600' : '500',
-                    textDecoration: 'none',
-                    backgroundColor: active ? customPrimaryColor : 'transparent',
-                    color: active ? 'white' : 'inherit',
-                    transition: 'all 0.2s ease',
-                    boxShadow: active ? '0 2px 8px rgba(22, 163, 74, 0.3)' : 'none'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }
-                  }}
-                >
-                  <Icon style={{ width: '22px', height: '22px', flexShrink: 0 }} />
-                  <span>{item.name}</span>
-                </Link>
-              )
-            })}
-          </div>
+        {/* Admin Section - Escondível */}
+        <div style={{ 
+          padding: '0 16px 16px', 
+          borderTop: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          <button
+            onClick={() => setAdminExpanded(!adminExpanded)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              width: '100%',
+              padding: '14px 18px',
+              marginTop: '16px',
+              borderRadius: '12px',
+              fontSize: '14px',
+              fontWeight: '600',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              backgroundColor: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: 'rgba(255,255,255,0.7)',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Settings style={{ width: '18px', height: '18px' }} />
+              Administração
+            </span>
+            {adminExpanded ? (
+              <ChevronUp style={{ width: '18px', height: '18px' }} />
+            ) : (
+              <ChevronDown style={{ width: '18px', height: '18px' }} />
+            )}
+          </button>
+
+          {adminExpanded && (
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '6px',
+              marginTop: '8px',
+              paddingLeft: '8px',
+              borderLeft: '2px solid rgba(22, 163, 74, 0.3)'
+            }}>
+              {adminNavigation.map((item) => {
+                const Icon = item.icon
+                const active = isActive(item.href)
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`nav-button ${active ? 'active' : ''}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '12px 14px',
+                      borderRadius: '10px',
+                      fontSize: '14px',
+                      fontWeight: active ? '600' : '500',
+                      textDecoration: 'none',
+                      backgroundColor: active ? customPrimaryColor : 'transparent',
+                      color: 'white',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    <Icon style={{ width: '18px', height: '18px' }} />
+                    <span>{item.name}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Footer */}
-        <div className="sidebar-accent" style={{ padding: '16px 20px', borderTop: '1px solid' }}>
+        {/* Footer - Logo DATA-RO centralizada com Copyright */}
+        <div style={{ 
+          padding: '20px', 
+          borderTop: '1px solid rgba(255,255,255,0.1)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
           <a 
             href="https://dataro-it.com.br" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="sidebar-muted"
-            style={{ fontSize: '12px', textDecoration: 'none' }}
+            style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              textDecoration: 'none'
+            }}
           >
-            DATA-RO Inteligência Territorial
+            <div style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              backgroundColor: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden'
+            }}>
+              <Image
+                src="/dataro-logo.png"
+                alt="DATA-RO"
+                width={24}
+                height={24}
+                style={{ objectFit: 'contain' }}
+              />
+            </div>
+            <span style={{ 
+              fontSize: '12px', 
+              color: 'rgba(255,255,255,0.6)',
+              fontWeight: '500'
+            }}>
+              DATA-RO Inteligência Territorial
+            </span>
+            <Copyright style={{ width: '14px', height: '14px', color: 'rgba(255,255,255,0.4)' }} />
           </a>
         </div>
       </aside>

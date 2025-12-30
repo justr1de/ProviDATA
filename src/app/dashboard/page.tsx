@@ -24,7 +24,15 @@ import {
   LayoutDashboard,
   LineChart,
   ScatterChart,
-  Flame
+  Flame,
+  AlertTriangle,
+  Search,
+  Send,
+  Sparkles,
+  Brain,
+  Zap,
+  HelpCircle,
+  ChevronDown
 } from 'lucide-react'
 
 interface Providencia {
@@ -45,6 +53,7 @@ interface Stats {
   concluidas: number
   em_analise: number
   encaminhadas: number
+  urgentes: number
 }
 
 interface CustomChart {
@@ -54,6 +63,13 @@ interface CustomChart {
   xAxis: string
   yAxis: string
   filters: string[]
+}
+
+interface TourStep {
+  target: string
+  title: string
+  content: string
+  position: 'top' | 'bottom' | 'left' | 'right'
 }
 
 const statusColors: Record<string, string> = {
@@ -93,6 +109,45 @@ const dataFields = [
   { id: 'ano', name: 'Ano', category: 'Tempo' },
 ]
 
+const tourSteps: TourStep[] = [
+  {
+    target: 'stats-cards',
+    title: 'Cards de Estatísticas',
+    content: 'Aqui você visualiza os principais indicadores do seu gabinete: total de providências, pendentes, em andamento, concluídas, urgentes, em análise e encaminhadas.',
+    position: 'bottom'
+  },
+  {
+    target: 'taxa-conclusao',
+    title: 'Taxa de Conclusão',
+    content: 'Acompanhe a porcentagem de providências concluídas em relação ao total. Quanto maior, melhor o desempenho do gabinete!',
+    position: 'bottom'
+  },
+  {
+    target: 'graficos-area',
+    title: 'Área de Gráficos',
+    content: 'Visualize seus dados em diferentes formatos. Você pode adicionar gráficos personalizados usando o painel lateral.',
+    position: 'top'
+  },
+  {
+    target: 'criar-grafico',
+    title: 'Criar Gráfico',
+    content: 'Selecione o tipo de gráfico, escolha os eixos X e Y, defina o período e clique em "Gerar Gráfico" para criar visualizações personalizadas.',
+    position: 'left'
+  },
+  {
+    target: 'ia-assistant',
+    title: 'Assistente de IA',
+    content: 'Nossa IA aprende com os dados do seu gabinete e pode cruzar informações para gerar insights valiosos. Faça perguntas em linguagem natural!',
+    position: 'left'
+  },
+  {
+    target: 'providencias-recentes',
+    title: 'Providências Recentes',
+    content: 'Acompanhe as últimas providências cadastradas ou atualizadas no sistema.',
+    position: 'top'
+  }
+]
+
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<Stats>({
@@ -102,6 +157,7 @@ export default function DashboardPage() {
     concluidas: 0,
     em_analise: 0,
     encaminhadas: 0,
+    urgentes: 0,
   })
   const [recentProvidencias, setRecentProvidencias] = useState<Providencia[]>([])
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
@@ -113,9 +169,23 @@ export default function DashboardPage() {
   const [generatingChart, setGeneratingChart] = useState(false)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [showTour, setShowTour] = useState(false)
+  const [currentTourStep, setCurrentTourStep] = useState(0)
+  const [aiQuery, setAiQuery] = useState('')
+  const [aiResponse, setAiResponse] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [showAiPanel, setShowAiPanel] = useState(false)
   
   const supabase = createClient()
   const { tenant } = useAuthStore()
+
+  useEffect(() => {
+    // Verificar se é o primeiro acesso
+    const hasSeenTour = localStorage.getItem('providata-tour-completed')
+    if (!hasSeenTour && tenant?.id) {
+      setShowTour(true)
+    }
+  }, [tenant?.id])
 
   useEffect(() => {
     if (tenant?.id) {
@@ -133,7 +203,7 @@ export default function DashboardPage() {
 
       const { data: providencias } = await supabase
         .from('providencias')
-        .select('status')
+        .select('status, prioridade')
         .eq('tenant_id', tenant.id)
         .gte('created_at', startOfYear)
         .lte('created_at', endOfYear)
@@ -146,6 +216,7 @@ export default function DashboardPage() {
           concluidas: providencias.filter(p => p.status === 'concluido').length,
           em_analise: providencias.filter(p => p.status === 'em_analise').length,
           encaminhadas: providencias.filter(p => p.status === 'encaminhado').length,
+          urgentes: providencias.filter(p => p.prioridade === 'urgente').length,
         }
         setStats(newStats)
       }
@@ -197,6 +268,44 @@ export default function DashboardPage() {
     setCustomCharts(prev => prev.filter(c => c.id !== chartId))
   }
 
+  const handleTourNext = () => {
+    if (currentTourStep < tourSteps.length - 1) {
+      setCurrentTourStep(prev => prev + 1)
+    } else {
+      handleTourComplete()
+    }
+  }
+
+  const handleTourPrev = () => {
+    if (currentTourStep > 0) {
+      setCurrentTourStep(prev => prev - 1)
+    }
+  }
+
+  const handleTourComplete = () => {
+    setShowTour(false)
+    localStorage.setItem('providata-tour-completed', 'true')
+  }
+
+  const handleAiQuery = async () => {
+    if (!aiQuery.trim()) return
+    
+    setAiLoading(true)
+    setAiResponse('')
+    
+    // Simular resposta da IA (em produção, isso seria uma chamada real à API)
+    setTimeout(() => {
+      const responses = [
+        `Com base nos dados do seu gabinete, identifiquei que ${stats.pendentes} providências estão pendentes. Recomendo priorizar as ${stats.urgentes} urgentes primeiro.`,
+        `Analisando o histórico, a taxa de conclusão está em ${Math.round((stats.concluidas / Math.max(stats.total, 1)) * 100)}%. Para melhorar, sugiro focar nas providências em andamento.`,
+        `Cruzando os dados, percebi que a maioria das providências pendentes são de alta prioridade. Considere redistribuir a carga de trabalho.`,
+        `Os dados mostram que você tem ${stats.total} providências no total. ${stats.concluidas} foram concluídas, representando um bom progresso!`
+      ]
+      setAiResponse(responses[Math.floor(Math.random() * responses.length)])
+      setAiLoading(false)
+    }, 1500)
+  }
+
   const taxaConclusao = stats.total > 0 
     ? Math.round((stats.concluidas / stats.total) * 100) 
     : 0
@@ -231,6 +340,122 @@ export default function DashboardPage() {
       minHeight: '100vh',
       padding: '24px'
     }}>
+      {/* Tour Overlay */}
+      {showTour && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '20px',
+            padding: '32px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <HelpCircle style={{ width: '28px', height: '28px', color: 'white' }} />
+              </div>
+              <div>
+                <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Passo {currentTourStep + 1} de {tourSteps.length}
+                </p>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#111827', margin: 0 }}>
+                  {tourSteps[currentTourStep].title}
+                </h3>
+              </div>
+            </div>
+            
+            <p style={{ fontSize: '15px', color: '#4b5563', lineHeight: '1.6', marginBottom: '24px' }}>
+              {tourSteps[currentTourStep].content}
+            </p>
+
+            {/* Progress dots */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
+              {tourSteps.map((_, index) => (
+                <div
+                  key={index}
+                  style={{
+                    width: index === currentTourStep ? '24px' : '8px',
+                    height: '8px',
+                    borderRadius: '4px',
+                    backgroundColor: index === currentTourStep ? '#16a34a' : '#e5e7eb',
+                    transition: 'all 0.3s ease'
+                  }}
+                />
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={handleTourComplete}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  borderRadius: '10px',
+                  border: '1px solid #e5e7eb',
+                  backgroundColor: 'white',
+                  color: '#6b7280',
+                  cursor: 'pointer'
+                }}
+              >
+                Pular Tour
+              </button>
+              {currentTourStep > 0 && (
+                <button
+                  onClick={handleTourPrev}
+                  style={{
+                    padding: '12px 20px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    borderRadius: '10px',
+                    border: '1px solid #e5e7eb',
+                    backgroundColor: 'white',
+                    color: '#374151',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Anterior
+                </button>
+              )}
+              <button
+                onClick={handleTourNext}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  borderRadius: '10px',
+                  border: 'none',
+                  backgroundColor: '#16a34a',
+                  color: 'white',
+                  cursor: 'pointer'
+                }}
+              >
+                {currentTourStep === tourSteps.length - 1 ? 'Concluir' : 'Próximo'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', gap: '24px' }}>
         {/* Área Principal */}
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -282,6 +507,25 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <button
+                  onClick={() => setShowTour(true)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '10px 16px',
+                    backgroundColor: '#f3f4f6',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#374151',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <HelpCircle style={{ width: '16px', height: '16px' }} />
+                  Tour
+                </button>
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(Number(e.target.value))}
@@ -322,128 +566,222 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '16px',
-            marginBottom: '24px'
-          }}>
-            {/* Total */}
+          {/* Stats Cards - 7 cards em 2 linhas */}
+          <div id="stats-cards" style={{ marginBottom: '24px' }}>
+            {/* Primeira linha - 4 cards principais */}
             <div style={{ 
-              backgroundColor: '#ffffff',
-              borderRadius: '16px',
-              border: '1px solid #e5e7eb',
-              padding: '20px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '16px',
+              marginBottom: '16px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ 
-                  width: '48px', 
-                  height: '48px', 
-                  borderRadius: '12px',
-                  backgroundColor: '#dbeafe',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <FileText style={{ width: '24px', height: '24px', color: '#2563eb' }} />
+              {/* Total */}
+              <div style={{ 
+                backgroundColor: '#ffffff',
+                borderRadius: '16px',
+                border: '1px solid #e5e7eb',
+                padding: '20px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    borderRadius: '12px',
+                    backgroundColor: '#dbeafe',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <FileText style={{ width: '24px', height: '24px', color: '#2563eb' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.total}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Total</p>
+                  </div>
                 </div>
-                <div>
-                  <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.total}</p>
-                  <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Total</p>
+              </div>
+
+              {/* Pendentes */}
+              <div style={{ 
+                backgroundColor: '#ffffff',
+                borderRadius: '16px',
+                border: '1px solid #e5e7eb',
+                padding: '20px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    borderRadius: '12px',
+                    backgroundColor: '#fef3c7',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Clock style={{ width: '24px', height: '24px', color: '#d97706' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.pendentes}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Pendentes</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Em Andamento */}
+              <div style={{ 
+                backgroundColor: '#ffffff',
+                borderRadius: '16px',
+                border: '1px solid #e5e7eb',
+                padding: '20px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    borderRadius: '12px',
+                    backgroundColor: '#e0e7ff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <TrendingUp style={{ width: '24px', height: '24px', color: '#4f46e5' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.em_andamento}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Em Andamento</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Concluídas */}
+              <div style={{ 
+                backgroundColor: '#ffffff',
+                borderRadius: '16px',
+                border: '1px solid #e5e7eb',
+                padding: '20px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    borderRadius: '12px',
+                    backgroundColor: '#dcfce7',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <CheckCircle2 style={{ width: '24px', height: '24px', color: '#16a34a' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.concluidas}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Concluídas</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Pendentes */}
+            {/* Segunda linha - 3 cards adicionais */}
             <div style={{ 
-              backgroundColor: '#ffffff',
-              borderRadius: '16px',
-              border: '1px solid #e5e7eb',
-              padding: '20px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '16px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ 
-                  width: '48px', 
-                  height: '48px', 
-                  borderRadius: '12px',
-                  backgroundColor: '#fef3c7',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <Clock style={{ width: '24px', height: '24px', color: '#d97706' }} />
-                </div>
-                <div>
-                  <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.pendentes}</p>
-                  <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Pendentes</p>
+              {/* Urgentes */}
+              <div style={{ 
+                backgroundColor: '#ffffff',
+                borderRadius: '16px',
+                border: '1px solid #e5e7eb',
+                padding: '20px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    borderRadius: '12px',
+                    backgroundColor: '#fee2e2',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <AlertTriangle style={{ width: '24px', height: '24px', color: '#dc2626' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.urgentes}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Urgentes</p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Em Andamento */}
-            <div style={{ 
-              backgroundColor: '#ffffff',
-              borderRadius: '16px',
-              border: '1px solid #e5e7eb',
-              padding: '20px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ 
-                  width: '48px', 
-                  height: '48px', 
-                  borderRadius: '12px',
-                  backgroundColor: '#e0e7ff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <TrendingUp style={{ width: '24px', height: '24px', color: '#4f46e5' }} />
-                </div>
-                <div>
-                  <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.em_andamento}</p>
-                  <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Em Andamento</p>
+              {/* Em Análise */}
+              <div style={{ 
+                backgroundColor: '#ffffff',
+                borderRadius: '16px',
+                border: '1px solid #e5e7eb',
+                padding: '20px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    borderRadius: '12px',
+                    backgroundColor: '#f3e8ff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Search style={{ width: '24px', height: '24px', color: '#9333ea' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.em_analise}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Em Análise</p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Concluídas */}
-            <div style={{ 
-              backgroundColor: '#ffffff',
-              borderRadius: '16px',
-              border: '1px solid #e5e7eb',
-              padding: '20px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ 
-                  width: '48px', 
-                  height: '48px', 
-                  borderRadius: '12px',
-                  backgroundColor: '#dcfce7',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <CheckCircle2 style={{ width: '24px', height: '24px', color: '#16a34a' }} />
-                </div>
-                <div>
-                  <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.concluidas}</p>
-                  <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Concluídas</p>
+              {/* Encaminhadas */}
+              <div style={{ 
+                backgroundColor: '#ffffff',
+                borderRadius: '16px',
+                border: '1px solid #e5e7eb',
+                padding: '20px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    borderRadius: '12px',
+                    backgroundColor: '#cffafe',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <Send style={{ width: '24px', height: '24px', color: '#0891b2' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>{stats.encaminhadas}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: '#6b7280', margin: '4px 0 0 0' }}>Encaminhadas</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Taxa de Conclusão */}
-          <div style={{ 
+          <div id="taxa-conclusao" style={{ 
             backgroundColor: '#ffffff',
             borderRadius: '16px',
             border: '1px solid #e5e7eb',
@@ -479,202 +817,261 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Gráficos */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '24px',
-            marginBottom: '24px'
+          {/* Área de Gráficos - Delimitada */}
+          <div id="graficos-area" style={{ 
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            border: '2px dashed #d1d5db',
+            padding: '24px',
+            marginBottom: '24px',
+            minHeight: '400px'
           }}>
-            {/* Providências por Status */}
             <div style={{ 
-              backgroundColor: '#ffffff',
-              borderRadius: '16px',
-              border: '1px solid #e5e7eb',
-              padding: '24px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+              paddingBottom: '16px',
+              borderBottom: '1px solid #e5e7eb'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{ 
                   width: '40px', 
                   height: '40px', 
                   borderRadius: '10px',
-                  backgroundColor: '#dbeafe',
+                  backgroundColor: '#f0fdf4',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <BarChart3 style={{ width: '20px', height: '20px', color: '#2563eb' }} />
+                  <BarChart3 style={{ width: '20px', height: '20px', color: '#16a34a' }} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', margin: 0 }}>Providências por Status</h3>
-                  <p style={{ fontSize: '12px', color: '#6b7280', margin: '2px 0 0 0' }}>Distribuição atual</p>
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', margin: 0 }}>Área de Gráficos Personalizados</h3>
+                  <p style={{ fontSize: '12px', color: '#6b7280', margin: '2px 0 0 0' }}>Adicione gráficos usando o painel lateral</p>
                 </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {chartData.map((item) => (
-                  <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ width: '100px', fontSize: '14px', fontWeight: '500', color: '#4b5563' }}>{item.label}</span>
-                    <div style={{ flex: 1, height: '24px', backgroundColor: '#f3f4f6', borderRadius: '6px', overflow: 'hidden' }}>
-                      <div style={{ 
-                        height: '100%', 
-                        borderRadius: '6px',
-                        width: `${(item.value / maxChartValue) * 100}%`,
-                        backgroundColor: item.color,
-                        transition: 'width 0.5s ease'
-                      }} />
-                    </div>
-                    <span style={{ width: '32px', textAlign: 'right', fontSize: '14px', fontWeight: '700', color: '#111827' }}>{item.value}</span>
-                  </div>
-                ))}
-              </div>
+              <span style={{ 
+                fontSize: '12px', 
+                color: '#9ca3af',
+                backgroundColor: '#f3f4f6',
+                padding: '4px 12px',
+                borderRadius: '9999px'
+              }}>
+                {customCharts.length} gráfico(s) adicionado(s)
+              </span>
             </div>
 
-            {/* Distribuição de Status */}
-            <div style={{ 
-              backgroundColor: '#ffffff',
-              borderRadius: '16px',
-              border: '1px solid #e5e7eb',
-              padding: '24px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-                <div style={{ 
-                  width: '40px', 
-                  height: '40px', 
-                  borderRadius: '10px',
-                  backgroundColor: '#f3e8ff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <PieChart style={{ width: '20px', height: '20px', color: '#9333ea' }} />
-                </div>
-                <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', margin: 0 }}>Distribuição de Status</h3>
-                  <p style={{ fontSize: '12px', color: '#6b7280', margin: '2px 0 0 0' }}>Visão proporcional</p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px 0' }}>
-                <div style={{ position: 'relative' }}>
-                  <svg width="160" height="160" viewBox="0 0 160 160">
-                    <circle cx="80" cy="80" r="60" fill="none" stroke="#22c55e" strokeWidth="20"
-                      strokeDasharray={`${(stats.concluidas / Math.max(stats.total, 1)) * 377} 377`}
-                      transform="rotate(-90 80 80)" />
-                    <circle cx="80" cy="80" r="60" fill="none" stroke="#6366f1" strokeWidth="20"
-                      strokeDasharray={`${(stats.em_andamento / Math.max(stats.total, 1)) * 377} 377`}
-                      strokeDashoffset={`-${(stats.concluidas / Math.max(stats.total, 1)) * 377}`}
-                      transform="rotate(-90 80 80)" />
-                    <circle cx="80" cy="80" r="60" fill="none" stroke="#f59e0b" strokeWidth="20"
-                      strokeDasharray={`${(stats.pendentes / Math.max(stats.total, 1)) * 377} 377`}
-                      strokeDashoffset={`-${((stats.concluidas + stats.em_andamento) / Math.max(stats.total, 1)) * 377}`}
-                      transform="rotate(-90 80 80)" />
-                  </svg>
-                  <div style={{ 
-                    position: 'absolute', 
-                    inset: 0, 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center', 
-                    justifyContent: 'center' 
-                  }}>
-                    <span style={{ fontSize: '28px', fontWeight: '700', color: '#111827' }}>{stats.total}</span>
-                    <span style={{ fontSize: '12px', color: '#6b7280' }}>Total</span>
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginTop: '16px' }}>
-                {chartData.map((item) => (
-                  <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: item.color, flexShrink: 0 }} />
-                    <span style={{ fontSize: '12px', color: '#4b5563', flex: 1 }}>{item.label}</span>
-                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#111827' }}>{item.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Gráficos Personalizados */}
-          {customCharts.length > 0 && (
+            {/* Gráficos padrão */}
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: 'repeat(2, 1fr)',
               gap: '24px',
-              marginBottom: '24px'
+              marginBottom: customCharts.length > 0 ? '24px' : '0'
             }}>
-              {customCharts.map((chart) => {
-                const ChartIcon = chartTypes.find(t => t.id === chart.type)?.icon || PieChart
-                return (
-                  <div key={chart.id} style={{ 
-                    backgroundColor: '#ffffff',
-                    borderRadius: '16px',
-                    border: '1px solid #e5e7eb',
-                    padding: '24px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+              {/* Providências por Status */}
+              <div style={{ 
+                backgroundColor: '#f9fafb',
+                borderRadius: '12px',
+                padding: '20px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                  <div style={{ 
+                    width: '36px', 
+                    height: '36px', 
+                    borderRadius: '8px',
+                    backgroundColor: '#dbeafe',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <BarChart3 style={{ width: '18px', height: '18px', color: '#2563eb' }} />
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#111827', margin: 0 }}>Providências por Status</h4>
+                    <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0 0' }}>Distribuição atual</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {chartData.map((item) => (
+                    <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ width: '90px', fontSize: '13px', fontWeight: '500', color: '#4b5563' }}>{item.label}</span>
+                      <div style={{ flex: 1, height: '20px', backgroundColor: '#e5e7eb', borderRadius: '4px', overflow: 'hidden' }}>
                         <div style={{ 
-                          width: '40px', 
-                          height: '40px', 
-                          borderRadius: '10px',
-                          backgroundColor: '#dcfce7',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <ChartIcon style={{ width: '20px', height: '20px', color: '#16a34a' }} />
-                        </div>
-                        <div>
-                          <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', margin: 0 }}>{chart.title}</h3>
-                          <p style={{ fontSize: '12px', color: '#6b7280', margin: '2px 0 0 0' }}>
-                            Gráfico de {chartTypes.find(t => t.id === chart.type)?.name}
-                          </p>
-                        </div>
+                          height: '100%', 
+                          borderRadius: '4px',
+                          width: `${(item.value / maxChartValue) * 100}%`,
+                          backgroundColor: item.color,
+                          transition: 'width 0.5s ease'
+                        }} />
                       </div>
-                      <button
-                        onClick={() => handleRemoveChart(chart.id)}
-                        style={{
-                          padding: '8px',
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          color: '#9ca3af'
-                        }}
-                      >
-                        <X style={{ width: '16px', height: '16px' }} />
-                      </button>
+                      <span style={{ width: '28px', textAlign: 'right', fontSize: '13px', fontWeight: '700', color: '#111827' }}>{item.value}</span>
                     </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Distribuição de Status */}
+              <div style={{ 
+                backgroundColor: '#f9fafb',
+                borderRadius: '12px',
+                padding: '20px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+                  <div style={{ 
+                    width: '36px', 
+                    height: '36px', 
+                    borderRadius: '8px',
+                    backgroundColor: '#f3e8ff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <PieChart style={{ width: '18px', height: '18px', color: '#9333ea' }} />
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#111827', margin: 0 }}>Distribuição de Status</h4>
+                    <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0 0' }}>Visão proporcional</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 0' }}>
+                  <div style={{ position: 'relative' }}>
+                    <svg width="140" height="140" viewBox="0 0 140 140">
+                      <circle cx="70" cy="70" r="50" fill="none" stroke="#22c55e" strokeWidth="18"
+                        strokeDasharray={`${(stats.concluidas / Math.max(stats.total, 1)) * 314} 314`}
+                        transform="rotate(-90 70 70)" />
+                      <circle cx="70" cy="70" r="50" fill="none" stroke="#6366f1" strokeWidth="18"
+                        strokeDasharray={`${(stats.em_andamento / Math.max(stats.total, 1)) * 314} 314`}
+                        strokeDashoffset={`-${(stats.concluidas / Math.max(stats.total, 1)) * 314}`}
+                        transform="rotate(-90 70 70)" />
+                      <circle cx="70" cy="70" r="50" fill="none" stroke="#f59e0b" strokeWidth="18"
+                        strokeDasharray={`${(stats.pendentes / Math.max(stats.total, 1)) * 314} 314`}
+                        strokeDashoffset={`-${((stats.concluidas + stats.em_andamento) / Math.max(stats.total, 1)) * 314}`}
+                        transform="rotate(-90 70 70)" />
+                    </svg>
                     <div style={{ 
-                      height: '160px', 
+                      position: 'absolute', 
+                      inset: 0, 
                       display: 'flex', 
+                      flexDirection: 'column', 
                       alignItems: 'center', 
-                      justifyContent: 'center',
-                      backgroundColor: '#f9fafb',
-                      borderRadius: '12px',
-                      border: '2px dashed #e5e7eb'
+                      justifyContent: 'center' 
                     }}>
-                      <div style={{ textAlign: 'center' }}>
-                        <ChartIcon style={{ width: '40px', height: '40px', color: '#d1d5db', margin: '0 auto 8px' }} />
-                        <p style={{ fontSize: '14px', color: '#6b7280' }}>Gráfico será renderizado aqui</p>
-                      </div>
+                      <span style={{ fontSize: '24px', fontWeight: '700', color: '#111827' }}>{stats.total}</span>
+                      <span style={{ fontSize: '11px', color: '#6b7280' }}>Total</span>
                     </div>
                   </div>
-                )
-              })}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginTop: '12px' }}>
+                  {chartData.map((item) => (
+                    <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: item.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: '11px', color: '#4b5563', flex: 1 }}>{item.label}</span>
+                      <span style={{ fontSize: '11px', fontWeight: '700', color: '#111827' }}>{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          )}
+
+            {/* Gráficos Personalizados */}
+            {customCharts.length > 0 && (
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '24px',
+                paddingTop: '24px',
+                borderTop: '1px dashed #d1d5db'
+              }}>
+                {customCharts.map((chart) => {
+                  const ChartIcon = chartTypes.find(t => t.id === chart.type)?.icon || PieChart
+                  return (
+                    <div key={chart.id} style={{ 
+                      backgroundColor: '#f9fafb',
+                      borderRadius: '12px',
+                      padding: '20px'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ 
+                            width: '36px', 
+                            height: '36px', 
+                            borderRadius: '8px',
+                            backgroundColor: '#dcfce7',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <ChartIcon style={{ width: '18px', height: '18px', color: '#16a34a' }} />
+                          </div>
+                          <div>
+                            <h4 style={{ fontSize: '14px', fontWeight: '700', color: '#111827', margin: 0 }}>{chart.title}</h4>
+                            <p style={{ fontSize: '11px', color: '#6b7280', margin: '2px 0 0 0' }}>
+                              Gráfico de {chartTypes.find(t => t.id === chart.type)?.name}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleRemoveChart(chart.id)}
+                          style={{
+                            padding: '6px',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            color: '#9ca3af'
+                          }}
+                        >
+                          <X style={{ width: '16px', height: '16px' }} />
+                        </button>
+                      </div>
+                      <div style={{ 
+                        height: '140px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        backgroundColor: 'white',
+                        borderRadius: '8px',
+                        border: '1px dashed #e5e7eb'
+                      }}>
+                        <div style={{ textAlign: 'center' }}>
+                          <ChartIcon style={{ width: '32px', height: '32px', color: '#d1d5db', margin: '0 auto 8px' }} />
+                          <p style={{ fontSize: '12px', color: '#6b7280' }}>Gráfico será renderizado aqui</p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Placeholder para adicionar gráficos */}
+            {customCharts.length === 0 && (
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                padding: '40px',
+                marginTop: '24px',
+                borderTop: '1px dashed #d1d5db'
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <Plus style={{ width: '40px', height: '40px', color: '#d1d5db', margin: '0 auto 12px' }} />
+                  <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
+                    Use o painel "Criar Gráfico" para adicionar visualizações personalizadas
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Providências Recentes */}
-          <div style={{ 
+          <div id="providencias-recentes" style={{ 
             backgroundColor: '#ffffff',
             borderRadius: '16px',
             border: '1px solid #e5e7eb',
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-            overflow: 'hidden',
-            marginBottom: '24px'
+            overflow: 'hidden'
           }}>
             <div style={{ 
               display: 'flex', 
@@ -831,300 +1228,398 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
-
-          {/* Footer Info */}
-          <div style={{ 
-            backgroundColor: '#f3f4f6',
-            borderRadius: '16px',
-            padding: '24px'
-          }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
-              <div>
-                <p style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600', margin: '0 0 4px 0' }}>Sistema</p>
-                <p style={{ fontSize: '14px', fontWeight: '700', color: '#111827', margin: 0 }}>ProviDATA</p>
-              </div>
-              <div>
-                <p style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600', margin: '0 0 4px 0' }}>Gabinete</p>
-                <p style={{ fontSize: '14px', fontWeight: '700', color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tenant?.parlamentar_name || 'Não definido'}</p>
-              </div>
-              <div>
-                <p style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600', margin: '0 0 4px 0' }}>Período</p>
-                <p style={{ fontSize: '14px', fontWeight: '700', color: '#111827', margin: 0 }}>2024 - 2025</p>
-              </div>
-              <div>
-                <p style={{ fontSize: '11px', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600', margin: '0 0 4px 0' }}>Atualização</p>
-                <p style={{ fontSize: '14px', fontWeight: '700', color: '#111827', margin: 0 }}>{format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* Painel Lateral - Criador de Gráficos */}
-        {showChartBuilder && (
-          <div style={{ width: '320px', flexShrink: 0 }}>
-            <div style={{ position: 'sticky', top: '24px' }}>
+        {/* Painel Lateral */}
+        <div style={{ width: '340px', flexShrink: 0 }}>
+          <div style={{ position: 'sticky', top: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Criar Gráfico */}
+            <div id="criar-grafico" style={{ 
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              overflow: 'hidden'
+            }}>
+              {/* Header do Painel */}
               <div style={{ 
-                backgroundColor: '#ffffff',
-                borderRadius: '16px',
-                border: '1px solid #e5e7eb',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                overflow: 'hidden'
+                padding: '20px',
+                background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)'
               }}>
-                {/* Header do Painel */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      borderRadius: '10px',
+                      backgroundColor: 'rgba(255,255,255,0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <Settings2 style={{ width: '20px', height: '20px', color: 'white' }} />
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'white', margin: 0 }}>Criar Gráfico</h3>
+                      <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', margin: '2px 0 0 0' }}>Personalize sua visualização</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ padding: '20px' }}>
+                {/* Tipo de Gráfico */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '12px', 
+                    fontWeight: '600', 
+                    color: '#374151',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    marginBottom: '12px'
+                  }}>
+                    Tipo de Gráfico
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                    {chartTypes.map((type) => (
+                      <button
+                        key={type.id}
+                        onClick={() => setSelectedChartType(type.id)}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '12px 8px',
+                          borderRadius: '10px',
+                          border: selectedChartType === type.id ? '2px solid #16a34a' : '2px solid #e5e7eb',
+                          backgroundColor: selectedChartType === type.id ? '#f0fdf4' : '#ffffff',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        <type.icon style={{ 
+                          width: '20px', 
+                          height: '20px', 
+                          color: selectedChartType === type.id ? '#16a34a' : '#9ca3af'
+                        }} />
+                        <span style={{ 
+                          fontSize: '11px', 
+                          fontWeight: '600',
+                          color: selectedChartType === type.id ? '#16a34a' : '#6b7280'
+                        }}>{type.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Eixo X */}
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '12px', 
+                    fontWeight: '600', 
+                    color: '#374151',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    marginBottom: '8px'
+                  }}>
+                    Eixo X (Categorias)
+                  </label>
+                  <select
+                    value={selectedXAxis}
+                    onChange={(e) => setSelectedXAxis(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      fontSize: '14px',
+                      backgroundColor: '#f9fafb',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      color: '#374151'
+                    }}
+                  >
+                    <optgroup label="Providências">
+                      {dataFields.filter(f => f.category === 'Providências').map(field => (
+                        <option key={field.id} value={field.id}>{field.name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Cidadãos">
+                      {dataFields.filter(f => f.category === 'Cidadãos').map(field => (
+                        <option key={field.id} value={field.id}>{field.name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Tempo">
+                      {dataFields.filter(f => f.category === 'Tempo').map(field => (
+                        <option key={field.id} value={field.id}>{field.name}</option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </div>
+
+                {/* Eixo Y */}
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '12px', 
+                    fontWeight: '600', 
+                    color: '#374151',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    marginBottom: '8px'
+                  }}>
+                    Eixo Y (Valores)
+                  </label>
+                  <select
+                    value={selectedYAxis}
+                    onChange={(e) => setSelectedYAxis(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      fontSize: '14px',
+                      backgroundColor: '#f9fafb',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      color: '#374151'
+                    }}
+                  >
+                    <option value="quantidade">Quantidade</option>
+                    <option value="tempo_resolucao">Tempo de Resolução</option>
+                  </select>
+                </div>
+
+                {/* Período */}
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '12px', 
+                    fontWeight: '600', 
+                    color: '#374151',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    marginBottom: '8px'
+                  }}>
+                    Período
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        fontSize: '14px',
+                        backgroundColor: '#f9fafb',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        color: '#374151'
+                      }}
+                    />
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        fontSize: '14px',
+                        backgroundColor: '#f9fafb',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        color: '#374151'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Botão Gerar */}
+                <button
+                  onClick={handleGenerateChart}
+                  disabled={generatingChart}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '12px 20px',
+                    backgroundColor: generatingChart ? '#86efac' : '#16a34a',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    borderRadius: '10px',
+                    border: 'none',
+                    cursor: generatingChart ? 'not-allowed' : 'pointer',
+                    marginBottom: '16px'
+                  }}
+                >
+                  {generatingChart ? (
+                    <>
+                      <Loader2 style={{ width: '18px', height: '18px', animation: 'spin 1s linear infinite' }} />
+                      Gerando...
+                    </>
+                  ) : (
+                    <>
+                      <Plus style={{ width: '18px', height: '18px' }} />
+                      Gerar Gráfico
+                    </>
+                  )}
+                </button>
+
+                {/* Dica */}
                 <div style={{ 
-                  padding: '20px',
-                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)'
+                  backgroundColor: '#eff6ff',
+                  borderRadius: '10px',
+                  padding: '14px'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ 
-                        width: '40px', 
-                        height: '40px', 
-                        borderRadius: '10px',
-                        backgroundColor: 'rgba(255,255,255,0.2)',
+                  <p style={{ fontSize: '12px', color: '#1d4ed8', lineHeight: '1.5', margin: 0 }}>
+                    <strong>Dica:</strong> Combine diferentes campos para criar análises personalizadas. Os gráficos gerados aparecerão na área principal.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Assistente de IA */}
+            <div id="ia-assistant" style={{ 
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              overflow: 'hidden'
+            }}>
+              {/* Header */}
+              <div style={{ 
+                padding: '20px',
+                background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ 
+                    width: '40px', 
+                    height: '40px', 
+                    borderRadius: '10px',
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Brain style={{ width: '20px', height: '20px', color: 'white' }} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'white', margin: 0 }}>Assistente de IA</h3>
+                    <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', margin: '2px 0 0 0' }}>Análise inteligente dos dados</p>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ padding: '20px' }}>
+                {/* Sugestões rápidas */}
+                <div style={{ marginBottom: '16px' }}>
+                  <p style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>Sugestões:</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {['Análise geral', 'Prioridades', 'Tendências'].map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        onClick={() => setAiQuery(suggestion)}
+                        style={{
+                          padding: '6px 12px',
+                          fontSize: '12px',
+                          backgroundColor: '#f3f4f6',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '9999px',
+                          color: '#4b5563',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Input de pergunta */}
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    gap: '8px',
+                    backgroundColor: '#f9fafb',
+                    borderRadius: '10px',
+                    padding: '4px',
+                    border: '1px solid #e5e7eb'
+                  }}>
+                    <input
+                      type="text"
+                      value={aiQuery}
+                      onChange={(e) => setAiQuery(e.target.value)}
+                      placeholder="Faça uma pergunta..."
+                      style={{
+                        flex: 1,
+                        padding: '10px 12px',
+                        fontSize: '14px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        outline: 'none',
+                        color: '#374151'
+                      }}
+                      onKeyPress={(e) => e.key === 'Enter' && handleAiQuery()}
+                    />
+                    <button
+                      onClick={handleAiQuery}
+                      disabled={aiLoading || !aiQuery.trim()}
+                      style={{
+                        padding: '10px 16px',
+                        backgroundColor: '#7c3aed',
+                        color: 'white',
+                        borderRadius: '8px',
+                        border: 'none',
+                        cursor: aiLoading || !aiQuery.trim() ? 'not-allowed' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        <Settings2 style={{ width: '20px', height: '20px', color: 'white' }} />
-                      </div>
-                      <div>
-                        <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'white', margin: 0 }}>Criar Gráfico</h3>
-                        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', margin: '2px 0 0 0' }}>Personalize sua visualização</p>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={() => setShowChartBuilder(false)}
-                      style={{
-                        padding: '6px',
-                        backgroundColor: 'rgba(255,255,255,0.2)',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        color: 'white'
+                        gap: '6px'
                       }}
                     >
-                      <X style={{ width: '16px', height: '16px' }} />
+                      {aiLoading ? (
+                        <Loader2 style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }} />
+                      ) : (
+                        <Sparkles style={{ width: '16px', height: '16px' }} />
+                      )}
                     </button>
                   </div>
                 </div>
 
-                <div style={{ padding: '20px' }}>
-                  {/* Tipo de Gráfico */}
-                  <div style={{ marginBottom: '20px' }}>
-                    <label style={{ 
-                      display: 'block', 
-                      fontSize: '12px', 
-                      fontWeight: '600', 
-                      color: '#374151',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      marginBottom: '12px'
-                    }}>
-                      Tipo de Gráfico
-                    </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                      {chartTypes.map((type) => (
-                        <button
-                          key={type.id}
-                          onClick={() => setSelectedChartType(type.id)}
-                          style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '6px',
-                            padding: '12px 8px',
-                            borderRadius: '10px',
-                            border: selectedChartType === type.id ? '2px solid #16a34a' : '2px solid #e5e7eb',
-                            backgroundColor: selectedChartType === type.id ? '#f0fdf4' : '#ffffff',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                          }}
-                        >
-                          <type.icon style={{ 
-                            width: '20px', 
-                            height: '20px', 
-                            color: selectedChartType === type.id ? '#16a34a' : '#9ca3af'
-                          }} />
-                          <span style={{ 
-                            fontSize: '11px', 
-                            fontWeight: '600',
-                            color: selectedChartType === type.id ? '#16a34a' : '#6b7280'
-                          }}>{type.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Eixo X */}
-                  <div style={{ marginBottom: '16px' }}>
-                    <label style={{ 
-                      display: 'block', 
-                      fontSize: '12px', 
-                      fontWeight: '600', 
-                      color: '#374151',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      marginBottom: '8px'
-                    }}>
-                      Eixo X (Categorias)
-                    </label>
-                    <select
-                      value={selectedXAxis}
-                      onChange={(e) => setSelectedXAxis(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        fontSize: '14px',
-                        backgroundColor: '#f9fafb',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        color: '#374151'
-                      }}
-                    >
-                      <optgroup label="Providências">
-                        {dataFields.filter(f => f.category === 'Providências').map(field => (
-                          <option key={field.id} value={field.id}>{field.name}</option>
-                        ))}
-                      </optgroup>
-                      <optgroup label="Cidadãos">
-                        {dataFields.filter(f => f.category === 'Cidadãos').map(field => (
-                          <option key={field.id} value={field.id}>{field.name}</option>
-                        ))}
-                      </optgroup>
-                      <optgroup label="Tempo">
-                        {dataFields.filter(f => f.category === 'Tempo').map(field => (
-                          <option key={field.id} value={field.id}>{field.name}</option>
-                        ))}
-                      </optgroup>
-                    </select>
-                  </div>
-
-                  {/* Eixo Y */}
-                  <div style={{ marginBottom: '16px' }}>
-                    <label style={{ 
-                      display: 'block', 
-                      fontSize: '12px', 
-                      fontWeight: '600', 
-                      color: '#374151',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      marginBottom: '8px'
-                    }}>
-                      Eixo Y (Valores)
-                    </label>
-                    <select
-                      value={selectedYAxis}
-                      onChange={(e) => setSelectedYAxis(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '10px 12px',
-                        fontSize: '14px',
-                        backgroundColor: '#f9fafb',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        color: '#374151'
-                      }}
-                    >
-                      <option value="quantidade">Quantidade</option>
-                      <option value="tempo_resolucao">Tempo de Resolução</option>
-                    </select>
-                  </div>
-
-                  {/* Período */}
-                  <div style={{ marginBottom: '20px' }}>
-                    <label style={{ 
-                      display: 'block', 
-                      fontSize: '12px', 
-                      fontWeight: '600', 
-                      color: '#374151',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      marginBottom: '8px'
-                    }}>
-                      Período
-                    </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '10px 12px',
-                          fontSize: '14px',
-                          backgroundColor: '#f9fafb',
-                          border: '1px solid #e5e7eb',
-                          borderRadius: '8px',
-                          color: '#374151'
-                        }}
-                      />
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '10px 12px',
-                          fontSize: '14px',
-                          backgroundColor: '#f9fafb',
-                          border: '1px solid #e5e7eb',
-                          borderRadius: '8px',
-                          color: '#374151'
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Botão Gerar */}
-                  <button
-                    onClick={handleGenerateChart}
-                    disabled={generatingChart}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      padding: '12px 20px',
-                      backgroundColor: generatingChart ? '#86efac' : '#16a34a',
-                      color: 'white',
-                      fontSize: '14px',
-                      fontWeight: '700',
-                      borderRadius: '10px',
-                      border: 'none',
-                      cursor: generatingChart ? 'not-allowed' : 'pointer',
-                      marginBottom: '16px'
-                    }}
-                  >
-                    {generatingChart ? (
-                      <>
-                        <Loader2 style={{ width: '18px', height: '18px', animation: 'spin 1s linear infinite' }} />
-                        Gerando...
-                      </>
-                    ) : (
-                      <>
-                        <Plus style={{ width: '18px', height: '18px' }} />
-                        Gerar Gráfico
-                      </>
-                    )}
-                  </button>
-
-                  {/* Dica */}
+                {/* Resposta da IA */}
+                {aiResponse && (
                   <div style={{ 
-                    backgroundColor: '#eff6ff',
+                    backgroundColor: '#faf5ff',
                     borderRadius: '10px',
-                    padding: '14px'
+                    padding: '14px',
+                    border: '1px solid #e9d5ff'
                   }}>
-                    <p style={{ fontSize: '12px', color: '#1d4ed8', lineHeight: '1.5', margin: 0 }}>
-                      <strong>Dica:</strong> Combine diferentes campos para criar análises personalizadas. Os gráficos gerados aparecerão na área principal.
-                    </p>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                      <Zap style={{ width: '16px', height: '16px', color: '#7c3aed', flexShrink: 0, marginTop: '2px' }} />
+                      <p style={{ fontSize: '13px', color: '#581c87', lineHeight: '1.5', margin: 0 }}>
+                        {aiResponse}
+                      </p>
+                    </div>
                   </div>
+                )}
+
+                {/* Info */}
+                <div style={{ 
+                  marginTop: '16px',
+                  backgroundColor: '#f3f4f6',
+                  borderRadius: '10px',
+                  padding: '12px'
+                }}>
+                  <p style={{ fontSize: '11px', color: '#6b7280', lineHeight: '1.5', margin: 0 }}>
+                    <strong>IA treinada</strong> com os dados do seu gabinete. Faça perguntas sobre providências, tendências, prioridades e muito mais.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )
