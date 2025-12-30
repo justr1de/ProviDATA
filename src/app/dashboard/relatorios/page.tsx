@@ -95,21 +95,21 @@ export default function RelatoriosPage() {
   }
 
   return (
-    <div style={{ padding: '0 8px' }}>
+    <div className="px-1 md:px-2">
       {/* Header */}
       <div style={{ marginBottom: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
           <FileBarChart style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
-          <h1 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)' }}>
+          <h1 className="text-xl md:text-2xl lg:text-[28px] font-bold" style={{ color: 'var(--foreground)' }}>
             Relatórios
           </h1>
         </div>
-        <p style={{ fontSize: '16px', color: 'var(--foreground-muted)' }}>
+        <p className="text-sm md:text-base" style={{ color: 'var(--foreground-muted)' }}>
           Gere relatórios detalhados sobre as providências e atendimentos do gabinete
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '24px', alignItems: 'start' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4 lg:gap-6 items-start">
         {/* Report Types Card */}
         <div style={cardStyle}>
           <div style={cardHeaderStyle}>
@@ -123,7 +123,7 @@ export default function RelatoriosPage() {
             </div>
           </div>
           <div style={cardContentStyle}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
               {reportTypes.map((report) => {
                 const Icon = report.icon
                 const isSelected = selectedReport === report.id

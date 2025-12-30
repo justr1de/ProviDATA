@@ -151,15 +151,15 @@ function ProvidenciasContent() {
   }
 
   const cardHeaderStyle: React.CSSProperties = {
-    padding: '20px 24px',
+    padding: '16px',
     borderBottom: '1px solid var(--border)',
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between'
+    flexDirection: 'column',
+    gap: '12px'
   }
 
   const cardContentStyle: React.CSSProperties = {
-    padding: '24px'
+    padding: '16px'
   }
 
   const inputStyle: React.CSSProperties = {
@@ -182,7 +182,7 @@ function ProvidenciasContent() {
     color: 'var(--foreground)',
     fontSize: '14px',
     cursor: 'pointer',
-    minWidth: '160px'
+    minWidth: '140px'
   }
 
   const buttonStyle: React.CSSProperties = {
@@ -212,17 +212,17 @@ function ProvidenciasContent() {
   })
 
   return (
-    <div style={{ padding: '0 8px' }}>
+    <div className="px-1 md:px-2">
       {/* Header */}
-      <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
             <FileText style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
-            <h1 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)' }}>
+            <h1 className="text-xl md:text-2xl lg:text-[28px] font-bold" style={{ color: 'var(--foreground)' }}>
               Providências
             </h1>
           </div>
-          <p style={{ fontSize: '16px', color: 'var(--foreground-muted)' }}>
+          <p className="text-sm md:text-base" style={{ color: 'var(--foreground-muted)' }}>
             Gerencie todas as providências do gabinete
           </p>
         </div>
@@ -238,8 +238,8 @@ function ProvidenciasContent() {
       <div style={cardStyle}>
         {/* Card Header with Filters */}
         <div style={cardHeaderStyle}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
-            <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 flex-1">
+            <div className="relative flex-1 sm:max-w-[400px]">
               <Search style={{ 
                 position: 'absolute', 
                 left: '14px', 
