@@ -37,6 +37,7 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [isLargeScreen, setIsLargeScreen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
@@ -46,6 +47,16 @@ export default function DashboardLayout({
     // Scroll to top on route change
     window.scrollTo(0, 0)
   }, [pathname])
+
+  useEffect(() => {
+    // Detectar largura da tela para aplicar padding do sidebar
+    const checkScreenSize = () => {
+      setIsLargeScreen(window.innerWidth >= 1024)
+    }
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -202,7 +213,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main content */}
-      <div className="lg:pl-[256px] min-w-0">
+      <div className="min-w-0" style={{ paddingLeft: isLargeScreen ? '256px' : '0' }}>
         {/* Header */}
         <header className="sticky top-0 z-30 h-16 bg-[var(--background)] border-b border-[var(--border)]">
           <div className="flex items-center justify-between h-full px-4 md:px-6">
