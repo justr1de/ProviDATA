@@ -203,9 +203,12 @@ export default function DashboardPage() {
       {/* Stats Cards */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-        gap: '16px' 
-      }}>
+        gridTemplateColumns: 'repeat(4, 1fr)', 
+        gap: '16px',
+        minWidth: 0
+      }}
+      className="stats-grid"
+      >
         {/* Total de Providências */}
         <div style={{ 
           backgroundColor: 'var(--background)', 
@@ -455,7 +458,7 @@ export default function DashboardPage() {
       )}
 
       {/* Charts Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+      <div style={{ display: 'grid', gap: '24px' }} className="charts-grid">
         {/* Gráfico de Barras */}
         <div style={{ 
           backgroundColor: 'var(--background)', 
