@@ -385,7 +385,7 @@ export default function DashboardLayout({
           )}
         </div>
 
-        {/* Footer - Logo DATA-RO visível, sem fundo branco */}
+        {/* Footer - Logo DATA-RO visível, sem fundo branco - v2 */}
         <div style={{ 
           padding: '16px 20px', 
           borderTop: '1px solid rgba(255,255,255,0.1)',
