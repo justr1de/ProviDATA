@@ -165,8 +165,26 @@ export default function HomePage() {
     <div style={{ 
       minHeight: '100vh', 
       backgroundColor: isDark ? '#0f172a' : '#ffffff',
-      color: isDark ? '#f1f5f9' : '#1e293b'
+      color: isDark ? '#f1f5f9' : '#1e293b',
+      position: 'relative'
     }}>
+      {/* Mapa do Brasil como marca d'água de fundo */}
+      <div style={{
+        position: 'fixed',
+        top: '96px', // Abaixo do header
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        height: 'calc(100vh - 96px)',
+        backgroundImage: 'url(/brazil-map.png)',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center center',
+        backgroundSize: 'contain',
+        opacity: isDark ? 0.03 : 0.05,
+        pointerEvents: 'none',
+        zIndex: 0,
+        filter: isDark ? 'invert(1) brightness(2)' : 'none'
+      }} />
       
       {/* HEADER com marca d'água espalhada */}
       <header style={{ 
