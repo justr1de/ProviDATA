@@ -5,6 +5,15 @@
   background-color: var(--background) !important;
 }
 
+/* Forçar fundo escuro no dashboard */
+.dark .dashboard-content {
+  background-color: #0f172a !important;
+}
+
+.dashboard-content {
+  background-color: #f9fafb;
+}
+
 .bg-card {
   background-color: var(--card) !important;
 }
