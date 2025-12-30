@@ -23,6 +23,8 @@ import {
 } from 'lucide-react'
 import { Toaster } from 'sonner'
 
+const SIDEBAR_WIDTH = 256
+
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Providências', href: '/dashboard/providencias', icon: FileText },
@@ -43,11 +45,23 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
   
   const { user, tenant, setUser, setTenant, reset } = useAuthStore()
+
+  // Detectar largura da tela
+  useEffect(() => {
+    const checkWidth = () => {
+      setIsDesktop(window.innerWidth >= 768)
+    }
+    
+    checkWidth()
+    window.addEventListener('resize', checkWidth)
+    return () => window.removeEventListener('resize', checkWidth)
+  }, [])
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -58,7 +72,6 @@ export default function DashboardLayout({
         return
       }
 
-      // Buscar dados do usuário
       const { data: userData } = await supabase
         .from('users')
         .select('*, tenant:tenants(*)')
@@ -90,48 +103,97 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--background)' }}>
       <Toaster position="top-right" richColors />
       
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 40,
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(4px)'
+          }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`dashboard-sidebar bg-gray-900 dark:bg-gray-950 ${sidebarOpen ? 'open' : ''}`}>
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="p-4 border-b border-gray-800">
-            <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center overflow-hidden">
-                <Image
-                  src="/providata-logo-final.png"
-                  alt="ProviDATA"
-                  width={32}
-                  height={32}
-                  className="object-contain"
-                />
-              </div>
-              <span className="text-lg font-bold text-white">ProviDATA</span>
-            </Link>
-          </div>
+      <aside 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: 50,
+          height: '100%',
+          width: `${SIDEBAR_WIDTH}px`,
+          transform: (isDesktop || sidebarOpen) ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 0.3s ease',
+          backgroundColor: '#111827',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        {/* Close button for mobile */}
+        {!isDesktop && sidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(false)}
+            style={{
+              position: 'absolute',
+              top: '16px',
+              right: '16px',
+              padding: '8px',
+              borderRadius: '8px',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              color: '#9CA3AF'
+            }}
+          >
+            <X style={{ width: '24px', height: '24px' }} />
+          </button>
+        )}
 
-          {/* Tenant Info */}
-          <div className="px-4 py-3 border-b border-gray-800">
-            <p className="text-sm font-medium text-white truncate">
-              {tenant?.parlamentar_name || 'Carregando...'}
-            </p>
-            <p className="text-xs text-gray-400 truncate">
-              {tenant?.cargo?.replace('_', ' ') || 'Deputado(a)'} · {tenant?.uf || 'RO'}
-            </p>
-          </div>
+        {/* Logo */}
+        <div style={{ padding: '16px', borderBottom: '1px solid #374151' }}>
+          <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '8px',
+              backgroundColor: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden'
+            }}>
+              <Image
+                src="/providata-logo-final.png"
+                alt="ProviDATA"
+                width={32}
+                height={32}
+                style={{ objectFit: 'contain' }}
+              />
+            </div>
+            <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'white' }}>ProviDATA</span>
+          </Link>
+        </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {/* Tenant Info */}
+        <div style={{ padding: '12px 16px', borderBottom: '1px solid #374151' }}>
+          <p style={{ fontSize: '14px', fontWeight: '500', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {tenant?.parlamentar_name || 'Carregando...'}
+          </p>
+          <p style={{ fontSize: '12px', color: '#9CA3AF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {tenant?.cargo?.replace('_', ' ') || 'deputado estadual'}
+          </p>
+        </div>
+
+        {/* Navigation */}
+        <nav style={{ flex: 1, padding: '16px 12px', overflowY: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {navigation.map((item) => {
               const Icon = item.icon
               const active = isActive(item.href)
@@ -140,24 +202,31 @@ export default function DashboardLayout({
                   key={item.name}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`
-                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
-                    transition-colors duration-200
-                    ${active 
-                      ? 'bg-green-600 text-white' 
-                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                    }
-                  `}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    textDecoration: 'none',
+                    backgroundColor: active ? '#16a34a' : 'transparent',
+                    color: active ? 'white' : '#D1D5DB',
+                    transition: 'all 0.2s'
+                  }}
                 >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <Icon style={{ width: '20px', height: '20px', flexShrink: 0 }} />
                   <span>{item.name}</span>
                 </Link>
               )
             })}
-          </nav>
+          </div>
+        </nav>
 
-          {/* Bottom Navigation */}
-          <div className="px-3 py-4 border-t border-gray-800 space-y-1">
+        {/* Bottom Navigation */}
+        <div style={{ padding: '16px 12px', borderTop: '1px solid #374151' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {bottomNavigation.map((item) => {
               const Icon = item.icon
               const active = isActive(item.href)
@@ -166,108 +235,192 @@ export default function DashboardLayout({
                   key={item.name}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`
-                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
-                    transition-colors duration-200
-                    ${active 
-                      ? 'bg-green-600 text-white' 
-                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                    }
-                  `}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    textDecoration: 'none',
+                    backgroundColor: active ? '#16a34a' : 'transparent',
+                    color: active ? 'white' : '#D1D5DB',
+                    transition: 'all 0.2s'
+                  }}
                 >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <Icon style={{ width: '20px', height: '20px', flexShrink: 0 }} />
                   <span>{item.name}</span>
                 </Link>
               )
             })}
           </div>
+        </div>
 
-          {/* Footer */}
-          <div className="px-4 py-3 border-t border-gray-800">
-            <a 
-              href="https://dataro-it.com.br" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-xs text-gray-500 hover:text-gray-400 transition-colors"
-            >
-              DATA-RO Inteligência Territorial
-            </a>
-          </div>
+        {/* Footer */}
+        <div style={{ padding: '12px 16px', borderTop: '1px solid #374151' }}>
+          <a 
+            href="https://dataro-it.com.br" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ fontSize: '12px', color: '#6B7280', textDecoration: 'none' }}
+          >
+            DATA-RO Inteligência Territorial
+          </a>
         </div>
       </aside>
 
       {/* Main content wrapper */}
-      <div className="dashboard-main-content">
+      <div 
+        style={{
+          marginLeft: isDesktop ? `${SIDEBAR_WIDTH}px` : '0',
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'margin-left 0.3s ease'
+        }}
+      >
         {/* Header */}
-        <header className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-          <div className="flex items-center justify-between h-16 px-4">
+        <header 
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 30,
+            backgroundColor: 'var(--card)',
+            borderBottom: '1px solid var(--border)'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '64px', padding: '0 16px' }}>
             {/* Mobile menu button */}
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 md:hidden"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
+            {!isDesktop && (
+              <button
+                onClick={() => setSidebarOpen(true)}
+                style={{
+                  padding: '8px',
+                  borderRadius: '8px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--foreground-muted)'
+                }}
+              >
+                <Menu style={{ width: '24px', height: '24px' }} />
+              </button>
+            )}
 
             {/* Spacer for desktop */}
-            <div className="hidden md:block" />
+            {isDesktop && <div />}
 
             {/* Right side */}
-            <div className="flex items-center gap-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <ThemeToggle />
               
               {/* Notifications */}
               <Link 
                 href="/dashboard/notificacoes"
-                className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 relative"
+                style={{
+                  padding: '8px',
+                  borderRadius: '8px',
+                  color: 'var(--foreground-muted)',
+                  textDecoration: 'none'
+                }}
               >
-                <Bell className="w-5 h-5" />
+                <Bell style={{ width: '20px', height: '20px' }} />
               </Link>
 
               {/* User menu */}
-              <div className="relative">
+              <div style={{ position: 'relative' }}>
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px',
+                    borderRadius: '8px',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
                 >
-                  <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center">
-                    <User className="w-4 h-4 text-white" />
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    backgroundColor: '#16a34a',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <User style={{ width: '16px', height: '16px', color: 'white' }} />
                   </div>
-                  <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-200">
+                  <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)' }}>
                     {user?.nome?.split(' ')[0] || 'Usuário'}
                   </span>
-                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                  <ChevronDown style={{ width: '16px', height: '16px', color: 'var(--foreground-muted)' }} />
                 </button>
 
                 {userMenuOpen && (
                   <>
                     <div 
-                      className="fixed inset-0 z-40"
+                      style={{ position: 'fixed', inset: 0, zIndex: 40 }}
                       onClick={() => setUserMenuOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                      <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    <div style={{
+                      position: 'absolute',
+                      right: 0,
+                      marginTop: '8px',
+                      width: '192px',
+                      backgroundColor: 'var(--card)',
+                      borderRadius: '8px',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                      border: '1px solid var(--border)',
+                      zIndex: 50
+                    }}>
+                      <div style={{ padding: '12px', borderBottom: '1px solid var(--border)' }}>
+                        <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {user?.nome || 'Usuário'}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">
+                        <p style={{ fontSize: '12px', color: 'var(--foreground-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {user?.email}
                         </p>
                       </div>
-                      <div className="p-1">
+                      <div style={{ padding: '4px' }}>
                         <Link
                           href="/dashboard/configuracoes"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 12px',
+                            fontSize: '14px',
+                            color: 'var(--foreground)',
+                            textDecoration: 'none',
+                            borderRadius: '6px'
+                          }}
                         >
-                          <Settings className="w-4 h-4" />
+                          <Settings style={{ width: '16px', height: '16px' }} />
                           Configurações
                         </Link>
                         <button
                           onClick={handleLogout}
-                          className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md w-full"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px 12px',
+                            fontSize: '14px',
+                            color: '#dc2626',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            borderRadius: '6px',
+                            width: '100%',
+                            cursor: 'pointer',
+                            textAlign: 'left'
+                          }}
                         >
-                          <LogOut className="w-4 h-4" />
+                          <LogOut style={{ width: '16px', height: '16px' }} />
                           Sair
                         </button>
                       </div>
@@ -280,7 +433,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 md:p-6">
+        <main style={{ flex: 1, padding: isDesktop ? '24px' : '16px' }}>
           {children}
         </main>
       </div>
