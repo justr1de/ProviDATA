@@ -72,6 +72,7 @@ export default function ProvidenciaDetailPage() {
   const [newStatus, setNewStatus] = useState<Providencia['status']>('pendente')
   const [observacao, setObservacao] = useState('')
   const [isUpdating, setIsUpdating] = useState(false)
+  const [currentUser, setCurrentUser] = useState<any>(null)
   const { tenant, user } = useAuthStore()
   const supabase = createClient()
   const router = useRouter()
@@ -83,6 +84,17 @@ export default function ProvidenciaDetailPage() {
       if (!tenant || !id) return
 
       try {
+        // Carregar usuário atual do Supabase Auth
+        const { data: { user: authUser } } = await supabase.auth.getUser()
+        if (authUser) {
+          const { data: userData } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', authUser.id)
+            .single()
+          if (userData) setCurrentUser(userData)
+        }
+
         // Carregar providência
         const { data: provData, error: provError } = await supabase
           .from('providencias')
@@ -123,7 +135,8 @@ export default function ProvidenciaDetailPage() {
   }, [tenant, id, supabase])
 
   const handleUpdateStatus = async () => {
-    if (!providencia || !user || newStatus === providencia.status) return
+    const activeUser = currentUser || user
+    if (!providencia || !activeUser || newStatus === providencia.status) return
 
     setIsUpdating(true)
     try {
@@ -143,7 +156,7 @@ export default function ProvidenciaDetailPage() {
         .from('historico_providencias')
         .insert({
           providencia_id: providencia.id,
-          usuario_id: user.id,
+          usuario_id: activeUser.id,
           acao: 'alteracao_status',
           status_anterior: providencia.status,
           status_novo: newStatus,
