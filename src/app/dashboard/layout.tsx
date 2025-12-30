@@ -625,6 +625,35 @@ export default function DashboardLayout({
 
         {/* Page content */}
         <main style={{ flex: 1, padding: isDesktop ? '32px' : '20px', paddingBottom: '40px' }}>
+          {/* Cabeçalho Global - ProviDATA */}
+          <div style={{
+            marginBottom: '24px',
+            paddingBottom: '16px',
+            borderBottom: '1px solid var(--border)'
+          }}>
+            <h1 style={{
+              fontSize: isDesktop ? '24px' : '18px',
+              fontWeight: '700',
+              color: 'var(--foreground)',
+              margin: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <span style={{
+                background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>
+                ProviDATA
+              </span>
+              <span style={{ color: 'var(--foreground-muted)', fontWeight: '400' }}>—</span>
+              <span style={{ fontWeight: '500', color: 'var(--foreground-secondary)' }}>
+                Gestão de Pedidos de Providência
+              </span>
+            </h1>
+          </div>
           {children}
         </main>
       </div>
