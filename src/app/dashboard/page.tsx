@@ -151,34 +151,33 @@ const tourSteps: TourStep[] = [
 
 export default function DashboardPage() {
   const { resolvedTheme } = useTheme()
-  const [localTheme, setLocalTheme] = useState<string>('light')
+  const [isDark, setIsDark] = useState(false)
+  const [mounted, setMounted] = useState(false)
   
-  // Sincronizar com o tema global
+  // Verificar tema no cliente
   useEffect(() => {
-    setLocalTheme(resolvedTheme)
-  }, [resolvedTheme])
-  
-  // Também observar mudanças na classe do HTML
-  useEffect(() => {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class') {
-          const isDarkMode = document.documentElement.classList.contains('dark')
-          setLocalTheme(isDarkMode ? 'dark' : 'light')
-        }
-      })
-    })
+    setMounted(true)
+    const checkTheme = () => {
+      const isDarkMode = document.documentElement.classList.contains('dark')
+      setIsDark(isDarkMode)
+    }
     
-    observer.observe(document.documentElement, { attributes: true })
+    // Verificar imediatamente
+    checkTheme()
     
-    // Verificar estado inicial
-    const isDarkMode = document.documentElement.classList.contains('dark')
-    setLocalTheme(isDarkMode ? 'dark' : 'light')
+    // Observar mudanças
+    const observer = new MutationObserver(checkTheme)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
     
     return () => observer.disconnect()
   }, [])
   
-  const isDark = localTheme === 'dark'
+  // Também reagir a mudanças do resolvedTheme
+  useEffect(() => {
+    if (mounted) {
+      setIsDark(resolvedTheme === 'dark')
+    }
+  }, [resolvedTheme, mounted])
   
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<Stats>({
