@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -23,7 +23,8 @@ import {
   CreditCard,
   Info,
   PhoneCall,
-  Key
+  Key,
+  Menu
 } from 'lucide-react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -98,6 +99,7 @@ const watermarkWords = [
 export default function HomePage() {
   const { resolvedTheme, setTheme } = useTheme();
   const [showContactForm, setShowContactForm] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [formData, setFormData] = useState({
     nome: '',
     cargo: '',
@@ -147,7 +149,6 @@ export default function HomePage() {
       
       setFormStatus('success');
       setFormData({ nome: '', cargo: '', email: '', telefone: '', mensagem: '', email_confirm: '' });
-      
       setTimeout(() => {
         setShowContactForm(false);
         setFormStatus('idle');
@@ -205,7 +206,7 @@ export default function HomePage() {
         } as React.CSSProperties} />
       </div>
       
-      {/* HEADER com marca d'água espalhada */}
+      {/* HEADER RESPONSIVO */}
       <header style={{ 
         position: 'fixed', 
         top: 0, 
@@ -217,7 +218,7 @@ export default function HomePage() {
         backdropFilter: 'blur(8px)',
         overflow: 'hidden'
       }}>
-        {/* Marca d'água espalhada no fundo do header */}
+        {/* Marca d'água espalhada no fundo do header - escondida em mobile */}
         <div style={{
           position: 'absolute',
           top: 0,
@@ -244,28 +245,30 @@ export default function HomePage() {
                 textTransform: 'uppercase',
                 letterSpacing: '1px',
                 whiteSpace: 'nowrap',
-                transform: `rotate(${(index % 5) * 2 - 4}deg)`
+                transform: `rotate(${(index % 5) * 2 - 4}deg)`,
+                display: 'none' // Escondido por padrão, mostrar apenas em desktop via media query
               }}
+              className="watermark-word"
             >
               {word}
             </span>
           ))}
         </div>
 
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '96px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px', position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px' }}>
             
-            {/* Logos - Mesmo tamanho de caixa */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              {/* Logo DATA-RO */}
+            {/* Logos - Responsivo */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {/* Logo DATA-RO - Menor em mobile */}
               <Link href="https://dataro-it.com.br" target="_blank" rel="noopener noreferrer">
                 <div style={{ 
-                  width: '64px', 
-                  height: '64px', 
+                  width: '44px', 
+                  height: '44px', 
                   backgroundColor: '#ffffff', 
-                  borderRadius: '12px', 
-                  padding: '6px', 
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  borderRadius: '10px', 
+                  padding: '4px', 
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -273,22 +276,22 @@ export default function HomePage() {
                   <Image 
                     src="/dataro-logo-final.png" 
                     alt="DATA-RO" 
-                    width={52} 
-                    height={52}
+                    width={36} 
+                    height={36}
                     style={{ objectFit: 'contain' }}
                   />
                 </div>
               </Link>
               
-              {/* Logo ProviDATA */}
-              <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+              {/* Logo ProviDATA - Texto escondido em mobile pequeno */}
+              <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
                 <div style={{ 
-                  width: '64px', 
-                  height: '64px', 
+                  width: '44px', 
+                  height: '44px', 
                   backgroundColor: '#ffffff', 
-                  borderRadius: '12px', 
-                  padding: '6px', 
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  borderRadius: '10px', 
+                  padding: '4px', 
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -296,104 +299,82 @@ export default function HomePage() {
                   <Image 
                     src="/providata-logo-final.png" 
                     alt="ProviDATA" 
-                    width={52} 
-                    height={52}
+                    width={36} 
+                    height={36}
                     style={{ objectFit: 'contain' }}
                   />
                 </div>
-                <span className="text-providata-gradient" style={{ fontWeight: 800, fontSize: '32px', letterSpacing: '-0.02em' }}>ProviDATA</span>
+                <span 
+                  className="text-providata-gradient logo-text-desktop" 
+                  style={{ fontWeight: 800, fontSize: '24px', letterSpacing: '-0.02em' }}
+                >
+                  ProviDATA
+                </span>
               </Link>
             </div>
 
-            {/* Nav - Botões com efeito espelho */}
-            <nav style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* Nav Desktop - Escondido em mobile */}
+            <nav className="nav-desktop" style={{ display: 'none', alignItems: 'center', gap: '12px' }}>
               {navItems.map((item) => (
                 <a 
                   key={item.name}
                   href={item.href} 
                   style={{ 
-                    fontSize: '14px', 
+                    fontSize: '13px', 
                     fontWeight: 600,
                     color: isDark ? '#e2e8f0' : '#374151',
                     textDecoration: 'none',
-                    padding: '10px 16px',
-                    borderRadius: '10px',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
                     backgroundColor: isDark ? '#1e293b' : '#f3f4f6',
-                    border: `2px solid ${isDark ? '#4b5563' : '#cbd5e1'}`,
+                    border: `1px solid ${isDark ? '#4b5563' : '#cbd5e1'}`,
                     boxShadow: isDark 
-                      ? '0 4px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -2px 4px rgba(0,0,0,0.2)' 
-                      : '0 4px 6px rgba(0,0,0,0.08), inset 0 2px 0 rgba(255,255,255,1), inset 0 -2px 4px rgba(0,0,0,0.03)',
+                      ? '0 2px 4px rgba(0,0,0,0.3)' 
+                      : '0 2px 4px rgba(0,0,0,0.05)',
                     transition: 'all 0.2s ease',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px',
-                    position: 'relative',
-                    overflow: 'hidden'
+                    gap: '4px'
                   }}
                 >
-                  {/* Efeito espelho/reflexo */}
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: '50%',
-                    background: isDark 
-                      ? 'linear-gradient(to bottom, rgba(255,255,255,0.08), transparent)'
-                      : 'linear-gradient(to bottom, rgba(255,255,255,0.9), transparent)',
-                    borderRadius: '10px 10px 0 0',
-                    pointerEvents: 'none'
-                  }} />
-                  <item.icon style={{ width: '16px', height: '16px', color: '#16a34a', position: 'relative', zIndex: 1 }} />
-                  <span style={{ position: 'relative', zIndex: 1 }}>{item.name}</span>
+                  <item.icon style={{ width: '14px', height: '14px', color: '#16a34a' }} />
+                  <span>{item.name}</span>
                 </a>
               ))}
             </nav>
 
-            {/* Actions */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              {/* Botão Entrar - Verde com ícone de chave e efeito espelho */}
+            {/* Actions - Sempre visíveis */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {/* Botão Entrar - SEMPRE VISÍVEL */}
               <Link 
                 href="/login" 
                 style={{ 
-                  padding: '12px 24px',
-                  borderRadius: '10px',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
                   backgroundColor: '#16a34a',
                   color: 'white',
                   fontWeight: 700,
-                  fontSize: '14px',
+                  fontSize: '13px',
                   textDecoration: 'none',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.4), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.1)',
-                  position: 'relative',
-                  overflow: 'hidden'
+                  gap: '6px',
+                  boxShadow: '0 2px 8px rgba(22, 163, 74, 0.35)',
+                  whiteSpace: 'nowrap'
                 }}
               >
-                {/* Efeito espelho */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '50%',
-                  background: 'linear-gradient(to bottom, rgba(255,255,255,0.25), transparent)',
-                  borderRadius: '10px 10px 0 0',
-                  pointerEvents: 'none'
-                }} />
-                <Key style={{ width: '18px', height: '18px', position: 'relative', zIndex: 1 }} />
-                <span style={{ position: 'relative', zIndex: 1 }}>Entrar</span>
+                <Key style={{ width: '16px', height: '16px' }} />
+                <span>Entrar</span>
               </Link>
               
-              {/* Botão Dia/Noite com efeito espelho */}
+              {/* Botão Dia/Noite */}
               <button
                 onClick={toggleTheme}
                 style={{ 
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '12px',
-                  border: `2px solid ${isDark ? '#4b5563' : '#cbd5e1'}`,
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '8px',
+                  border: `1px solid ${isDark ? '#4b5563' : '#cbd5e1'}`,
                   backgroundColor: isDark ? '#1e293b' : '#f3f4f6',
                   color: isDark ? '#fbbf24' : '#64748b',
                   display: 'flex',
@@ -401,263 +382,272 @@ export default function HomePage() {
                   justifyContent: 'center',
                   cursor: 'pointer',
                   boxShadow: isDark 
-                    ? '0 4px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)' 
-                    : '0 4px 6px rgba(0,0,0,0.08), inset 0 2px 0 rgba(255,255,255,1)',
-                  position: 'relative',
-                  overflow: 'hidden'
+                    ? '0 2px 4px rgba(0,0,0,0.3)' 
+                    : '0 2px 4px rgba(0,0,0,0.05)',
+                  flexShrink: 0
                 }}
                 title={isDark ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
               >
-                {/* Efeito espelho */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '50%',
-                  background: isDark 
-                    ? 'linear-gradient(to bottom, rgba(255,255,255,0.08), transparent)'
-                    : 'linear-gradient(to bottom, rgba(255,255,255,0.9), transparent)',
-                  borderRadius: '12px 12px 0 0',
-                  pointerEvents: 'none'
-                }} />
-                {isDark ? <Sun style={{ width: '24px', height: '24px', position: 'relative', zIndex: 1 }} /> : <Moon style={{ width: '24px', height: '24px', position: 'relative', zIndex: 1 }} />}
+                {isDark ? <Sun style={{ width: '20px', height: '20px' }} /> : <Moon style={{ width: '20px', height: '20px' }} />}
+              </button>
+
+              {/* Menu Hamburger - Apenas mobile */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="menu-mobile-btn"
+                style={{ 
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '8px',
+                  border: `1px solid ${isDark ? '#4b5563' : '#cbd5e1'}`,
+                  backgroundColor: isDark ? '#1e293b' : '#f3f4f6',
+                  color: isDark ? '#e2e8f0' : '#374151',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  boxShadow: isDark 
+                    ? '0 2px 4px rgba(0,0,0,0.3)' 
+                    : '0 2px 4px rgba(0,0,0,0.05)'
+                }}
+              >
+                {mobileMenuOpen ? <X style={{ width: '20px', height: '20px' }} /> : <Menu style={{ width: '20px', height: '20px' }} />}
               </button>
             </div>
           </div>
+
+          {/* Menu Mobile Dropdown */}
+          {mobileMenuOpen && (
+            <div 
+              className="mobile-menu"
+              style={{
+                position: 'absolute',
+                top: '72px',
+                left: 0,
+                right: 0,
+                backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                borderTop: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+                padding: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+              }}
+            >
+              {navItems.map((item) => (
+                <a 
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ 
+                    fontSize: '15px', 
+                    fontWeight: 600,
+                    color: isDark ? '#e2e8f0' : '#374151',
+                    textDecoration: 'none',
+                    padding: '12px 16px',
+                    borderRadius: '10px',
+                    backgroundColor: isDark ? '#0f172a' : '#f3f4f6',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px'
+                  }}
+                >
+                  <item.icon style={{ width: '18px', height: '18px', color: '#16a34a' }} />
+                  <span>{item.name}</span>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </header>
 
+      {/* CSS para responsividade */}
+      <style jsx global>{`
+        /* Mobile primeiro */
+        .logo-text-desktop {
+          display: none !important;
+        }
+        .nav-desktop {
+          display: none !important;
+        }
+        .menu-mobile-btn {
+          display: flex !important;
+        }
+        .watermark-word {
+          display: none !important;
+        }
+        
+        /* Tablet (768px+) */
+        @media (min-width: 768px) {
+          .logo-text-desktop {
+            display: inline !important;
+          }
+          .menu-mobile-btn {
+            display: none !important;
+          }
+          .nav-desktop {
+            display: flex !important;
+          }
+          .watermark-word {
+            display: inline !important;
+          }
+        }
+        
+        /* Desktop (1024px+) */
+        @media (min-width: 1024px) {
+          .logo-text-desktop {
+            font-size: 28px !important;
+          }
+        }
+      `}</style>
+
       {/* HERO */}
-      <section style={{ paddingTop: '200px', paddingBottom: '100px', paddingLeft: '24px', paddingRight: '24px' }}>
+      <section style={{ paddingTop: '140px', paddingBottom: '80px', paddingLeft: '16px', paddingRight: '16px' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
           
           {/* Badge */}
           <div style={{ 
             display: 'inline-block', 
-            padding: '12px 24px', 
+            padding: '10px 20px', 
             borderRadius: '9999px', 
             backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
             color: isDark ? 'var(--foreground)' : 'var(--foreground)',
-            fontSize: '15px',
+            fontSize: '14px',
             fontWeight: 600,
-            marginBottom: '40px',
+            marginBottom: '32px',
             border: `1px solid ${isDark ? 'rgba(34, 197, 94, 0.3)' : '#bbf7d0'}`
           }}>
             ✨ A solução completa para gabinetes parlamentares
           </div>
 
-	          {/* Title com efeito 3D */}
-	          <h1 style={{ 
-	            fontSize: 'clamp(36px, 5vw, 56px)', 
-	            fontWeight: 800, 
-	            lineHeight: 1.15,
-	            marginBottom: '28px',
-	          }}>
-
-<span className="text-providata-gradient" style={{ 
-		                display: 'block',
-		                letterSpacing: '-0.02em'
-		              }}>
-		                Plataforma para Gestão de
-		              </span>
-<span className="text-providata-gradient" style={{ 
-		              display: 'block',
-		              marginTop: '8px',
-		              letterSpacing: '-0.02em'
-		            }}>
-		              Pedidos de Providência
-		            </span>
-	          </h1>
+          {/* Title com efeito 3D */}
+          <h1 style={{ 
+            fontSize: 'clamp(32px, 8vw, 64px)', 
+            fontWeight: 900, 
+            lineHeight: 1.1, 
+            marginBottom: '24px',
+            letterSpacing: '-0.03em'
+          }}>
+            <span style={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>Plataforma para </span>
+            <span style={{ 
+              color: '#16a34a',
+              textShadow: isDark 
+                ? '2px 2px 0 #0f172a, 4px 4px 0 rgba(22, 163, 74, 0.3)' 
+                : '2px 2px 0 #ffffff, 4px 4px 0 rgba(22, 163, 74, 0.2)'
+            }}>
+              Gestão de Providências
+            </span>
+            <span style={{ color: isDark ? '#f1f5f9' : '#1e293b' }}> Parlamentares</span>
+          </h1>
 
           {/* Subtitle */}
           <p style={{ 
-            fontSize: '20px', 
-            lineHeight: 1.7,
-            marginBottom: '48px',
-            maxWidth: '700px',
-            margin: '0 auto 48px auto',
-            color: isDark ? '#94a3b8' : '#64748b'
+            fontSize: 'clamp(16px, 4vw, 20px)', 
+            color: isDark ? '#94a3b8' : '#64748b', 
+            maxWidth: '700px', 
+            margin: '0 auto 40px',
+            lineHeight: 1.6
           }}>
-            Organize as solicitações dos cidadãos de forma simples e transparente. 
-            Acompanhe prazos, encaminhe demandas e mantenha todos informados.
+            Organize, acompanhe e gerencie todas as demandas do seu gabinete em um único lugar. 
+            Mais eficiência, transparência e resultados para o cidadão.
           </p>
 
-          {/* CTAs */}
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            gap: '20px',
-            marginBottom: '72px'
-          }}>
-            <Link 
-              href="/demo"
+          {/* CTA Buttons */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
+            <button
+              onClick={() => setShowContactForm(true)}
               style={{ 
-                padding: '18px 36px', 
-                borderRadius: '12px', 
+                padding: '16px 32px',
+                borderRadius: '12px',
                 backgroundColor: '#16a34a',
                 color: 'white',
                 fontWeight: 700,
-                fontSize: '17px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                textDecoration: 'none',
-                boxShadow: '0 6px 20px rgba(22, 163, 74, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-            >
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '50%',
-                background: 'linear-gradient(to bottom, rgba(255,255,255,0.2), transparent)',
-                borderRadius: '12px 12px 0 0',
-                pointerEvents: 'none'
-              }} />
-              <span style={{ position: 'relative', zIndex: 1 }}>Acessar demonstração</span>
-              <ArrowRight style={{ width: '22px', height: '22px', position: 'relative', zIndex: 1 }} />
-            </Link>
-            <button 
-              onClick={() => setShowContactForm(true)}
-              style={{ 
-                padding: '18px 36px', 
-                borderRadius: '12px', 
-                border: `2px solid ${isDark ? '#334155' : '#d1d5db'}`,
-                backgroundColor: isDark ? '#1e293b' : '#ffffff',
-                fontWeight: 700,
-                fontSize: '17px',
-                color: isDark ? '#f1f5f9' : '#1e293b',
+                fontSize: '16px',
+                border: 'none',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
-                boxShadow: isDark 
-                  ? '0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)' 
-                  : '0 4px 12px rgba(0,0,0,0.08), inset 0 2px 0 rgba(255,255,255,1)',
-                position: 'relative',
-                overflow: 'hidden'
+                boxShadow: '0 4px 14px rgba(22, 163, 74, 0.4)',
+                width: '100%',
+                maxWidth: '300px',
+                justifyContent: 'center'
               }}
             >
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '50%',
-                background: isDark 
-                  ? 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)'
-                  : 'linear-gradient(to bottom, rgba(255,255,255,0.8), transparent)',
-                borderRadius: '12px 12px 0 0',
-                pointerEvents: 'none'
-              }} />
-              <span style={{ position: 'relative', zIndex: 1 }}>Entrar em contato</span>
+              Solicitar Demonstração
+              <ArrowRight style={{ width: '20px', height: '20px' }} />
             </button>
-          </div>
-
-          {/* Stats */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            gap: '56px',
-            flexWrap: 'wrap'
-          }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '26px', fontWeight: 700, color: '#16a34a' }}>Gestão</div>
-              <div style={{ fontSize: '15px', marginTop: '6px', color: isDark ? '#94a3b8' : '#64748b' }}>Inteligente</div>
-            </div>
-            <div style={{ width: '2px', height: '56px', backgroundColor: isDark ? '#334155' : '#d1d5db', borderRadius: '2px' }}></div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '26px', fontWeight: 700, color: '#16a34a' }}>Acompanhamento</div>
-              <div style={{ fontSize: '15px', marginTop: '6px', color: isDark ? '#94a3b8' : '#64748b' }}>em tempo real</div>
-            </div>
-            <div style={{ width: '2px', height: '56px', backgroundColor: isDark ? '#334155' : '#d1d5db', borderRadius: '2px' }}></div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '26px', fontWeight: 700, color: '#16a34a' }}>LGPD</div>
-              <div style={{ fontSize: '15px', marginTop: '6px', color: isDark ? '#94a3b8' : '#64748b' }}>Conforme</div>
-            </div>
+            
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ 
+                padding: '16px 32px',
+                borderRadius: '12px',
+                backgroundColor: '#25D366',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '16px',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                boxShadow: '0 4px 14px rgba(37, 211, 102, 0.4)',
+                width: '100%',
+                maxWidth: '300px',
+                justifyContent: 'center'
+              }}
+            >
+              <MessageCircle style={{ width: '20px', height: '20px' }} />
+              Falar no WhatsApp
+            </a>
           </div>
         </div>
       </section>
 
       {/* RECURSOS */}
-      <section id="recursos" style={{ 
-        padding: '100px 24px', 
-        backgroundColor: isDark ? '#1e293b' : '#f9fafb' 
-      }}>
+      <section id="recursos" style={{ padding: '80px 16px', backgroundColor: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(241, 245, 249, 0.5)', position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          
-          <div style={{ textAlign: 'center', marginBottom: '72px' }}>
-            <h2 style={{ 
-              fontSize: '40px', 
-              fontWeight: 700, 
-              marginBottom: '20px',
-              color: isDark ? '#f1f5f9' : '#1e293b'
-            }}>
-              Tudo que você precisa
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <h2 style={{ fontSize: 'clamp(28px, 6vw, 40px)', fontWeight: 800, marginBottom: '16px' }}>
+              Recursos <span style={{ color: '#16a34a' }}>Completos</span>
             </h2>
-            <p style={{ 
-              fontSize: '19px', 
-              maxWidth: '600px', 
-              margin: '0 auto',
-              color: isDark ? '#94a3b8' : '#64748b'
-            }}>
-              Funcionalidades pensadas para otimizar o trabalho do gabinete parlamentar
+            <p style={{ fontSize: '18px', color: isDark ? '#94a3b8' : '#64748b', maxWidth: '600px', margin: '0 auto' }}>
+              Tudo que seu gabinete precisa para uma gestão eficiente
             </p>
           </div>
-
+          
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', 
-            gap: '28px'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+            gap: '24px' 
           }}>
             {features.map((feature, index) => (
               <div 
                 key={index}
                 style={{ 
-                  padding: '36px',
+                  padding: '32px',
                   borderRadius: '20px',
-                  border: `2px solid ${isDark ? '#4b5563' : '#cbd5e1'}`,
-                  backgroundColor: isDark ? '#0f172a' : '#ffffff',
-                  boxShadow: isDark 
-                    ? '0 4px 12px rgba(0,0,0,0.3)' 
-                    : '0 4px 12px rgba(0,0,0,0.05)'
+                  backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                  border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+                  boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.05)'
                 }}
               >
                 <div style={{ 
-                  width: '64px', 
-                  height: '64px', 
-                  borderRadius: '16px', 
-                  backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
+                  width: '56px', 
+                  height: '56px', 
+                  borderRadius: '14px', 
+                  backgroundColor: isDark ? 'rgba(34, 197, 94, 0.15)' : '#dcfce7',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: '28px'
+                  marginBottom: '20px'
                 }}>
-                  <feature.icon style={{ width: '32px', height: '32px', color: '#16a34a' }} />
+                  <feature.icon style={{ width: '28px', height: '28px', color: '#16a34a' }} />
                 </div>
-                <h3 style={{ 
-                  fontSize: '22px', 
-                  fontWeight: 700, 
-                  marginBottom: '14px',
-                  color: isDark ? '#f1f5f9' : '#1e293b'
-                }}>
-                  {feature.title}
-                </h3>
-                <p style={{ 
-                  fontSize: '16px', 
-                  lineHeight: 1.7,
-                  color: isDark ? '#94a3b8' : '#64748b'
-                }}>
-                  {feature.description}
-                </p>
+                <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>{feature.title}</h3>
+                <p style={{ fontSize: '15px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.6 }}>{feature.description}</p>
               </div>
             ))}
           </div>
@@ -665,209 +655,114 @@ export default function HomePage() {
       </section>
 
       {/* PLANOS */}
-      <section id="planos" style={{ 
-        padding: '100px 24px',
-        backgroundColor: isDark ? '#0f172a' : '#ffffff'
-      }}>
+      <section id="planos" style={{ padding: '80px 16px', position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          
-          <div style={{ textAlign: 'center', marginBottom: '72px' }}>
-            <h2 style={{ 
-              fontSize: '40px', 
-              fontWeight: 700, 
-              marginBottom: '20px',
-              color: isDark ? '#f1f5f9' : '#1e293b'
-            }}>
-              Planos e Preços
+          <div style={{ textAlign: 'center', marginBottom: '60px' }}>
+            <h2 style={{ fontSize: 'clamp(28px, 6vw, 40px)', fontWeight: 800, marginBottom: '16px' }}>
+              Planos <span style={{ color: '#16a34a' }}>Flexíveis</span>
             </h2>
-            <p style={{ 
-              fontSize: '19px', 
-              maxWidth: '600px', 
-              margin: '0 auto',
-              color: isDark ? '#94a3b8' : '#64748b'
-            }}>
-              Escolha o plano ideal para o seu gabinete. Todos incluem suporte técnico e atualizações.
+            <p style={{ fontSize: '18px', color: isDark ? '#94a3b8' : '#64748b' }}>
+              Escolha o plano ideal para seu gabinete
             </p>
           </div>
-
+          
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
-            gap: '32px',
-            alignItems: 'stretch'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+            gap: '24px' 
           }}>
             {/* Plano Básico */}
             <div style={{ 
-              padding: '40px',
+              padding: '32px',
               borderRadius: '20px',
-              border: `2px solid ${isDark ? '#4b5563' : '#cbd5e1'}`,
               backgroundColor: isDark ? '#1e293b' : '#ffffff',
-              boxShadow: isDark 
-                ? '0 10px 30px rgba(0, 0, 0, 0.2)' 
-                : '0 10px 30px rgba(0, 0, 0, 0.08)',
-              transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-              position: 'relative',
-              cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between'
-            }}
-            className="hover:-translate-y-1 hover:shadow-xl">
-              <h3 style={{ 
-                fontSize: '26px', 
-                fontWeight: 700, 
-                marginBottom: '10px',
-                color: isDark ? '#f1f5f9' : '#1e293b'
-              }}>
-                Básico
-              </h3>
-              <p style={{ 
-                fontSize: '15px', 
-                marginBottom: '28px',
-                color: isDark ? '#94a3b8' : '#64748b'
-              }}>
-                Para gabinetes menores
-              </p>
-              <div style={{ 
-                fontSize: '42px', 
-                fontWeight: 700, 
-                marginBottom: '32px',
-                color: '#16a34a'
-              }}>
-                Consulte
+              border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+              boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.05)'
+            }}>
+              <h3 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Básico</h3>
+              <p style={{ fontSize: '14px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '24px' }}>Para gabinetes menores</p>
+              <div style={{ marginBottom: '24px' }}>
+                <span style={{ fontSize: '40px', fontWeight: 800, color: '#16a34a' }}>R$ 297</span>
+                <span style={{ fontSize: '16px', color: isDark ? '#94a3b8' : '#64748b' }}>/mês</span>
               </div>
-              <ul style={{ listStyle: 'none', padding: 0, marginBottom: '36px' }}>
+              <ul style={{ listStyle: 'none', padding: 0, marginBottom: '24px' }}>
                 {planoBasico.map((item, index) => (
-                  <li 
-                    key={index}
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '12px',
-                      marginBottom: '16px',
-                      color: isDark ? '#94a3b8' : '#64748b',
-                      fontSize: '16px'
-                    }}
-                  >
-                    <Check style={{ width: '22px', height: '22px', color: '#16a34a' }} />
+                  <li key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', fontSize: '15px' }}>
+                    <Check style={{ width: '18px', height: '18px', color: '#16a34a' }} />
                     {item}
                   </li>
                 ))}
               </ul>
-              <button 
+              <button
                 onClick={() => setShowContactForm(true)}
                 style={{ 
                   width: '100%',
-                  padding: '16px',
-                  borderRadius: '12px',
-                  border: `2px solid ${isDark ? '#334155' : '#d1d5db'}`,
-                  backgroundColor: 'transparent',
-                  fontWeight: 700,
-                  fontSize: '16px',
+                  padding: '14px',
+                  borderRadius: '10px',
+                  backgroundColor: isDark ? '#334155' : '#f1f5f9',
                   color: isDark ? '#f1f5f9' : '#1e293b',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
+                  fontWeight: 600,
+                  fontSize: '15px',
+                  border: 'none',
+                  cursor: 'pointer'
                 }}
               >
-                Solicitar proposta
-                <ArrowRight style={{ width: '18px', height: '18px' }} />
+                Começar Agora
               </button>
             </div>
 
             {/* Plano Ilimitado */}
             <div style={{ 
-              padding: '40px',
+              padding: '32px',
               borderRadius: '20px',
-              border: '2px solid #16a34a',
-              backgroundColor: isDark ? '#1e293b' : '#ffffff',
+              backgroundColor: '#16a34a',
+              color: 'white',
+              boxShadow: '0 8px 30px rgba(22, 163, 74, 0.4)',
               position: 'relative',
-              boxShadow: '0 8px 24px rgba(22, 163, 74, 0.25)',
-              transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-              cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between'
-            }}
-            className="hover:-translate-y-1 hover:shadow-2xl hover:shadow-green-500/30">
+              overflow: 'hidden'
+            }}>
               <div style={{ 
-                position: 'absolute',
-                top: '-14px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                padding: '8px 20px',
-                borderRadius: '9999px',
-                backgroundColor: '#16a34a',
-                color: 'white',
-                fontSize: '13px',
-                fontWeight: 700
+                position: 'absolute', 
+                top: '16px', 
+                right: '16px', 
+                backgroundColor: '#fbbf24', 
+                color: '#1e293b', 
+                padding: '4px 12px', 
+                borderRadius: '9999px', 
+                fontSize: '12px', 
+                fontWeight: 700 
               }}>
-                Recomendado
+                POPULAR
               </div>
-              <h3 style={{ 
-                fontSize: '26px', 
-                fontWeight: 700, 
-                marginBottom: '10px',
-                color: isDark ? '#f1f5f9' : '#1e293b'
-              }}>
-                Ilimitado
-              </h3>
-              <p style={{ 
-                fontSize: '15px', 
-                marginBottom: '28px',
-                color: isDark ? '#94a3b8' : '#64748b'
-              }}>
-                Para gabinetes completos
-              </p>
-              <div style={{ 
-                fontSize: '42px', 
-                fontWeight: 700, 
-                marginBottom: '32px',
-                color: '#16a34a'
-              }}>
-                Consulte
+              <h3 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Ilimitado</h3>
+              <p style={{ fontSize: '14px', opacity: 0.9, marginBottom: '24px' }}>Para gabinetes de qualquer porte</p>
+              <div style={{ marginBottom: '24px' }}>
+                <span style={{ fontSize: '40px', fontWeight: 800 }}>R$ 497</span>
+                <span style={{ fontSize: '16px', opacity: 0.9 }}>/mês</span>
               </div>
-              <ul style={{ listStyle: 'none', padding: 0, marginBottom: '36px' }}>
+              <ul style={{ listStyle: 'none', padding: 0, marginBottom: '24px' }}>
                 {planoIlimitado.map((item, index) => (
-                  <li 
-                    key={index}
-                    style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: '12px',
-                      marginBottom: '16px',
-                      color: isDark ? '#94a3b8' : '#64748b',
-                      fontSize: '16px'
-                    }}
-                  >
-                    <Check style={{ width: '22px', height: '22px', color: '#16a34a' }} />
+                  <li key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', fontSize: '15px' }}>
+                    <Check style={{ width: '18px', height: '18px' }} />
                     {item}
                   </li>
                 ))}
               </ul>
-              <button 
+              <button
                 onClick={() => setShowContactForm(true)}
                 style={{ 
                   width: '100%',
-                  padding: '16px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  backgroundColor: '#16a34a',
+                  padding: '14px',
+                  borderRadius: '10px',
+                  backgroundColor: 'white',
+                  color: '#16a34a',
                   fontWeight: 700,
-                  fontSize: '16px',
-                  color: 'white',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.35)'
+                  fontSize: '15px',
+                  border: 'none',
+                  cursor: 'pointer'
                 }}
               >
-                Solicitar proposta
-                <ArrowRight style={{ width: '18px', height: '18px' }} />
+                Começar Agora
               </button>
             </div>
           </div>
@@ -875,211 +770,110 @@ export default function HomePage() {
       </section>
 
       {/* SOBRE */}
-      <section id="sobre" style={{ 
-        padding: '100px 24px', 
-        backgroundColor: isDark ? '#1e293b' : '#f9fafb' 
-      }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ 
-            fontSize: '40px', 
-            fontWeight: 700, 
-            marginBottom: '28px',
-            color: isDark ? '#f1f5f9' : '#1e293b'
-          }}>
-            Sobre o Projeto
+      <section id="sobre" style={{ padding: '80px 16px', backgroundColor: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(241, 245, 249, 0.5)', position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+          <h2 style={{ fontSize: 'clamp(28px, 6vw, 40px)', fontWeight: 800, marginBottom: '24px' }}>
+            Sobre o <span style={{ color: '#16a34a' }}>ProviDATA</span>
           </h2>
-          <p style={{ 
-            fontSize: '19px', 
-            lineHeight: 1.8, 
-            marginBottom: '36px',
-            color: isDark ? '#94a3b8' : '#64748b'
-          }}>
-            O ProviDATA foi desenvolvido especialmente para atender às necessidades dos gabinetes 
-            parlamentares brasileiros, com foco em simplicidade, transparência e eficiência no 
-            atendimento ao cidadão. Nossa plataforma permite que vereadores, deputados e senadores 
-            gerenciem todas as demandas de forma organizada e profissional.
+          <p style={{ fontSize: '18px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.8, marginBottom: '32px' }}>
+            O ProviDATA é uma solução desenvolvida pela <strong>DATA-RO Inteligência Territorial</strong> especialmente 
+            para gabinetes parlamentares que buscam modernizar e otimizar a gestão de providências e demandas dos cidadãos.
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-            <div style={{ 
-              width: '64px', 
-              height: '64px', 
-              backgroundColor: '#ffffff', 
-              borderRadius: '12px', 
-              padding: '6px', 
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <Image 
-                src="/providata-logo-final.png" 
-                alt="ProviDATA" 
-                width={52} 
-                height={52} 
-                style={{ objectFit: 'contain' }}
-              />
-            </div>
-            <span style={{ fontWeight: 600, color: isDark ? '#9ca3af' : '#4b5563' }}>
-              Desenvolvido por DATA-RO INTELIGÊNCIA TERRITORIAL
-            </span>
-          </div>
+          <p style={{ fontSize: '18px', color: isDark ? '#94a3b8' : '#64748b', lineHeight: 1.8 }}>
+            Com anos de experiência em soluções tecnológicas para o setor público, entendemos as necessidades 
+            específicas dos gabinetes e desenvolvemos uma plataforma completa, segura e fácil de usar.
+          </p>
         </div>
       </section>
 
-      {/* CONTATO */}
-      <section id="contato" style={{ 
-        padding: '100px 24px',
-        backgroundColor: isDark ? '#0f172a' : '#ffffff'
-      }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
-          
-          <div style={{ 
-            width: '72px', 
-            height: '72px', 
-            borderRadius: '20px', 
-            backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 36px auto'
-          }}>
-            <Mail style={{ width: '36px', height: '36px', color: '#16a34a' }} />
-          </div>
-          
-          <h2 style={{ 
-            fontSize: '40px', 
-            fontWeight: 700, 
-            marginBottom: '20px',
-            color: isDark ? '#f1f5f9' : '#1e293b'
-          }}>
-            Entre em contato
+      {/* CONTATO / CTA */}
+      <section id="contato" style={{ padding: '80px 16px', position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: '700px', margin: '0 auto', textAlign: 'center' }}>
+          <h2 style={{ fontSize: 'clamp(28px, 6vw, 40px)', fontWeight: 800, marginBottom: '24px' }}>
+            Pronto para <span style={{ color: '#16a34a' }}>Começar</span>?
           </h2>
-          <p style={{ 
-            fontSize: '19px', 
-            marginBottom: '48px', 
-            maxWidth: '600px', 
-            margin: '0 auto 48px auto',
-            color: isDark ? '#94a3b8' : '#64748b'
-          }}>
-            Fale com nossa equipe comercial para conhecer melhor o sistema e receber uma proposta personalizada.
+          <p style={{ fontSize: '18px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '40px' }}>
+            Entre em contato conosco e solicite uma demonstração gratuita
           </p>
-
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            gap: '20px'
-          }}>
-            <a 
-              href="mailto:contato@dataro-it.com.br"
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
+            <button
+              onClick={() => setShowContactForm(true)}
               style={{ 
-                padding: '18px 36px', 
-                borderRadius: '12px', 
+                padding: '16px 32px',
+                borderRadius: '12px',
                 backgroundColor: '#16a34a',
                 color: 'white',
                 fontWeight: 700,
                 fontSize: '16px',
+                border: 'none',
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
-                textDecoration: 'none',
-                boxShadow: '0 6px 20px rgba(22, 163, 74, 0.4)'
+                boxShadow: '0 4px 14px rgba(22, 163, 74, 0.4)',
+                width: '100%',
+                maxWidth: '300px',
+                justifyContent: 'center'
               }}
             >
-              <Mail style={{ width: '22px', height: '22px' }} />
-              contato@dataro-it.com.br
-            </a>
-            {/* WhatsApp apenas com ícone */}
-            <a 
+              <Mail style={{ width: '20px', height: '20px' }} />
+              Solicitar Contato
+            </button>
+            
+            <a
               href={whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
               style={{ 
-                width: '60px',
-                height: '60px',
-                borderRadius: '50%',
+                padding: '16px 32px',
+                borderRadius: '12px',
                 backgroundColor: '#25D366',
                 color: 'white',
+                fontWeight: 700,
+                fontSize: '16px',
+                textDecoration: 'none',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                textDecoration: 'none',
-                boxShadow: '0 6px 20px rgba(37, 211, 102, 0.4)'
+                gap: '10px',
+                boxShadow: '0 4px 14px rgba(37, 211, 102, 0.4)',
+                width: '100%',
+                maxWidth: '300px',
+                justifyContent: 'center'
               }}
-              title="Fale conosco pelo WhatsApp"
             >
-              <MessageCircle style={{ width: '28px', height: '28px' }} />
+              <MessageCircle style={{ width: '20px', height: '20px' }} />
+              WhatsApp
             </a>
           </div>
         </div>
       </section>
 
-      {/* FOOTER - Centralizado */}
+      {/* FOOTER */}
       <footer style={{ 
-        padding: '28px 24px', 
+        padding: '40px 16px', 
         borderTop: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
-        backgroundColor: isDark ? '#0f172a' : '#ffffff'
+        backgroundColor: isDark ? '#0f172a' : '#ffffff',
+        position: 'relative',
+        zIndex: 1
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-          {/* Logos centralizadas - Mesmo tamanho de caixa */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', marginBottom: '16px' }}>
-            <Link href="https://dataro-it.com.br" target="_blank" rel="noopener noreferrer">
-              <div style={{ 
-                width: '48px', 
-                height: '48px', 
-                backgroundColor: '#ffffff', 
-                borderRadius: '10px', 
-                padding: '4px', 
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <Image 
-                  src="/dataro-logo-final.png" 
-                  alt="DATA-RO" 
-                  width={40} 
-                  height={40} 
-                  style={{ objectFit: 'contain' }}
-                />
-              </div>
-            </Link>
-            <div style={{ 
-              width: '48px', 
-              height: '48px', 
-              backgroundColor: '#ffffff', 
-              borderRadius: '10px', 
-              padding: '4px', 
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <Image 
-                src="/providata-logo-final.png" 
-                alt="ProviDATA" 
-                width={40} 
-                height={40} 
-                style={{ objectFit: 'contain' }}
-              />
-            </div>
-            <span style={{ fontWeight: 700, color: isDark ? '#f1f5f9' : '#1e293b' }}>ProviDATA</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '16px' }}>
+            <Image 
+              src="/providata-logo-final.png" 
+              alt="ProviDATA" 
+              width={40} 
+              height={40}
+              style={{ objectFit: 'contain' }}
+            />
+            <span className="text-providata-gradient" style={{ fontWeight: 800, fontSize: '24px' }}>ProviDATA</span>
           </div>
-          {/* Texto centralizado */}
-          <div style={{ fontSize: '14px', color: isDark ? '#64748b' : '#94a3b8' }}>
-            <span>Desenvolvido por </span>
-            <a 
-              href="https://dataro-it.com.br" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              style={{ fontWeight: 600, color: isDark ? '#94a3b8' : '#64748b', textDecoration: 'none' }}
-            >
-              DATA-RO INTELIGÊNCIA TERRITORIAL
-            </a>
-            <span> • Todos os direitos reservados. © 2025</span>
-          </div>
+          <p style={{ fontSize: '14px', color: isDark ? '#64748b' : '#94a3b8', marginBottom: '8px' }}>
+            Sistema de Gestão de Providências Parlamentares
+          </p>
+          <p style={{ fontSize: '13px', color: isDark ? '#475569' : '#cbd5e1' }}>
+            © {new Date().getFullYear()} DATA-RO Inteligência Territorial. Todos os direitos reservados.
+          </p>
         </div>
       </footer>
 
@@ -1087,229 +881,215 @@ export default function HomePage() {
       {showContactForm && (
         <div style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.6)',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 100,
-          padding: '24px'
+          padding: '16px'
         }}>
           <div style={{
             backgroundColor: isDark ? '#1e293b' : '#ffffff',
             borderRadius: '20px',
-            padding: '40px',
-            maxWidth: '500px',
             width: '100%',
-            position: 'relative',
+            maxWidth: '480px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
           }}>
-            <button
-              onClick={() => setShowContactForm(false)}
-              style={{
-                position: 'absolute',
-                top: '20px',
-                right: '20px',
-                width: '40px',
-                height: '40px',
-                borderRadius: '10px',
-                border: 'none',
-                backgroundColor: isDark ? '#334155' : '#f3f4f6',
-                color: isDark ? '#94a3b8' : '#64748b',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <X style={{ width: '22px', height: '22px' }} />
-            </button>
-
-            <h3 style={{
-              fontSize: '28px',
-              fontWeight: 700,
-              marginBottom: '12px',
-              color: isDark ? '#f1f5f9' : '#1e293b'
+            {/* Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '20px 24px',
+              borderBottom: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`
             }}>
-              Entre em contato
-            </h3>
-            <p style={{
-              fontSize: '15px',
-              marginBottom: '32px',
-              color: isDark ? '#94a3b8' : '#64748b'
-            }}>
-              Preencha o formulário abaixo e nossa equipe entrará em contato em breve.
-            </p>
+              <h3 style={{ fontSize: '20px', fontWeight: 700 }}>Solicitar Demonstração</h3>
+              <button
+                onClick={() => setShowContactForm(false)}
+                style={{
+                  padding: '8px',
+                  borderRadius: '8px',
+                  backgroundColor: isDark ? '#334155' : '#f1f5f9',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: isDark ? '#94a3b8' : '#64748b'
+                }}
+              >
+                <X style={{ width: '20px', height: '20px' }} />
+              </button>
+            </div>
 
-            {formStatus === 'success' ? (
-              <div style={{
-                padding: '24px',
-                borderRadius: '12px',
-                backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7',
-                textAlign: 'center'
-              }}>
-                <Check style={{ width: '48px', height: '48px', color: '#16a34a', margin: '0 auto 16px auto' }} />
-                <p style={{ fontWeight: 600, color: '#16a34a', fontSize: '17px' }}>
-                  Mensagem enviada com sucesso!
-                </p>
-                <p style={{ color: isDark ? '#94a3b8' : '#64748b', marginTop: '8px' }}>
-                  Entraremos em contato em breve.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmitLead}>
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#374151', fontSize: '14px' }}>
-                    Nome completo
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.nome}
-                    onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      borderRadius: '10px',
-                      border: `1px solid ${isDark ? '#334155' : '#d1d5db'}`,
-                      backgroundColor: isDark ? '#0f172a' : '#ffffff',
-                      color: isDark ? '#f1f5f9' : '#1e293b',
-                      fontSize: '15px',
-                      outline: 'none'
-                    }}
-                    placeholder="Seu nome completo"
-                  />
+            {/* Form */}
+            <form onSubmit={handleSubmitLead} style={{ padding: '24px' }}>
+              {formStatus === 'success' ? (
+                <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                  <div style={{ 
+                    width: '64px', 
+                    height: '64px', 
+                    borderRadius: '50%', 
+                    backgroundColor: '#dcfce7', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    margin: '0 auto 20px'
+                  }}>
+                    <Check style={{ width: '32px', height: '32px', color: '#16a34a' }} />
+                  </div>
+                  <h4 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>Mensagem Enviada!</h4>
+                  <p style={{ color: isDark ? '#94a3b8' : '#64748b' }}>Entraremos em contato em breve.</p>
                 </div>
-                {/* Campo Honeypot - Visível para bots, invisível para humanos */}
-                <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', opacity: 0, height: 0, width: 0, overflow: 'hidden' }}>
-                  <label htmlFor="email_confirm">Nao preencha este campo</label>
+              ) : (
+                <>
+                  {/* Campo Honeypot - invisível para usuários, visível para bots */}
                   <input
                     type="text"
-                    id="email_confirm"
                     name="email_confirm"
                     value={formData.email_confirm}
-                    onChange={(e) => setFormData({ ...formData, email_confirm: e.target.value })}
+                    onChange={(e) => setFormData({...formData, email_confirm: e.target.value})}
+                    style={{ 
+                      position: 'absolute',
+                      left: '-9999px',
+                      opacity: 0,
+                      height: 0,
+                      width: 0
+                    }}
                     tabIndex={-1}
                     autoComplete="off"
                   />
-                </div>
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#374151', fontSize: '14px' }}>
-                    Cargo
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.cargo}
-                    onChange={(e) => setFormData({ ...formData, cargo: e.target.value })}
+                  
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '6px' }}>Nome Completo *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.nome}
+                      onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '10px',
+                        border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+                        backgroundColor: isDark ? '#0f172a' : '#f9fafb',
+                        color: isDark ? '#f1f5f9' : '#1e293b',
+                        fontSize: '15px'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '6px' }}>Cargo/Função *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.cargo}
+                      onChange={(e) => setFormData({...formData, cargo: e.target.value})}
+                      placeholder="Ex: Deputado Estadual, Assessor..."
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '10px',
+                        border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+                        backgroundColor: isDark ? '#0f172a' : '#f9fafb',
+                        color: isDark ? '#f1f5f9' : '#1e293b',
+                        fontSize: '15px'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '6px' }}>E-mail *</label>
+                    <input
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '10px',
+                        border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+                        backgroundColor: isDark ? '#0f172a' : '#f9fafb',
+                        color: isDark ? '#f1f5f9' : '#1e293b',
+                        fontSize: '15px'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '6px' }}>Telefone/WhatsApp</label>
+                    <input
+                      type="tel"
+                      value={formData.telefone}
+                      onChange={(e) => setFormData({...formData, telefone: e.target.value})}
+                      placeholder="(00) 00000-0000"
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '10px',
+                        border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+                        backgroundColor: isDark ? '#0f172a' : '#f9fafb',
+                        color: isDark ? '#f1f5f9' : '#1e293b',
+                        fontSize: '15px'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: '24px' }}>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '6px' }}>Mensagem</label>
+                    <textarea
+                      value={formData.mensagem}
+                      onChange={(e) => setFormData({...formData, mensagem: e.target.value})}
+                      rows={3}
+                      placeholder="Conte-nos sobre seu gabinete..."
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        borderRadius: '10px',
+                        border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+                        backgroundColor: isDark ? '#0f172a' : '#f9fafb',
+                        color: isDark ? '#f1f5f9' : '#1e293b',
+                        fontSize: '15px',
+                        resize: 'none'
+                      }}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={formStatus === 'loading'}
                     style={{
                       width: '100%',
-                      padding: '14px 16px',
+                      padding: '14px',
                       borderRadius: '10px',
-                      border: `1px solid ${isDark ? '#334155' : '#d1d5db'}`,
-                      backgroundColor: isDark ? '#0f172a' : '#ffffff',
-                      color: isDark ? '#f1f5f9' : '#1e293b',
+                      backgroundColor: '#16a34a',
+                      color: 'white',
+                      fontWeight: 700,
                       fontSize: '15px',
-                      outline: 'none'
+                      border: 'none',
+                      cursor: formStatus === 'loading' ? 'not-allowed' : 'pointer',
+                      opacity: formStatus === 'loading' ? 0.7 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
                     }}
-                    placeholder="Ex: Vereador, Assessor, etc."
-                  />
-                </div>
-                <div style={{ marginBottom: '20px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#374151', fontSize: '14px' }}>
-                    E-mail
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      borderRadius: '10px',
-                      border: `1px solid ${isDark ? '#334155' : '#d1d5db'}`,
-                      backgroundColor: isDark ? '#0f172a' : '#ffffff',
-                      color: isDark ? '#f1f5f9' : '#1e293b',
-                      fontSize: '15px',
-                      outline: 'none'
-                    }}
-                    placeholder="seu@email.com"
-                  />
-                </div>
-                <div style={{ marginBottom: '28px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#374151', fontSize: '14px' }}>
-                    Telefone / WhatsApp
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={formData.telefone}
-                    onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      borderRadius: '10px',
-                      border: `1px solid ${isDark ? '#334155' : '#d1d5db'}`,
-                      backgroundColor: isDark ? '#0f172a' : '#ffffff',
-                      color: isDark ? '#f1f5f9' : '#1e293b',
-                      fontSize: '15px',
-                      outline: 'none'
-                    }}
-                    placeholder="(00) 0 0000-0000"
-                  />
-                </div>
-                <div style={{ marginBottom: '28px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600, color: isDark ? '#e2e8f0' : '#374151', fontSize: '14px' }}>
-                    Mensagem (Opcional)
-                  </label>
-                  <textarea
-                    value={formData.mensagem}
-                    onChange={(e) => setFormData({ ...formData, mensagem: e.target.value })}
-                    rows={4}
-                    style={{
-                      width: '100%',
-                      padding: '14px 16px',
-                      borderRadius: '10px',
-                      border: `1px solid ${isDark ? '#334155' : '#d1d5db'}`,
-                      backgroundColor: isDark ? '#0f172a' : '#ffffff',
-                      color: isDark ? '#f1f5f9' : '#1e293b',
-                      fontSize: '15px',
-                      outline: 'none',
-                      resize: 'vertical'
-                    }}
-                    placeholder="Deixe sua mensagem aqui..."
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={formStatus === 'loading'}
-                  style={{
-                    width: '100%',
-                    padding: '16px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    backgroundColor: '#16a34a',
-                    color: 'white',
-                    fontWeight: 700,
-                    fontSize: '16px',
-                    cursor: formStatus === 'loading' ? 'not-allowed' : 'pointer',
-                    opacity: formStatus === 'loading' ? 0.7 : 1,
-                    boxShadow: '0 4px 12px rgba(22, 163, 74, 0.35)'
-                  }}
-                >
-                  {formStatus === 'loading' ? 'Enviando...' : 'Enviar mensagem'}
-                </button>
-                {formStatus === 'error' && (
-                  <p style={{ color: '#ef4444', marginTop: '16px', textAlign: 'center', fontSize: '14px' }}>
-                    Erro ao enviar. Tente novamente.
-                  </p>
-                )}
-              </form>
-            )}
+                  >
+                    {formStatus === 'loading' ? 'Enviando...' : 'Enviar Solicitação'}
+                    {formStatus !== 'loading' && <ArrowRight style={{ width: '18px', height: '18px' }} />}
+                  </button>
+
+                  {formStatus === 'error' && (
+                    <p style={{ color: '#ef4444', fontSize: '14px', textAlign: 'center', marginTop: '12px' }}>
+                      Erro ao enviar. Tente novamente ou entre em contato pelo WhatsApp.
+                    </p>
+                  )}
+                </>
+              )}
+            </form>
           </div>
         </div>
       )}
