@@ -395,24 +395,24 @@ input, textarea, select {
    SIDEBAR COM SUPORTE A TEMA
    ======================================== */
 .sidebar-themed {
-  background-color: #f8fafc;
-  border-color: #e2e8f0;
+  background-color: #ffffff;
+  border-color: #e5e7eb;
 }
 
 .sidebar-themed .sidebar-text {
-  color: #1e293b;
+  color: #111827;
 }
 
 .sidebar-themed .sidebar-muted {
-  color: #64748b;
+  color: #6b7280;
 }
 
 .sidebar-themed .sidebar-hover:hover {
-  background-color: #e2e8f0;
+  background-color: #f3f4f6;
 }
 
 .sidebar-themed .sidebar-accent {
-  background-color: #f1f5f9;
+  background-color: #f9fafb;
 }
 
 .dark .sidebar-themed {
