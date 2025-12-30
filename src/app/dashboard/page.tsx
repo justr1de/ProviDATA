@@ -1315,7 +1315,7 @@ export default function DashboardPage() {
                           padding: '12px 8px',
                           borderRadius: '10px',
                           border: selectedChartType === type.id ? '2px solid #16a34a' : '2px solid #e5e7eb',
-                          backgroundColor: selectedChartType === type.id ? '#f0fdf4' : '#ffffff',
+                          backgroundColor: selectedChartType === type.id ? '#f0fdf4' : 'var(--card)',
                           cursor: 'pointer',
                           transition: 'all 0.2s'
                         }}
