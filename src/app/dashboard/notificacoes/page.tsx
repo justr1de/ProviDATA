@@ -4,9 +4,6 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { 
   Bell, 
   CheckCircle2,
@@ -35,6 +32,14 @@ const tipoLabels: Record<string, string> = {
   prazo: 'Prazo',
   atualizacao: 'Atualização',
   sucesso: 'Sucesso',
+}
+
+const tipoColors: Record<string, { bg: string; text: string }> = {
+  info: { bg: '#dbeafe', text: '#1e40af' },
+  alerta: { bg: '#fef3c7', text: '#92400e' },
+  prazo: { bg: '#fecaca', text: '#991b1b' },
+  atualizacao: { bg: '#e0e7ff', text: '#3730a3' },
+  sucesso: { bg: '#dcfce7', text: '#166534' },
 }
 
 export default function NotificacoesPage() {
@@ -124,13 +129,64 @@ export default function NotificacoesPage() {
 
   const unreadCount = notificacoes.filter(n => !n.lida).length
 
+  // Estilos padronizados
+  const cardStyle: React.CSSProperties = {
+    backgroundColor: 'var(--card)',
+    borderRadius: '16px',
+    border: '1px solid var(--border)',
+    overflow: 'hidden'
+  }
+
+  const cardHeaderStyle: React.CSSProperties = {
+    padding: '20px 24px',
+    borderBottom: '1px solid var(--border)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  }
+
+  const cardContentStyle: React.CSSProperties = {
+    padding: '24px'
+  }
+
+  const buttonOutlineStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 20px',
+    borderRadius: '10px',
+    backgroundColor: 'transparent',
+    color: 'var(--foreground)',
+    border: '1px solid var(--border)',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease'
+  }
+
+  const badgeStyle = (colors: { bg: string; text: string }): React.CSSProperties => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '4px 10px',
+    borderRadius: '6px',
+    fontSize: '12px',
+    fontWeight: '500',
+    backgroundColor: colors.bg,
+    color: colors.text
+  })
+
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div style={{ padding: '0 8px' }}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <h1 className="text-2xl font-bold">Notificações</h1>
-          <p className="text-[var(--muted-foreground)]">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <Bell style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
+            <h1 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)' }}>
+              Notificações
+            </h1>
+          </div>
+          <p style={{ fontSize: '16px', color: 'var(--foreground-muted)' }}>
             {unreadCount > 0 
               ? `Você tem ${unreadCount} notificação${unreadCount > 1 ? 'ões' : ''} não lida${unreadCount > 1 ? 's' : ''}`
               : 'Todas as notificações foram lidas'
@@ -138,105 +194,151 @@ export default function NotificacoesPage() {
           </p>
         </div>
         {unreadCount > 0 && (
-          <Button variant="outline" onClick={handleMarkAllAsRead}>
-            <CheckCheck className="w-4 h-4" />
+          <button style={buttonOutlineStyle} onClick={handleMarkAllAsRead}>
+            <CheckCheck style={{ width: '18px', height: '18px' }} />
             Marcar todas como lidas
-          </Button>
+          </button>
         )}
       </div>
 
-      {/* List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">
+      {/* Main Card */}
+      <div style={cardStyle}>
+        <div style={cardHeaderStyle}>
+          <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--foreground)' }}>
+            Todas as Notificações
+          </h2>
+          <span style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>
             {notificacoes.length} notificação{notificacoes.length !== 1 ? 'ões' : ''}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+          </span>
+        </div>
+        <div style={cardContentStyle}>
           {isLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="w-8 h-8 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                border: '3px solid var(--border)',
+                borderTopColor: 'var(--primary)',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }} />
             </div>
           ) : notificacoes.length === 0 ? (
-            <div className="text-center py-12">
-              <Bell className="w-12 h-12 mx-auto text-[var(--muted-foreground)] mb-4" />
-              <p className="text-[var(--muted-foreground)]">
+            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+              <Bell style={{ width: '48px', height: '48px', color: 'var(--foreground-muted)', margin: '0 auto 16px' }} />
+              <p style={{ fontSize: '16px', color: 'var(--foreground-muted)' }}>
                 Nenhuma notificação
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {notificacoes.map((notificacao) => {
                 const Icon = tipoIcons[notificacao.tipo] || Bell
+                const colors = tipoColors[notificacao.tipo] || tipoColors.info
                 return (
                   <div
                     key={notificacao.id}
-                    className={`flex items-start gap-4 p-4 rounded-lg border border-[var(--border)] transition-colors ${
-                      !notificacao.lida ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800' : ''
-                    }`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '16px',
+                      padding: '20px',
+                      borderRadius: '12px',
+                      border: `1px solid ${!notificacao.lida ? '#3b82f6' : 'var(--border)'}`,
+                      backgroundColor: !notificacao.lida ? 'rgba(59, 130, 246, 0.05)' : 'var(--muted)',
+                      transition: 'all 0.2s ease'
+                    }}
                   >
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      notificacao.tipo === 'alerta' ? 'bg-amber-100 text-amber-600' :
-                      notificacao.tipo === 'prazo' ? 'bg-red-100 text-red-600' :
-                      notificacao.tipo === 'sucesso' ? 'bg-green-100 text-green-600' :
-                      'bg-blue-100 text-blue-600'
-                    }`}>
-                      <Icon className="w-5 h-5" />
+                    <div style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '12px',
+                      backgroundColor: colors.bg,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <Icon style={{ width: '22px', height: '22px', color: colors.text }} />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium">{notificacao.titulo}</h4>
-                        <Badge variant="outline">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                        <h4 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--foreground)' }}>
+                          {notificacao.titulo}
+                        </h4>
+                        <span style={badgeStyle({ bg: 'var(--muted)', text: 'var(--foreground-muted)' })}>
                           {tipoLabels[notificacao.tipo]}
-                        </Badge>
+                        </span>
                         {!notificacao.lida && (
-                          <Badge variant="default">Nova</Badge>
+                          <span style={badgeStyle({ bg: '#3b82f6', text: 'white' })}>
+                            Nova
+                          </span>
                         )}
                       </div>
-                      <p className="text-sm text-[var(--muted-foreground)] mb-2">
+                      <p style={{ fontSize: '14px', color: 'var(--foreground-muted)', lineHeight: '1.5', marginBottom: '12px' }}>
                         {notificacao.mensagem}
                       </p>
-                      <div className="flex items-center gap-4">
-                        <span className="text-xs text-[var(--muted-foreground)]">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <span style={{ fontSize: '13px', color: 'var(--foreground-muted)' }}>
                           {format(new Date(notificacao.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                         </span>
                         {notificacao.providencia_id && (
                           <Link 
                             href={`/dashboard/providencias/${notificacao.providencia_id}`}
-                            className="text-xs text-[var(--primary)] hover:underline"
+                            style={{ fontSize: '13px', color: 'var(--primary)', textDecoration: 'none' }}
                           >
                             Ver providência
                           </Link>
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-1">
+                    <div style={{ display: 'flex', gap: '4px' }}>
                       {!notificacao.lida && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
+                        <button 
                           onClick={() => handleMarkAsRead(notificacao.id)}
                           title="Marcar como lida"
+                          style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '8px',
+                            border: '1px solid var(--border)',
+                            backgroundColor: 'var(--background)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            color: 'var(--foreground-muted)'
+                          }}
                         >
-                          <CheckCircle2 className="w-4 h-4" />
-                        </Button>
+                          <CheckCircle2 style={{ width: '16px', height: '16px' }} />
+                        </button>
                       )}
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
+                      <button 
                         onClick={() => handleDelete(notificacao.id)}
                         title="Excluir"
+                        style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border)',
+                          backgroundColor: 'var(--background)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          color: '#ef4444'
+                        }}
                       >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </Button>
+                        <Trash2 style={{ width: '16px', height: '16px' }} />
+                      </button>
                     </div>
                   </div>
                 )
               })}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

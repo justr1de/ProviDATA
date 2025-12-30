@@ -3,10 +3,6 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { 
   Plus, 
   FolderOpen,
@@ -137,66 +133,149 @@ export default function CategoriasPage() {
     setEditingId(null)
   }
 
+  // Estilos padronizados
+  const cardStyle: React.CSSProperties = {
+    backgroundColor: 'var(--card)',
+    borderRadius: '16px',
+    border: '1px solid var(--border)',
+    overflow: 'hidden'
+  }
+
+  const cardHeaderStyle: React.CSSProperties = {
+    padding: '20px 24px',
+    borderBottom: '1px solid var(--border)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  }
+
+  const cardContentStyle: React.CSSProperties = {
+    padding: '24px'
+  }
+
+  const buttonStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 20px',
+    borderRadius: '10px',
+    backgroundColor: 'var(--primary)',
+    color: 'white',
+    border: 'none',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease'
+  }
+
+  const buttonOutlineStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 20px',
+    borderRadius: '10px',
+    backgroundColor: 'transparent',
+    color: 'var(--foreground)',
+    border: '1px solid var(--border)',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease'
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '12px 16px',
+    borderRadius: '10px',
+    border: '1px solid var(--border)',
+    backgroundColor: 'var(--background)',
+    color: 'var(--foreground)',
+    fontSize: '14px',
+    outline: 'none'
+  }
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: 'var(--foreground)',
+    marginBottom: '8px'
+  }
+
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div style={{ padding: '0 8px' }}>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <h1 className="text-2xl font-bold">Categorias</h1>
-          <p className="text-[var(--muted-foreground)]">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <FolderOpen style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
+            <h1 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)' }}>
+              Categorias
+            </h1>
+          </div>
+          <p style={{ fontSize: '16px', color: 'var(--foreground-muted)' }}>
             Gerencie as categorias de providências
           </p>
         </div>
         {!showForm && (
-          <Button onClick={() => setShowForm(true)}>
-            <Plus className="w-4 h-4" />
+          <button style={buttonStyle} onClick={() => setShowForm(true)}>
+            <Plus style={{ width: '18px', height: '18px' }} />
             Nova Categoria
-          </Button>
+          </button>
         )}
       </div>
 
       {/* Form */}
       {showForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">
+        <div style={{ ...cardStyle, marginBottom: '24px' }}>
+          <div style={cardHeaderStyle}>
+            <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--foreground)' }}>
               {editingId ? 'Editar Categoria' : 'Nova Categoria'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Nome *"
-                  placeholder="Nome da categoria"
-                  value={formData.nome}
-                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  required
-                />
-                
-                <Input
-                  label="Descrição"
-                  placeholder="Descrição opcional"
-                  value={formData.descricao}
-                  onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-                />
+            </h2>
+          </div>
+          <div style={cardContentStyle}>
+            <form onSubmit={handleSubmit}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '20px' }}>
+                <div>
+                  <label style={labelStyle}>Nome *</label>
+                  <input
+                    type="text"
+                    placeholder="Nome da categoria"
+                    value={formData.nome}
+                    onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                    required
+                    style={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Descrição</label>
+                  <input
+                    type="text"
+                    placeholder="Descrição opcional"
+                    value={formData.descricao}
+                    onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                    style={inputStyle}
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[var(--foreground)] mb-2">
-                  Cor
-                </label>
-                <div className="flex flex-wrap gap-2">
+              <div style={{ marginBottom: '24px' }}>
+                <label style={labelStyle}>Cor</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
                   {defaultColors.map((color) => (
                     <button
                       key={color}
                       type="button"
-                      className={`w-8 h-8 rounded-full border-2 transition-all ${
-                        formData.cor === color 
-                          ? 'border-[var(--foreground)] scale-110' 
-                          : 'border-transparent'
-                      }`}
-                      style={{ backgroundColor: color }}
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        backgroundColor: color,
+                        border: formData.cor === color ? '3px solid var(--foreground)' : '2px solid transparent',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        transform: formData.cor === color ? 'scale(1.1)' : 'scale(1)'
+                      }}
                       onClick={() => setFormData({ ...formData, cor: color })}
                     />
                   ))}
@@ -204,94 +283,144 @@ export default function CategoriasPage() {
                     type="color"
                     value={formData.cor}
                     onChange={(e) => setFormData({ ...formData, cor: e.target.value })}
-                    className="w-8 h-8 rounded-full cursor-pointer"
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      border: 'none',
+                      padding: 0
+                    }}
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2">
-                <Button type="button" variant="outline" onClick={cancelForm}>
-                  <X className="w-4 h-4" />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px' }}>
+                <button type="button" style={buttonOutlineStyle} onClick={cancelForm}>
+                  <X style={{ width: '18px', height: '18px' }} />
                   Cancelar
-                </Button>
-                <Button type="submit">
-                  <Save className="w-4 h-4" />
+                </button>
+                <button type="submit" style={buttonStyle}>
+                  <Save style={{ width: '18px', height: '18px' }} />
                   {editingId ? 'Atualizar' : 'Criar'}
-                </Button>
+                </button>
               </div>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
-      {/* List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">
-            {categorias.length} categoria{categorias.length !== 1 ? 's' : ''} cadastrada{categorias.length !== 1 ? 's' : ''}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      {/* Main Card */}
+      <div style={cardStyle}>
+        <div style={cardHeaderStyle}>
+          <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--foreground)' }}>
+            Categorias Cadastradas
+          </h2>
+          <span style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>
+            {categorias.length} categoria{categorias.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <div style={cardContentStyle}>
           {isLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="w-8 h-8 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                border: '3px solid var(--border)',
+                borderTopColor: 'var(--primary)',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }} />
             </div>
           ) : categorias.length === 0 ? (
-            <div className="text-center py-12">
-              <FolderOpen className="w-12 h-12 mx-auto text-[var(--muted-foreground)] mb-4" />
-              <p className="text-[var(--muted-foreground)]">
+            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+              <FolderOpen style={{ width: '48px', height: '48px', color: 'var(--foreground-muted)', margin: '0 auto 16px' }} />
+              <p style={{ fontSize: '16px', color: 'var(--foreground-muted)', marginBottom: '16px' }}>
                 Nenhuma categoria cadastrada ainda
               </p>
-              <Button className="mt-4" onClick={() => setShowForm(true)}>
-                <Plus className="w-4 h-4" />
+              <button style={buttonStyle} onClick={() => setShowForm(true)}>
+                <Plus style={{ width: '18px', height: '18px' }} />
                 Criar Primeira Categoria
-              </Button>
+              </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
               {categorias.map((categoria) => (
                 <div
                   key={categoria.id}
-                  className="p-4 rounded-lg border border-[var(--border)] hover:bg-[var(--secondary)] transition-colors"
+                  style={{
+                    padding: '20px',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border)',
+                    backgroundColor: 'var(--muted)',
+                    transition: 'all 0.2s ease'
+                  }}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div 
-                        className="w-4 h-4 rounded-full"
-                        style={{ backgroundColor: categoria.cor }}
+                        style={{
+                          width: '20px',
+                          height: '20px',
+                          borderRadius: '50%',
+                          backgroundColor: categoria.cor,
+                          flexShrink: 0
+                        }}
                       />
                       <div>
-                        <h4 className="font-medium">{categoria.nome}</h4>
+                        <h4 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>
+                          {categoria.nome}
+                        </h4>
                         {categoria.descricao && (
-                          <p className="text-sm text-[var(--muted-foreground)]">
+                          <p style={{ fontSize: '13px', color: 'var(--foreground-muted)' }}>
                             {categoria.descricao}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-1">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <button 
                         onClick={() => handleEdit(categoria)}
+                        style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border)',
+                          backgroundColor: 'var(--background)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          color: 'var(--foreground-muted)'
+                        }}
                       >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
+                        <Edit style={{ width: '16px', height: '16px' }} />
+                      </button>
+                      <button 
                         onClick={() => handleDelete(categoria.id)}
+                        style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border)',
+                          backgroundColor: 'var(--background)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          color: '#ef4444'
+                        }}
                       >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </Button>
+                        <Trash2 style={{ width: '16px', height: '16px' }} />
+                      </button>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }
