@@ -347,11 +347,14 @@ input, textarea, select {
   display: flex;
   flex-direction: column;
   transition: margin-left 0.3s ease;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 @media (min-width: 768px) {
   .dashboard-main-content {
     margin-left: 256px;
+    width: calc(100% - 256px);
   }
 }
 
