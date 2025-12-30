@@ -19,11 +19,15 @@ import {
   Menu,
   X,
   ChevronDown,
-  User
+  User,
+  FileBarChart,
+  Shield,
+  Palette,
+  ImageIcon
 } from 'lucide-react'
 import { Toaster } from 'sonner'
 
-const SIDEBAR_WIDTH = 256
+const SIDEBAR_WIDTH = 280
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -31,10 +35,12 @@ const navigation = [
   { name: 'Cidadãos', href: '/dashboard/cidadaos', icon: Users },
   { name: 'Órgãos', href: '/dashboard/orgaos', icon: Building2 },
   { name: 'Categorias', href: '/dashboard/categorias', icon: FolderOpen },
+  { name: 'Relatórios', href: '/dashboard/relatorios', icon: FileBarChart },
 ]
 
 const bottomNavigation = [
   { name: 'Notificações', href: '/dashboard/notificacoes', icon: Bell },
+  { name: 'Administração', href: '/dashboard/administracao', icon: Shield },
   { name: 'Configurações', href: '/dashboard/configuracoes', icon: Settings },
 ]
 
@@ -46,6 +52,8 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
+  const [customBgImage, setCustomBgImage] = useState<string | null>(null)
+  const [customPrimaryColor, setCustomPrimaryColor] = useState('#16a34a')
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
@@ -61,6 +69,15 @@ export default function DashboardLayout({
     checkWidth()
     window.addEventListener('resize', checkWidth)
     return () => window.removeEventListener('resize', checkWidth)
+  }, [])
+
+  // Carregar configurações de personalização
+  useEffect(() => {
+    const savedBgImage = localStorage.getItem('providata-bg-image')
+    const savedPrimaryColor = localStorage.getItem('providata-primary-color')
+    
+    if (savedBgImage) setCustomBgImage(savedBgImage)
+    if (savedPrimaryColor) setCustomPrimaryColor(savedPrimaryColor)
   }, [])
 
   useEffect(() => {
@@ -103,7 +120,16 @@ export default function DashboardLayout({
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--background)' }}>
+    <div 
+      style={{ 
+        minHeight: '100vh', 
+        backgroundColor: 'var(--background)',
+        backgroundImage: customBgImage ? `url(${customBgImage})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
       <Toaster position="top-right" richColors />
       
       {/* Mobile sidebar overlay */}
@@ -130,8 +156,9 @@ export default function DashboardLayout({
           height: '100%',
           width: `${SIDEBAR_WIDTH}px`,
           transform: (isDesktop || sidebarOpen) ? 'translateX(0)' : 'translateX(-100%)',
-          transition: 'transform 0.3s ease',
-          backgroundColor: '#111827',
+          transition: 'transform 0.3s ease, background-color 0.3s ease',
+          backgroundColor: 'var(--sidebar-bg)',
+          borderRight: '1px solid var(--sidebar-border)',
           display: 'flex',
           flexDirection: 'column'
         }}
@@ -149,7 +176,7 @@ export default function DashboardLayout({
               backgroundColor: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              color: '#9CA3AF'
+              color: 'var(--sidebar-muted)'
             }}
           >
             <X style={{ width: '24px', height: '24px' }} />
@@ -157,43 +184,44 @@ export default function DashboardLayout({
         )}
 
         {/* Logo */}
-        <div style={{ padding: '16px', borderBottom: '1px solid #374151' }}>
-          <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ padding: '20px', borderBottom: '1px solid var(--sidebar-border)' }}>
+          <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
             <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '8px',
+              width: '44px',
+              height: '44px',
+              borderRadius: '12px',
               backgroundColor: 'white',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
             }}>
               <Image
                 src="/providata-logo-final.png"
                 alt="ProviDATA"
-                width={32}
-                height={32}
+                width={36}
+                height={36}
                 style={{ objectFit: 'contain' }}
               />
             </div>
-            <span style={{ fontSize: '18px', fontWeight: 'bold', color: 'white' }}>ProviDATA</span>
+            <span style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--sidebar-foreground)' }}>ProviDATA</span>
           </Link>
         </div>
 
         {/* Tenant Info */}
-        <div style={{ padding: '12px 16px', borderBottom: '1px solid #374151' }}>
-          <p style={{ fontSize: '14px', fontWeight: '500', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--sidebar-border)', backgroundColor: 'var(--sidebar-accent)' }}>
+          <p style={{ fontSize: '15px', fontWeight: '600', color: 'var(--sidebar-foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '4px' }}>
             {tenant?.parlamentar_name || 'Carregando...'}
           </p>
-          <p style={{ fontSize: '12px', color: '#9CA3AF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <p style={{ fontSize: '13px', color: 'var(--sidebar-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {tenant?.cargo?.replace('_', ' ') || 'deputado estadual'}
           </p>
         </div>
 
         {/* Navigation */}
-        <nav style={{ flex: 1, padding: '16px 12px', overflowY: 'auto' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <nav style={{ flex: 1, padding: '20px 16px', overflowY: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {navigation.map((item) => {
               const Icon = item.icon
               const active = isActive(item.href)
@@ -205,18 +233,29 @@ export default function DashboardLayout({
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: '500',
+                    gap: '14px',
+                    padding: '12px 16px',
+                    borderRadius: '10px',
+                    fontSize: '15px',
+                    fontWeight: active ? '600' : '500',
                     textDecoration: 'none',
-                    backgroundColor: active ? '#16a34a' : 'transparent',
-                    color: active ? 'white' : '#D1D5DB',
-                    transition: 'all 0.2s'
+                    backgroundColor: active ? customPrimaryColor : 'transparent',
+                    color: active ? 'white' : 'var(--sidebar-foreground)',
+                    transition: 'all 0.2s ease',
+                    boxShadow: active ? '0 2px 8px rgba(22, 163, 74, 0.3)' : 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!active) {
+                      e.currentTarget.style.backgroundColor = 'var(--sidebar-hover)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!active) {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }
                   }}
                 >
-                  <Icon style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+                  <Icon style={{ width: '22px', height: '22px', flexShrink: 0 }} />
                   <span>{item.name}</span>
                 </Link>
               )
@@ -225,8 +264,8 @@ export default function DashboardLayout({
         </nav>
 
         {/* Bottom Navigation */}
-        <div style={{ padding: '16px 12px', borderTop: '1px solid #374151' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ padding: '16px', borderTop: '1px solid var(--sidebar-border)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {bottomNavigation.map((item) => {
               const Icon = item.icon
               const active = isActive(item.href)
@@ -238,18 +277,29 @@ export default function DashboardLayout({
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: '500',
+                    gap: '14px',
+                    padding: '12px 16px',
+                    borderRadius: '10px',
+                    fontSize: '15px',
+                    fontWeight: active ? '600' : '500',
                     textDecoration: 'none',
-                    backgroundColor: active ? '#16a34a' : 'transparent',
-                    color: active ? 'white' : '#D1D5DB',
-                    transition: 'all 0.2s'
+                    backgroundColor: active ? customPrimaryColor : 'transparent',
+                    color: active ? 'white' : 'var(--sidebar-foreground)',
+                    transition: 'all 0.2s ease',
+                    boxShadow: active ? '0 2px 8px rgba(22, 163, 74, 0.3)' : 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!active) {
+                      e.currentTarget.style.backgroundColor = 'var(--sidebar-hover)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!active) {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }
                   }}
                 >
-                  <Icon style={{ width: '20px', height: '20px', flexShrink: 0 }} />
+                  <Icon style={{ width: '22px', height: '22px', flexShrink: 0 }} />
                   <span>{item.name}</span>
                 </Link>
               )
@@ -258,12 +308,12 @@ export default function DashboardLayout({
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '12px 16px', borderTop: '1px solid #374151' }}>
+        <div style={{ padding: '16px 20px', borderTop: '1px solid var(--sidebar-border)', backgroundColor: 'var(--sidebar-accent)' }}>
           <a 
             href="https://dataro-it.com.br" 
             target="_blank" 
             rel="noopener noreferrer"
-            style={{ fontSize: '12px', color: '#6B7280', textDecoration: 'none' }}
+            style={{ fontSize: '12px', color: 'var(--sidebar-muted)', textDecoration: 'none' }}
           >
             DATA-RO Inteligência Territorial
           </a>
@@ -277,7 +327,8 @@ export default function DashboardLayout({
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
-          transition: 'margin-left 0.3s ease'
+          transition: 'margin-left 0.3s ease',
+          backgroundColor: customBgImage ? 'rgba(var(--background-rgb), 0.95)' : 'transparent'
         }}
       >
         {/* Header */}
@@ -287,18 +338,19 @@ export default function DashboardLayout({
             top: 0,
             zIndex: 30,
             backgroundColor: 'var(--card)',
-            borderBottom: '1px solid var(--border)'
+            borderBottom: '1px solid var(--border)',
+            backdropFilter: 'blur(8px)'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '64px', padding: '0 16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '68px', padding: '0 24px' }}>
             {/* Mobile menu button */}
             {!isDesktop && (
               <button
                 onClick={() => setSidebarOpen(true)}
                 style={{
-                  padding: '8px',
-                  borderRadius: '8px',
-                  backgroundColor: 'transparent',
+                  padding: '10px',
+                  borderRadius: '10px',
+                  backgroundColor: 'var(--muted)',
                   border: 'none',
                   cursor: 'pointer',
                   color: 'var(--foreground-muted)'
@@ -312,17 +364,21 @@ export default function DashboardLayout({
             {isDesktop && <div />}
 
             {/* Right side */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <ThemeToggle />
               
               {/* Notifications */}
               <Link 
                 href="/dashboard/notificacoes"
                 style={{
-                  padding: '8px',
-                  borderRadius: '8px',
+                  padding: '10px',
+                  borderRadius: '10px',
                   color: 'var(--foreground-muted)',
-                  textDecoration: 'none'
+                  textDecoration: 'none',
+                  backgroundColor: 'var(--muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
                 <Bell style={{ width: '20px', height: '20px' }} />
@@ -335,29 +391,29 @@ export default function DashboardLayout({
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px',
-                    padding: '8px',
-                    borderRadius: '8px',
-                    backgroundColor: 'transparent',
+                    gap: '10px',
+                    padding: '8px 12px',
+                    borderRadius: '10px',
+                    backgroundColor: 'var(--muted)',
                     border: 'none',
                     cursor: 'pointer'
                   }}
                 >
                   <div style={{
-                    width: '32px',
-                    height: '32px',
+                    width: '36px',
+                    height: '36px',
                     borderRadius: '50%',
-                    backgroundColor: '#16a34a',
+                    backgroundColor: customPrimaryColor,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}>
-                    <User style={{ width: '16px', height: '16px', color: 'white' }} />
+                    <User style={{ width: '18px', height: '18px', color: 'white' }} />
                   </div>
-                  <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)' }}>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--foreground)' }}>
                     {user?.nome?.split(' ')[0] || 'Usuário'}
                   </span>
-                  <ChevronDown style={{ width: '16px', height: '16px', color: 'var(--foreground-muted)' }} />
+                  <ChevronDown style={{ width: '18px', height: '18px', color: 'var(--foreground-muted)' }} />
                 </button>
 
                 {userMenuOpen && (
@@ -370,57 +426,75 @@ export default function DashboardLayout({
                       position: 'absolute',
                       right: 0,
                       marginTop: '8px',
-                      width: '192px',
+                      width: '220px',
                       backgroundColor: 'var(--card)',
-                      borderRadius: '8px',
-                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 40px -10px rgba(0, 0, 0, 0.2)',
                       border: '1px solid var(--border)',
-                      zIndex: 50
+                      zIndex: 50,
+                      overflow: 'hidden'
                     }}>
-                      <div style={{ padding: '12px', borderBottom: '1px solid var(--border)' }}>
-                        <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ padding: '16px', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--muted)' }}>
+                        <p style={{ fontSize: '15px', fontWeight: '600', color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {user?.nome || 'Usuário'}
                         </p>
-                        <p style={{ fontSize: '12px', color: 'var(--foreground-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>
                           {user?.email}
                         </p>
                       </div>
-                      <div style={{ padding: '4px' }}>
+                      <div style={{ padding: '8px' }}>
                         <Link
                           href="/dashboard/configuracoes"
                           onClick={() => setUserMenuOpen(false)}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '8px',
-                            padding: '8px 12px',
+                            gap: '12px',
+                            padding: '10px 14px',
                             fontSize: '14px',
                             color: 'var(--foreground)',
                             textDecoration: 'none',
-                            borderRadius: '6px'
+                            borderRadius: '8px'
                           }}
                         >
-                          <Settings style={{ width: '16px', height: '16px' }} />
+                          <Settings style={{ width: '18px', height: '18px' }} />
                           Configurações
+                        </Link>
+                        <Link
+                          href="/dashboard/configuracoes/aparencia"
+                          onClick={() => setUserMenuOpen(false)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            padding: '10px 14px',
+                            fontSize: '14px',
+                            color: 'var(--foreground)',
+                            textDecoration: 'none',
+                            borderRadius: '8px'
+                          }}
+                        >
+                          <Palette style={{ width: '18px', height: '18px' }} />
+                          Aparência
                         </Link>
                         <button
                           onClick={handleLogout}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '8px',
-                            padding: '8px 12px',
+                            gap: '12px',
+                            padding: '10px 14px',
                             fontSize: '14px',
                             color: '#dc2626',
                             backgroundColor: 'transparent',
                             border: 'none',
-                            borderRadius: '6px',
+                            borderRadius: '8px',
                             width: '100%',
                             cursor: 'pointer',
                             textAlign: 'left'
                           }}
                         >
-                          <LogOut style={{ width: '16px', height: '16px' }} />
+                          <LogOut style={{ width: '18px', height: '18px' }} />
                           Sair
                         </button>
                       </div>
@@ -433,7 +507,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main style={{ flex: 1, padding: isDesktop ? '24px' : '16px' }}>
+        <main style={{ flex: 1, padding: isDesktop ? '28px' : '20px' }}>
           {children}
         </main>
       </div>

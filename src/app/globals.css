@@ -122,11 +122,17 @@ input, textarea, select {
   --input: #e2e8f0;
   --ring: #16a34a;
   
-  /* Sidebar */
-  --sidebar-bg: #ffffff;
+  /* Sidebar - Tema Claro */
+  --sidebar-bg: #f8fafc;
   --sidebar-border: #e2e8f0;
-  --sidebar-item-hover: #f1f5f9;
+  --sidebar-foreground: #1e293b;
+  --sidebar-muted: #64748b;
+  --sidebar-hover: #e2e8f0;
+  --sidebar-accent: #f1f5f9;
   --sidebar-item-active: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  
+  /* Background RGB para overlay */
+  --background-rgb: 255, 255, 255;
   
   /* Status Colors */
   --status-pending: #f59e0b;
@@ -190,11 +196,17 @@ input, textarea, select {
   --input: #475569;
   --ring: #22c55e;
   
-  /* Sidebar - Elegante e distinto */
-  --sidebar-bg: #0f172a;
+  /* Sidebar - Tema Escuro */
+  --sidebar-bg: #1e293b;
   --sidebar-border: #334155;
-  --sidebar-item-hover: #1e293b;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-muted: #94a3b8;
+  --sidebar-hover: #334155;
+  --sidebar-accent: #0f172a;
   --sidebar-item-active: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  
+  /* Background RGB para overlay */
+  --background-rgb: 15, 23, 42;
   
   /* Status Colors - Mais vibrantes no escuro */
   --status-pending: #fbbf24;
