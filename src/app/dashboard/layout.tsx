@@ -203,26 +203,26 @@ export default function DashboardLayout({
           </button>
         )}
 
-        {/* Logo ProviDATA - Preenche todo o espaço sem fundo branco */}
-        <div className="sidebar-section" style={{ 
-          padding: '12px 16px', 
+        {/* Logo ProviDATA - Ocupa todo o espaço do cabeçalho */}
+        <div className="sidebar-logo-container" style={{ 
+          padding: 0, 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          minHeight: '100px'
+          width: '100%',
+          overflow: 'hidden'
         }}>
-          <Link href="/dashboard" style={{ display: 'block', textDecoration: 'none', width: '100%', height: '100%' }}>
+          <Link href="/dashboard" style={{ display: 'block', textDecoration: 'none', width: '100%' }}>
             <Image
               src="/providata-logo-final.png"
               alt="ProviDATA"
               width={280}
-              height={90}
+              height={100}
               style={{ 
                 width: '100%',
                 height: 'auto',
-                maxHeight: '90px',
-                objectFit: 'contain',
-                filter: 'drop-shadow(0 4px 12px rgba(22, 163, 74, 0.4)) brightness(1.1)'
+                objectFit: 'cover',
+                display: 'block'
               }}
               priority
             />

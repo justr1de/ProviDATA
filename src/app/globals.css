@@ -625,6 +625,16 @@ input, textarea, select {
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
+/* Logo container - sem fundo, sem bordas */
+.sidebar-logo-container {
+  background: transparent !important;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.dark .sidebar-logo-container {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
 /* Tenant Info */
 .sidebar-tenant {
   border-bottom: 1px solid #e2e8f0;
