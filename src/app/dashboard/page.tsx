@@ -322,20 +322,14 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        minHeight: '400px',
-        backgroundColor: 'var(--background)'
-      }}>
+      <div className="flex items-center justify-center min-h-[400px] bg-gray-50 dark:bg-slate-900">
         <Loader2 style={{ width: '32px', height: '32px', animation: 'spin 1s linear infinite', color: '#16a34a' }} />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen p-6 bg-background">
+    <div className="min-h-screen p-6 bg-gray-50 dark:bg-slate-900">
       {/* Tour Overlay */}
       {showTour && (
         <div style={{
