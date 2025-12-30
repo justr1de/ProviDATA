@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
+import { useTheme } from '@/providers/theme-provider'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { 
@@ -149,6 +150,9 @@ const tourSteps: TourStep[] = [
 ]
 
 export default function DashboardPage() {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
+  
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<Stats>({
     total: 0,
@@ -320,16 +324,25 @@ export default function DashboardPage() {
 
   const maxChartValue = Math.max(...chartData.map(d => d.value), 1)
 
+  // Cores para loading (antes de isDark estar disponível)
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px] dashboard-content">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', backgroundColor: '#f9fafb' }}>
         <Loader2 style={{ width: '32px', height: '32px', animation: 'spin 1s linear infinite', color: '#16a34a' }} />
       </div>
     )
   }
 
+  // Cores baseadas no tema
+  const bgColor = isDark ? '#0f172a' : '#f9fafb'
+  const cardBg = isDark ? '#1e293b' : '#ffffff'
+  const textColor = isDark ? '#f1f5f9' : '#111827'
+  const textMuted = isDark ? '#94a3b8' : '#6b7280'
+  const borderColor = isDark ? '#475569' : '#e5e7eb'
+  const mutedBg = isDark ? '#334155' : '#f1f5f9'
+
   return (
-    <div className="min-h-screen p-6 dashboard-content">
+    <div style={{ backgroundColor: bgColor, minHeight: '100vh', padding: '24px' }}>
       {/* Tour Overlay */}
       {showTour && (
         <div style={{
@@ -362,16 +375,16 @@ export default function DashboardPage() {
                 <HelpCircle style={{ width: '28px', height: '28px', color: 'white' }} />
               </div>
               <div>
-                <p style={{ fontSize: '12px', color: 'var(--foreground-muted)', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <p style={{ fontSize: '12px', color: textMuted, fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   Passo {currentTourStep + 1} de {tourSteps.length}
                 </p>
-                <h3 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: textColor, margin: 0 }}>
                   {tourSteps[currentTourStep].title}
                 </h3>
               </div>
             </div>
             
-            <p style={{ fontSize: '15px', color: 'var(--foreground-secondary)', lineHeight: '1.6', marginBottom: '24px' }}>
+            <p style={{ fontSize: '15px', color: textMuted, lineHeight: '1.6', marginBottom: '24px' }}>
               {tourSteps[currentTourStep].content}
             </p>
 
@@ -400,9 +413,9 @@ export default function DashboardPage() {
                   fontSize: '14px',
                   fontWeight: '600',
                   borderRadius: '10px',
-                  border: '1px solid var(--border)',
+                  border: `1px solid ${borderColor}`,
                   backgroundColor: 'var(--card)',
-                  color: 'var(--foreground-muted)',
+                  color: textMuted,
                   cursor: 'pointer'
                 }}
               >
@@ -416,9 +429,9 @@ export default function DashboardPage() {
                     fontSize: '14px',
                     fontWeight: '600',
                     borderRadius: '10px',
-                    border: '1px solid var(--border)',
+                    border: `1px solid ${borderColor}`,
                     backgroundColor: 'var(--card)',
-                    color: 'var(--foreground-secondary)',
+                    color: textMuted,
                     cursor: 'pointer'
                   }}
                 >
@@ -451,9 +464,9 @@ export default function DashboardPage() {
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Header */}
           <div style={{ 
-            backgroundColor: 'var(--card)',
+            backgroundColor: cardBg,
             borderRadius: '16px',
-            border: '1px solid var(--border)',
+            border: `1px solid ${borderColor}`,
             padding: '24px',
             marginBottom: '24px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
@@ -482,14 +495,14 @@ export default function DashboardPage() {
                   <h1 style={{ 
                     fontSize: '24px', 
                     fontWeight: '700', 
-                    color: 'var(--foreground)',
+                    color: textColor,
                     margin: 0
                   }}>
                     Dashboard de Providências
                   </h1>
                   <p style={{ 
                     fontSize: '14px', 
-                    color: 'var(--foreground-muted)',
+                    color: textMuted,
                     margin: '4px 0 0 0'
                   }}>
                     Visão geral das demandas · {tenant?.parlamentar_name || 'Gabinete'}
@@ -504,12 +517,12 @@ export default function DashboardPage() {
                     alignItems: 'center',
                     gap: '6px',
                     padding: '10px 16px',
-                    backgroundColor: 'var(--muted)',
-                    border: '1px solid var(--border)',
+                    backgroundColor: mutedBg,
+                    border: `1px solid ${borderColor}`,
                     borderRadius: '8px',
                     fontSize: '14px',
                     fontWeight: '500',
-                    color: 'var(--foreground-secondary)',
+                    color: textMuted,
                     cursor: 'pointer'
                   }}
                 >
@@ -522,11 +535,11 @@ export default function DashboardPage() {
                   style={{
                     padding: '10px 16px',
                     fontSize: '14px',
-                    backgroundColor: 'var(--muted)',
-                    border: '1px solid var(--border)',
+                    backgroundColor: mutedBg,
+                    border: `1px solid ${borderColor}`,
                     borderRadius: '8px',
                     fontWeight: '500',
-                    color: 'var(--foreground-secondary)',
+                    color: textMuted,
                     cursor: 'pointer'
                   }}
                 >
@@ -567,9 +580,9 @@ export default function DashboardPage() {
             }}>
               {/* Total */}
               <div style={{ 
-                backgroundColor: 'var(--card)',
+                backgroundColor: cardBg,
                 borderRadius: '16px',
-                border: '1px solid var(--border)',
+                border: `1px solid ${borderColor}`,
                 padding: '20px',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
               }}>
@@ -587,17 +600,17 @@ export default function DashboardPage() {
                     <FileText style={{ width: '24px', height: '24px', color: '#2563eb' }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>{stats.total}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground-muted)', margin: '4px 0 0 0' }}>Total</p>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: textColor, margin: 0 }}>{stats.total}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: textMuted, margin: '4px 0 0 0' }}>Total</p>
                   </div>
                 </div>
               </div>
 
               {/* Pendentes */}
               <div style={{ 
-                backgroundColor: 'var(--card)',
+                backgroundColor: cardBg,
                 borderRadius: '16px',
-                border: '1px solid var(--border)',
+                border: `1px solid ${borderColor}`,
                 padding: '20px',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
               }}>
@@ -615,17 +628,17 @@ export default function DashboardPage() {
                     <Clock style={{ width: '24px', height: '24px', color: '#d97706' }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>{stats.pendentes}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground-muted)', margin: '4px 0 0 0' }}>Pendentes</p>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: textColor, margin: 0 }}>{stats.pendentes}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: textMuted, margin: '4px 0 0 0' }}>Pendentes</p>
                   </div>
                 </div>
               </div>
 
               {/* Em Andamento */}
               <div style={{ 
-                backgroundColor: 'var(--card)',
+                backgroundColor: cardBg,
                 borderRadius: '16px',
-                border: '1px solid var(--border)',
+                border: `1px solid ${borderColor}`,
                 padding: '20px',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
               }}>
@@ -643,17 +656,17 @@ export default function DashboardPage() {
                     <TrendingUp style={{ width: '24px', height: '24px', color: '#4f46e5' }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>{stats.em_andamento}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground-muted)', margin: '4px 0 0 0' }}>Em Andamento</p>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: textColor, margin: 0 }}>{stats.em_andamento}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: textMuted, margin: '4px 0 0 0' }}>Em Andamento</p>
                   </div>
                 </div>
               </div>
 
               {/* Concluídas */}
               <div style={{ 
-                backgroundColor: 'var(--card)',
+                backgroundColor: cardBg,
                 borderRadius: '16px',
-                border: '1px solid var(--border)',
+                border: `1px solid ${borderColor}`,
                 padding: '20px',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
               }}>
@@ -671,8 +684,8 @@ export default function DashboardPage() {
                     <CheckCircle2 style={{ width: '24px', height: '24px', color: '#16a34a' }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>{stats.concluidas}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground-muted)', margin: '4px 0 0 0' }}>Concluídas</p>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: textColor, margin: 0 }}>{stats.concluidas}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: textMuted, margin: '4px 0 0 0' }}>Concluídas</p>
                   </div>
                 </div>
               </div>
@@ -686,9 +699,9 @@ export default function DashboardPage() {
             }}>
               {/* Urgentes */}
               <div style={{ 
-                backgroundColor: 'var(--card)',
+                backgroundColor: cardBg,
                 borderRadius: '16px',
-                border: '1px solid var(--border)',
+                border: `1px solid ${borderColor}`,
                 padding: '20px',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
               }}>
@@ -706,17 +719,17 @@ export default function DashboardPage() {
                     <AlertTriangle style={{ width: '24px', height: '24px', color: '#dc2626' }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>{stats.urgentes}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground-muted)', margin: '4px 0 0 0' }}>Urgentes</p>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: textColor, margin: 0 }}>{stats.urgentes}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: textMuted, margin: '4px 0 0 0' }}>Urgentes</p>
                   </div>
                 </div>
               </div>
 
               {/* Em Análise */}
               <div style={{ 
-                backgroundColor: 'var(--card)',
+                backgroundColor: cardBg,
                 borderRadius: '16px',
-                border: '1px solid var(--border)',
+                border: `1px solid ${borderColor}`,
                 padding: '20px',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
               }}>
@@ -734,17 +747,17 @@ export default function DashboardPage() {
                     <Search style={{ width: '24px', height: '24px', color: '#9333ea' }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>{stats.em_analise}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground-muted)', margin: '4px 0 0 0' }}>Em Análise</p>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: textColor, margin: 0 }}>{stats.em_analise}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: textMuted, margin: '4px 0 0 0' }}>Em Análise</p>
                   </div>
                 </div>
               </div>
 
               {/* Encaminhadas */}
               <div style={{ 
-                backgroundColor: 'var(--card)',
+                backgroundColor: cardBg,
                 borderRadius: '16px',
-                border: '1px solid var(--border)',
+                border: `1px solid ${borderColor}`,
                 padding: '20px',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
               }}>
@@ -762,8 +775,8 @@ export default function DashboardPage() {
                     <Send style={{ width: '24px', height: '24px', color: '#0891b2' }} />
                   </div>
                   <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>{stats.encaminhadas}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground-muted)', margin: '4px 0 0 0' }}>Encaminhadas</p>
+                    <p style={{ fontSize: '28px', fontWeight: '700', color: textColor, margin: 0 }}>{stats.encaminhadas}</p>
+                    <p style={{ fontSize: '14px', fontWeight: '500', color: textMuted, margin: '4px 0 0 0' }}>Encaminhadas</p>
                   </div>
                 </div>
               </div>
@@ -772,24 +785,24 @@ export default function DashboardPage() {
 
           {/* Taxa de Conclusão */}
           <div id="taxa-conclusao" style={{ 
-            backgroundColor: 'var(--card)',
+            backgroundColor: cardBg,
             borderRadius: '16px',
-            border: '1px solid var(--border)',
+            border: `1px solid ${borderColor}`,
             padding: '24px',
             marginBottom: '24px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>Taxa de Conclusão</h3>
-                <p style={{ fontSize: '14px', color: 'var(--foreground-muted)', margin: '4px 0 0 0' }}>Providências concluídas vs total</p>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', color: textColor, margin: 0 }}>Taxa de Conclusão</h3>
+                <p style={{ fontSize: '14px', color: textMuted, margin: '4px 0 0 0' }}>Providências concluídas vs total</p>
               </div>
               <span style={{ fontSize: '32px', fontWeight: '700', color: '#16a34a' }}>{taxaConclusao}%</span>
             </div>
             <div style={{ 
               width: '100%', 
               height: '12px', 
-              backgroundColor: 'var(--border)', 
+              backgroundColor: borderColor, 
               borderRadius: '6px',
               overflow: 'hidden'
             }}>
@@ -801,7 +814,7 @@ export default function DashboardPage() {
                 transition: 'width 0.5s ease'
               }} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', fontSize: '14px', color: 'var(--foreground-muted)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', fontSize: '14px', color: textMuted }}>
               <span>Concluídas: {stats.concluidas}</span>
               <span>Total: {stats.total}</span>
             </div>
@@ -837,14 +850,14 @@ export default function DashboardPage() {
                   <BarChart3 style={{ width: '20px', height: '20px', color: '#16a34a' }} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>Área de Gráficos Personalizados</h3>
-                  <p style={{ fontSize: '12px', color: 'var(--foreground-muted)', margin: '2px 0 0 0' }}>Adicione gráficos usando o painel lateral</p>
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: textColor, margin: 0 }}>Área de Gráficos Personalizados</h3>
+                  <p style={{ fontSize: '12px', color: textMuted, margin: '2px 0 0 0' }}>Adicione gráficos usando o painel lateral</p>
                 </div>
               </div>
               <span style={{ 
                 fontSize: '12px', 
-                color: 'var(--foreground-muted)',
-                backgroundColor: 'var(--muted)',
+                color: textMuted,
+                backgroundColor: mutedBg,
                 padding: '4px 12px',
                 borderRadius: '9999px'
               }}>
@@ -861,7 +874,7 @@ export default function DashboardPage() {
             }}>
               {/* Providências por Status */}
               <div style={{ 
-                backgroundColor: 'var(--muted)',
+                backgroundColor: mutedBg,
                 borderRadius: '12px',
                 padding: '20px'
               }}>
@@ -878,15 +891,15 @@ export default function DashboardPage() {
                     <BarChart3 style={{ width: '18px', height: '18px', color: '#2563eb' }} />
                   </div>
                   <div>
-                    <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>Providências por Status</h4>
-                    <p style={{ fontSize: '11px', color: 'var(--foreground-muted)', margin: '2px 0 0 0' }}>Distribuição atual</p>
+                    <h4 style={{ fontSize: '14px', fontWeight: '700', color: textColor, margin: 0 }}>Providências por Status</h4>
+                    <p style={{ fontSize: '11px', color: textMuted, margin: '2px 0 0 0' }}>Distribuição atual</p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {chartData.map((item) => (
                     <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ width: '90px', fontSize: '13px', fontWeight: '500', color: 'var(--foreground-secondary)' }}>{item.label}</span>
-                      <div style={{ flex: 1, height: '20px', backgroundColor: 'var(--border)', borderRadius: '4px', overflow: 'hidden' }}>
+                      <span style={{ width: '90px', fontSize: '13px', fontWeight: '500', color: textMuted }}>{item.label}</span>
+                      <div style={{ flex: 1, height: '20px', backgroundColor: borderColor, borderRadius: '4px', overflow: 'hidden' }}>
                         <div style={{ 
                           height: '100%', 
                           borderRadius: '4px',
@@ -895,7 +908,7 @@ export default function DashboardPage() {
                           transition: 'width 0.5s ease'
                         }} />
                       </div>
-                      <span style={{ width: '28px', textAlign: 'right', fontSize: '13px', fontWeight: '700', color: 'var(--foreground)' }}>{item.value}</span>
+                      <span style={{ width: '28px', textAlign: 'right', fontSize: '13px', fontWeight: '700', color: textColor }}>{item.value}</span>
                     </div>
                   ))}
                 </div>
@@ -903,7 +916,7 @@ export default function DashboardPage() {
 
               {/* Distribuição de Status */}
               <div style={{ 
-                backgroundColor: 'var(--muted)',
+                backgroundColor: mutedBg,
                 borderRadius: '12px',
                 padding: '20px'
               }}>
@@ -920,8 +933,8 @@ export default function DashboardPage() {
                     <PieChart style={{ width: '18px', height: '18px', color: '#9333ea' }} />
                   </div>
                   <div>
-                    <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>Distribuição de Status</h4>
-                    <p style={{ fontSize: '11px', color: 'var(--foreground-muted)', margin: '2px 0 0 0' }}>Visão proporcional</p>
+                    <h4 style={{ fontSize: '14px', fontWeight: '700', color: textColor, margin: 0 }}>Distribuição de Status</h4>
+                    <p style={{ fontSize: '11px', color: textMuted, margin: '2px 0 0 0' }}>Visão proporcional</p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 0' }}>
@@ -947,8 +960,8 @@ export default function DashboardPage() {
                       alignItems: 'center', 
                       justifyContent: 'center' 
                     }}>
-                      <span style={{ fontSize: '24px', fontWeight: '700', color: 'var(--foreground)' }}>{stats.total}</span>
-                      <span style={{ fontSize: '11px', color: 'var(--foreground-muted)' }}>Total</span>
+                      <span style={{ fontSize: '24px', fontWeight: '700', color: textColor }}>{stats.total}</span>
+                      <span style={{ fontSize: '11px', color: textMuted }}>Total</span>
                     </div>
                   </div>
                 </div>
@@ -956,8 +969,8 @@ export default function DashboardPage() {
                   {chartData.map((item) => (
                     <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: item.color, flexShrink: 0 }} />
-                      <span style={{ fontSize: '11px', color: 'var(--foreground-secondary)', flex: 1 }}>{item.label}</span>
-                      <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--foreground)' }}>{item.value}</span>
+                      <span style={{ fontSize: '11px', color: textMuted, flex: 1 }}>{item.label}</span>
+                      <span style={{ fontSize: '11px', fontWeight: '700', color: textColor }}>{item.value}</span>
                     </div>
                   ))}
                 </div>
@@ -977,7 +990,7 @@ export default function DashboardPage() {
                   const ChartIcon = chartTypes.find(t => t.id === chart.type)?.icon || PieChart
                   return (
                     <div key={chart.id} style={{ 
-                      backgroundColor: 'var(--muted)',
+                      backgroundColor: mutedBg,
                       borderRadius: '12px',
                       padding: '20px'
                     }}>
@@ -995,8 +1008,8 @@ export default function DashboardPage() {
                             <ChartIcon style={{ width: '18px', height: '18px', color: '#16a34a' }} />
                           </div>
                           <div>
-                            <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>{chart.title}</h4>
-                            <p style={{ fontSize: '11px', color: 'var(--foreground-muted)', margin: '2px 0 0 0' }}>
+                            <h4 style={{ fontSize: '14px', fontWeight: '700', color: textColor, margin: 0 }}>{chart.title}</h4>
+                            <p style={{ fontSize: '11px', color: textMuted, margin: '2px 0 0 0' }}>
                               Gráfico de {chartTypes.find(t => t.id === chart.type)?.name}
                             </p>
                           </div>
@@ -1009,7 +1022,7 @@ export default function DashboardPage() {
                             border: 'none',
                             borderRadius: '6px',
                             cursor: 'pointer',
-                            color: 'var(--foreground-muted)'
+                            color: textMuted
                           }}
                         >
                           <X style={{ width: '16px', height: '16px' }} />
@@ -1025,8 +1038,8 @@ export default function DashboardPage() {
                         bborder: '2px solid var(--border)'
                       }}>
                         <div style={{ textAlign: 'center' }}>
-                          <ChartIcon style={{ width: '32px', height: '32px', color: 'var(--border)', margin: '0 auto 8px' }} />
-                          <p style={{ fontSize: '12px', color: 'var(--foreground-muted)' }}>Gráfico será renderizado aqui</p>
+                          <ChartIcon style={{ width: '32px', height: '32px', color: borderColor, margin: '0 auto 8px' }} />
+                          <p style={{ fontSize: '12px', color: textMuted }}>Gráfico será renderizado aqui</p>
                         </div>
                       </div>
                     </div>
@@ -1046,8 +1059,8 @@ export default function DashboardPage() {
                 border: '1px dashed var(--border)'
               }}>
                 <div style={{ textAlign: 'center' }}>
-                  <Plus style={{ width: '40px', height: '40px', color: 'var(--border)', margin: '0 auto 12px' }} />
-                  <p style={{ fontSize: '14px', color: 'var(--foreground-muted)', margin: 0 }}>
+                  <Plus style={{ width: '40px', height: '40px', color: borderColor, margin: '0 auto 12px' }} />
+                  <p style={{ fontSize: '14px', color: textMuted, margin: 0 }}>
                     Use o painel "Criar Gráfico" para adicionar visualizações personalizadas
                   </p>
                 </div>
@@ -1057,9 +1070,9 @@ export default function DashboardPage() {
 
           {/* Providências Recentes */}
           <div id="providencias-recentes" style={{ 
-            backgroundColor: 'var(--card)',
+            backgroundColor: cardBg,
             borderRadius: '16px',
-            border: '1px solid var(--border)',
+            border: `1px solid ${borderColor}`,
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
             overflow: 'hidden'
           }}>
@@ -1083,8 +1096,8 @@ export default function DashboardPage() {
                   <Clock style={{ width: '20px', height: '20px', color: '#ea580c' }} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>Providências Recentes</h3>
-                  <p style={{ fontSize: '12px', color: 'var(--foreground-muted)', margin: '2px 0 0 0' }}>Últimas atualizações</p>
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', color: textColor, margin: 0 }}>Providências Recentes</h3>
+                  <p style={{ fontSize: '12px', color: textMuted, margin: '2px 0 0 0' }}>Últimas atualizações</p>
                 </div>
               </div>
               <Link href="/dashboard/providencias">
@@ -1111,16 +1124,16 @@ export default function DashboardPage() {
                   width: '64px', 
                   height: '64px', 
                   borderRadius: '16px',
-                  backgroundColor: 'var(--muted)',
+                  backgroundColor: mutedBg,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   margin: '0 auto 16px'
                 }}>
-                  <FileText style={{ width: '32px', height: '32px', color: 'var(--foreground-muted)' }} />
+                  <FileText style={{ width: '32px', height: '32px', color: textMuted }} />
                 </div>
-                <h4 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--foreground)', margin: '0 0 8px 0' }}>Nenhuma providência cadastrada</h4>
-                <p style={{ fontSize: '14px', color: 'var(--foreground-muted)', margin: '0 0 24px 0', maxWidth: '300px', marginLeft: 'auto', marginRight: 'auto' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: '700', color: textColor, margin: '0 0 8px 0' }}>Nenhuma providência cadastrada</h4>
+                <p style={{ fontSize: '14px', color: textMuted, margin: '0 0 24px 0', maxWidth: '300px', marginLeft: 'auto', marginRight: 'auto' }}>
                   Comece cadastrando a primeira providência do gabinete
                 </p>
                 <Link href="/dashboard/providencias/nova">
@@ -1171,8 +1184,8 @@ export default function DashboardPage() {
                           <span style={{ 
                             fontSize: '12px', 
                             fontFamily: 'monospace',
-                            color: 'var(--foreground-muted)',
-                            backgroundColor: 'var(--muted)',
+                            color: textMuted,
+                            backgroundColor: mutedBg,
                             padding: '2px 8px',
                             borderRadius: '4px'
                           }}>
@@ -1196,7 +1209,7 @@ export default function DashboardPage() {
                         <h4 style={{ 
                           fontSize: '14px', 
                           fontWeight: '600', 
-                          color: 'var(--foreground)',
+                          color: textColor,
                           margin: 0,
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -1205,13 +1218,13 @@ export default function DashboardPage() {
                           {providencia.titulo}
                         </h4>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '8px' }}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--foreground-muted)' }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: textMuted }}>
                             <Calendar style={{ width: '14px', height: '14px' }} />
                             {format(new Date(providencia.created_at), "dd/MM/yyyy", { locale: ptBR })}
                           </span>
                         </div>
                       </div>
-                      <ChevronRight style={{ width: '20px', height: '20px', color: 'var(--foreground-muted)', flexShrink: 0 }} />
+                      <ChevronRight style={{ width: '20px', height: '20px', color: textMuted, flexShrink: 0 }} />
                     </div>
                   </Link>
                 ))}
@@ -1227,7 +1240,7 @@ export default function DashboardPage() {
             <div id="criar-grafico" style={{ 
               backgroundColor: 'var(--card)',
               borderRadius: '16px',
-              border: '1px solid var(--border)',
+              border: `1px solid ${borderColor}`,
               boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
               overflow: 'hidden'
             }}>
@@ -1264,7 +1277,7 @@ export default function DashboardPage() {
                     display: 'block', 
                     fontSize: '12px', 
                     fontWeight: '600', 
-                    color: 'var(--foreground-secondary)',
+                    color: textMuted,
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     marginBottom: '12px'
@@ -1310,7 +1323,7 @@ export default function DashboardPage() {
                     display: 'block', 
                     fontSize: '12px', 
                     fontWeight: '600', 
-                    color: 'var(--foreground-secondary)',
+                    color: textMuted,
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     marginBottom: '8px'
@@ -1324,10 +1337,10 @@ export default function DashboardPage() {
                       width: '100%',
                       padding: '10px 12px',
                       fontSize: '14px',
-                      backgroundColor: 'var(--muted)',
-                      border: '1px solid var(--border)',
+                      backgroundColor: mutedBg,
+                      border: `1px solid ${borderColor}`,
                       borderRadius: '8px',
-                      color: 'var(--foreground-secondary)'
+                      color: textMuted
                     }}
                   >
                     <optgroup label="Providências">
@@ -1354,7 +1367,7 @@ export default function DashboardPage() {
                     display: 'block', 
                     fontSize: '12px', 
                     fontWeight: '600', 
-                    color: 'var(--foreground-secondary)',
+                    color: textMuted,
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     marginBottom: '8px'
@@ -1368,10 +1381,10 @@ export default function DashboardPage() {
                       width: '100%',
                       padding: '10px 12px',
                       fontSize: '14px',
-                      backgroundColor: 'var(--muted)',
-                      border: '1px solid var(--border)',
+                      backgroundColor: mutedBg,
+                      border: `1px solid ${borderColor}`,
                       borderRadius: '8px',
-                      color: 'var(--foreground-secondary)'
+                      color: textMuted
                     }}
                   >
                     <option value="quantidade">Quantidade</option>
@@ -1385,7 +1398,7 @@ export default function DashboardPage() {
                     display: 'block', 
                     fontSize: '12px', 
                     fontWeight: '600', 
-                    color: 'var(--foreground-secondary)',
+                    color: textMuted,
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                     marginBottom: '8px'
@@ -1401,10 +1414,10 @@ export default function DashboardPage() {
                         width: '100%',
                         padding: '10px 12px',
                         fontSize: '14px',
-                        backgroundColor: 'var(--muted)',
-                        border: '1px solid var(--border)',
+                        backgroundColor: mutedBg,
+                        border: `1px solid ${borderColor}`,
                         borderRadius: '8px',
-                        color: 'var(--foreground-secondary)'
+                        color: textMuted
                       }}
                     />
                     <input
@@ -1415,10 +1428,10 @@ export default function DashboardPage() {
                         width: '100%',
                         padding: '10px 12px',
                         fontSize: '14px',
-                        backgroundColor: 'var(--muted)',
-                        border: '1px solid var(--border)',
+                        backgroundColor: mutedBg,
+                        border: `1px solid ${borderColor}`,
                         borderRadius: '8px',
-                        color: 'var(--foreground-secondary)'
+                        color: textMuted
                       }}
                     />
                   </div>
@@ -1475,7 +1488,7 @@ export default function DashboardPage() {
             <div id="ia-assistant" style={{ 
               backgroundColor: 'var(--card)',
               borderRadius: '16px',
-              border: '1px solid var(--border)',
+              border: `1px solid ${borderColor}`,
               boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
               overflow: 'hidden'
             }}>
@@ -1506,7 +1519,7 @@ export default function DashboardPage() {
               <div style={{ padding: '20px' }}>
                 {/* Sugestões rápidas */}
                 <div style={{ marginBottom: '16px' }}>
-                  <p style={{ fontSize: '12px', fontWeight: '600', color: 'var(--foreground-muted)', marginBottom: '8px' }}>Sugestões:</p>
+                  <p style={{ fontSize: '12px', fontWeight: '600', color: textMuted, marginBottom: '8px' }}>Sugestões:</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {['Análise geral', 'Prioridades', 'Tendências'].map((suggestion) => (
                       <button
@@ -1515,10 +1528,10 @@ export default function DashboardPage() {
                         style={{
                           padding: '6px 12px',
                           fontSize: '12px',
-                          backgroundColor: 'var(--muted)',
-                          border: '1px solid var(--border)',
+                          backgroundColor: mutedBg,
+                          border: `1px solid ${borderColor}`,
                           borderRadius: '9999px',
-                          color: 'var(--foreground-secondary)',
+                          color: textMuted,
                           cursor: 'pointer'
                         }}
                       >
@@ -1533,10 +1546,10 @@ export default function DashboardPage() {
                   <div style={{ 
                     display: 'flex', 
                     gap: '8px',
-                    backgroundColor: 'var(--muted)',
+                    backgroundColor: mutedBg,
                     borderRadius: '10px',
                     padding: '4px',
-                    border: '1px solid var(--border)'
+                    border: `1px solid ${borderColor}`
                   }}>
                     <input
                       type="text"
@@ -1550,7 +1563,7 @@ export default function DashboardPage() {
                         backgroundColor: 'transparent',
                         border: 'none',
                         outline: 'none',
-                        color: 'var(--foreground-secondary)'
+                        color: textMuted
                       }}
                       onKeyPress={(e) => e.key === 'Enter' && handleAiQuery()}
                     />
@@ -1584,7 +1597,7 @@ export default function DashboardPage() {
                     backgroundColor: '#faf5ff',
                     borderRadius: '10px',
                     padding: '14px',
-                    border: '1px solid var(--border)'
+                    border: `1px solid ${borderColor}`
                   }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                       <Zap style={{ width: '16px', height: '16px', color: '#7c3aed', flexShrink: 0, marginTop: '2px' }} />
@@ -1598,11 +1611,11 @@ export default function DashboardPage() {
                 {/* Info */}
                 <div style={{ 
                   marginTop: '16px',
-                  backgroundColor: 'var(--muted)',
+                  backgroundColor: mutedBg,
                   borderRadius: '10px',
                   padding: '12px'
                 }}>
-                  <p style={{ fontSize: '11px', color: 'var(--foreground-muted)', lineHeight: '1.5', margin: 0 }}>
+                  <p style={{ fontSize: '11px', color: textMuted, lineHeight: '1.5', margin: 0 }}>
                     <strong>IA treinada</strong> com os dados do seu gabinete. Faça perguntas sobre providências, tendências, prioridades e muito mais.
                   </p>
                 </div>
