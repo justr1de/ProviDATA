@@ -554,19 +554,33 @@ export default function ConfiguracoesPage() {
           </div>
           <div style={cardContentStyle}>
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
+              {/* Logo ProviDATA */}
               <div style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '16px',
-                background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 16px'
+                width: '120px',
+                height: '120px',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                margin: '0 auto 16px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
               }}>
-                <svg style={{ width: '36px', height: '36px', color: 'white' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <img 
+                  src="/providata-logo.png" 
+                  alt="ProviDATA Logo" 
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'cover'
+                  }}
+                  onError={(e) => {
+                    // Fallback para ícone se a imagem não carregar
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #22c55e, #16a34a); display: flex; align-items: center; justify-content: center;"><svg style="width: 60px; height: 60px; color: white;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>`;
+                    }
+                  }}
+                />
               </div>
               <h3 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--foreground)', marginBottom: '4px' }}>
                 ProviDATA
@@ -589,8 +603,8 @@ export default function ConfiguracoesPage() {
                     DATA-RO INTELIGÊNCIA TERRITORIAL
                   </a>
                 </p>
-                <p style={{ fontSize: '12px', color: 'var(--foreground-muted)', marginTop: '4px' }}>
-                  Todos os direitos reservados.
+                <p style={{ fontSize: '12px', color: 'var(--foreground-muted)', marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                  <span style={{ fontSize: '14px' }}>©</span> {new Date().getFullYear()} Todos os direitos reservados.
                 </p>
               </div>
             </div>
