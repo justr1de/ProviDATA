@@ -160,12 +160,12 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <select className="px-3 py-2 text-sm bg-[var(--background)] border border-[var(--border)] rounded-lg text-[var(--foreground)]">
+          <select className="px-4 py-2.5 text-sm bg-[var(--background)] border border-[var(--border)] rounded-xl text-[var(--foreground)] font-medium cursor-pointer hover:border-[var(--border-hover)] focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all">
             <option>2025</option>
             <option>2024</option>
           </select>
           <Link href="/dashboard/providencias/nova">
-            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
+            <button className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white text-sm font-semibold rounded-xl shadow-lg shadow-green-600/25 hover:shadow-green-600/40 transition-all duration-200 hover:-translate-y-0.5">
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Nova Providência</span>
               <span className="sm:hidden">Nova</span>
@@ -177,88 +177,90 @@ export default function DashboardPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {/* Total de Providências */}
-        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">
+        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 group">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">
               Total de Providências
             </span>
-            <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 flex items-center justify-center group-hover:scale-110 transition-transform">
               <FileText className="w-5 h-5 text-blue-500" />
             </div>
           </div>
-          <p className="text-3xl font-bold text-[var(--foreground)]">
+          <p className="text-4xl font-bold text-[var(--foreground)] tracking-tight">
             {stats?.total_providencias?.toLocaleString() || 0}
           </p>
-          <p className="text-xs text-[var(--muted-foreground)] mt-1">Cadastradas no sistema</p>
+          <p className="text-sm text-[var(--muted-foreground)] mt-2">Cadastradas no sistema</p>
         </div>
 
         {/* Pendentes */}
-        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">
+        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-300 group">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">
               Pendentes
             </span>
-            <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Clock className="w-5 h-5 text-amber-500" />
             </div>
           </div>
-          <p className="text-3xl font-bold text-[var(--foreground)]">
+          <p className="text-4xl font-bold text-[var(--foreground)] tracking-tight">
             {stats?.pendentes || 0}
           </p>
-          <p className="text-xs text-[var(--muted-foreground)] mt-1">Aguardando análise</p>
+          <p className="text-sm text-[var(--muted-foreground)] mt-2">Aguardando análise</p>
         </div>
 
         {/* Em Andamento */}
-        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">
+        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6 hover:border-purple-500/30 hover:shadow-lg hover:shadow-purple-500/5 transition-all duration-300 group">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">
               Em Andamento
             </span>
-            <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 flex items-center justify-center group-hover:scale-110 transition-transform">
               <TrendingUp className="w-5 h-5 text-purple-500" />
             </div>
           </div>
-          <p className="text-3xl font-bold text-[var(--foreground)]">
+          <p className="text-4xl font-bold text-[var(--foreground)] tracking-tight">
             {(stats?.em_analise || 0) + (stats?.encaminhadas || 0) + (stats?.em_andamento || 0)}
           </p>
-          <p className="text-xs text-[var(--muted-foreground)] mt-1">Em processamento</p>
+          <p className="text-sm text-[var(--muted-foreground)] mt-2">Em processamento</p>
         </div>
 
         {/* Concluídas */}
-        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">
+        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6 hover:border-green-500/30 hover:shadow-lg hover:shadow-green-500/5 transition-all duration-300 group">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">
               Concluídas
             </span>
-            <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/10 flex items-center justify-center group-hover:scale-110 transition-transform">
               <CheckCircle2 className="w-5 h-5 text-green-500" />
             </div>
           </div>
-          <p className="text-3xl font-bold text-[var(--foreground)]">
+          <p className="text-4xl font-bold text-[var(--foreground)] tracking-tight">
             {stats?.concluidas || 0}
           </p>
-          <p className="text-xs text-[var(--muted-foreground)] mt-1">Finalizadas com sucesso</p>
+          <p className="text-sm text-[var(--muted-foreground)] mt-2">Finalizadas com sucesso</p>
         </div>
       </div>
 
       {/* Taxa de Conclusão */}
-      <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5">
-        <div className="flex items-center justify-between mb-3">
+      <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-sm font-semibold text-[var(--foreground)]">Taxa de Conclusão</h3>
-            <p className="text-xs text-[var(--muted-foreground)] mt-0.5">Providências concluídas vs total</p>
+            <h3 className="text-base font-semibold text-[var(--foreground)]">Taxa de Conclusão</h3>
+            <p className="text-sm text-[var(--muted-foreground)] mt-1">Providências concluídas vs total</p>
           </div>
-          <span className="text-2xl font-bold text-green-500">{taxaConclusao}%</span>
+          <div className="text-right">
+            <span className="text-3xl font-bold bg-gradient-to-r from-green-500 to-green-400 bg-clip-text text-transparent">{taxaConclusao}%</span>
+          </div>
         </div>
-        <div className="w-full h-3 bg-[var(--muted)] rounded-full overflow-hidden">
+        <div className="w-full h-4 bg-[var(--muted)] rounded-full overflow-hidden">
           <div 
-            className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500"
+            className="h-full bg-gradient-to-r from-green-600 via-green-500 to-green-400 rounded-full transition-all duration-700 ease-out"
             style={{ width: `${taxaConclusao}%` }}
           />
         </div>
-        <div className="flex justify-between mt-2 text-xs text-[var(--muted-foreground)]">
-          <span>Concluídas: {concluidas}</span>
-          <span>Total: {totalProvidencias}</span>
+        <div className="flex justify-between mt-3 text-sm text-[var(--muted-foreground)]">
+          <span>Concluídas: <strong className="text-[var(--foreground)]">{concluidas}</strong></span>
+          <span>Total: <strong className="text-[var(--foreground)]">{totalProvidencias}</strong></span>
         </div>
       </div>
 
@@ -315,7 +317,7 @@ export default function DashboardPage() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Gráfico de Barras */}
-        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-6">
+        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6 hover:shadow-lg transition-shadow duration-300">
           <div className="flex items-center gap-2 mb-6">
             <BarChart3 className="w-5 h-5 text-[var(--muted-foreground)]" />
             <h3 className="font-semibold text-[var(--foreground)]">Providências por Status</h3>
@@ -342,7 +344,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Gráfico de Pizza */}
-        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-6">
+        <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6 hover:shadow-lg transition-shadow duration-300">
           <div className="flex items-center gap-2 mb-6">
             <PieChart className="w-5 h-5 text-[var(--muted-foreground)]" />
             <h3 className="font-semibold text-[var(--foreground)]">Distribuição de Status</h3>
@@ -402,14 +404,16 @@ export default function DashboardPage() {
       </div>
 
       {/* Providências Recentes */}
-      <div className="bg-[var(--background)] rounded-xl border border-[var(--border)]">
-        <div className="flex items-center justify-between p-5 sm:px-6 border-b border-[var(--border)]">
-          <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-[var(--muted-foreground)]" />
+      <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+        <div className="flex items-center justify-between p-6 border-b border-[var(--border)] bg-[var(--background-secondary)]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/10 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-green-500" />
+            </div>
             <h3 className="font-semibold text-[var(--foreground)]">Providências Recentes</h3>
           </div>
           <Link href="/dashboard/providencias">
-            <button className="flex items-center gap-1 text-sm text-green-600 font-medium hover:text-green-700 transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2 text-sm text-green-600 dark:text-green-400 font-semibold hover:bg-green-500/10 rounded-xl transition-colors">
               Ver Todas
               <ArrowRight className="w-4 h-4" />
             </button>
@@ -426,7 +430,7 @@ export default function DashboardPage() {
               Comece cadastrando a primeira providência do gabinete
             </p>
             <Link href="/dashboard/providencias/nova">
-              <button className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
+              <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white text-sm font-semibold rounded-xl shadow-lg shadow-green-600/25 hover:shadow-green-600/40 transition-all duration-200 hover:-translate-y-0.5">
                 <Plus className="w-4 h-4" />
                 Nova Providência
               </button>
@@ -500,23 +504,23 @@ export default function DashboardPage() {
       </div>
 
       {/* Fonte dos Dados */}
-      <div className="bg-[var(--muted)] rounded-xl p-4 sm:px-6">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="bg-[var(--card)] rounded-2xl border border-[var(--border)] p-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
           <div>
-            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide mb-1">Sistema</p>
-            <p className="text-sm font-medium text-[var(--foreground)]">ProviDATA</p>
+            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wider font-semibold mb-2">Sistema</p>
+            <p className="text-sm font-semibold text-[var(--foreground)]">ProviDATA</p>
           </div>
           <div>
-            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide mb-1">Gabinete</p>
-            <p className="text-sm font-medium text-[var(--foreground)]">{tenant?.parlamentar_name || 'Não definido'}</p>
+            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wider font-semibold mb-2">Gabinete</p>
+            <p className="text-sm font-semibold text-[var(--foreground)]">{tenant?.parlamentar_name || 'Não definido'}</p>
           </div>
           <div>
-            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide mb-1">Período</p>
-            <p className="text-sm font-medium text-[var(--foreground)]">2024 - 2025</p>
+            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wider font-semibold mb-2">Período</p>
+            <p className="text-sm font-semibold text-[var(--foreground)]">2024 - 2025</p>
           </div>
           <div>
-            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide mb-1">Última Atualização</p>
-            <p className="text-sm font-medium text-[var(--foreground)]">{format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wider font-semibold mb-2">Última Atualização</p>
+            <p className="text-sm font-semibold text-[var(--foreground)]">{format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
           </div>
         </div>
       </div>
