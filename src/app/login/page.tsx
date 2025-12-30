@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowRight, Eye, EyeOff, Shield, BarChart, Map, FileText, Users, Building, MapPin, Sparkles, Lock, RefreshCw } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, Shield, BarChart, Map, FileText, Users, Building, MapPin, Sparkles, Lock, RefreshCw, Clock, Zap, Headphones, GraduationCap, BookOpen } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
 
 export default function LoginPage() {
@@ -339,11 +339,11 @@ export default function LoginPage() {
             <div style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', borderRadius: '16px', padding: '24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '12px' }}>
-                  <FileText style={{ width: '28px', height: '28px', color: '#ffffff' }} />
+                  <Clock style={{ width: '28px', height: '28px', color: '#ffffff' }} />
                 </div>
                 <div>
-                  <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#ffffff', margin: 0 }}>10k+</p>
-                  <p style={{ fontSize: '14px', color: '#bbf7d0', marginTop: '4px' }}>Pedidos Gerenciados</p>
+                  <p style={{ fontSize: '16px', fontWeight: 'bold', color: '#ffffff', margin: 0, lineHeight: '1.3' }}>Relatórios pontuais</p>
+                  <p style={{ fontSize: '14px', color: '#bbf7d0', marginTop: '4px' }}>e em tempo real</p>
                 </div>
               </div>
             </div>
@@ -351,11 +351,11 @@ export default function LoginPage() {
             <div style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', borderRadius: '16px', padding: '24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '12px' }}>
-                  <Building style={{ width: '28px', height: '28px', color: '#ffffff' }} />
+                  <Zap style={{ width: '28px', height: '28px', color: '#ffffff' }} />
                 </div>
                 <div>
-                  <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#ffffff', margin: 0 }}>50+</p>
-                  <p style={{ fontSize: '14px', color: '#bbf7d0', marginTop: '4px' }}>Gabinetes Atendidos</p>
+                  <p style={{ fontSize: '16px', fontWeight: 'bold', color: '#ffffff', margin: 0, lineHeight: '1.3' }}>Simplicidade</p>
+                  <p style={{ fontSize: '14px', color: '#bbf7d0', marginTop: '4px' }}>e eficiência</p>
                 </div>
               </div>
             </div>
@@ -363,11 +363,11 @@ export default function LoginPage() {
             <div style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', borderRadius: '16px', padding: '24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '12px' }}>
-                  <MapPin style={{ width: '28px', height: '28px', color: '#ffffff' }} />
+                  <Headphones style={{ width: '28px', height: '28px', color: '#ffffff' }} />
                 </div>
                 <div>
-                  <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#ffffff', margin: 0 }}>150+</p>
-                  <p style={{ fontSize: '14px', color: '#bbf7d0', marginTop: '4px' }}>Municípios Cobertos</p>
+                  <p style={{ fontSize: '16px', fontWeight: 'bold', color: '#ffffff', margin: 0, lineHeight: '1.3' }}>Suporte técnico</p>
+                  <p style={{ fontSize: '14px', color: '#bbf7d0', marginTop: '4px' }}>local 24/7</p>
                 </div>
               </div>
             </div>
@@ -375,11 +375,11 @@ export default function LoginPage() {
             <div style={{ backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', borderRadius: '16px', padding: '24px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', padding: '12px', borderRadius: '12px' }}>
-                  <Users style={{ width: '28px', height: '28px', color: '#ffffff' }} />
+                  <GraduationCap style={{ width: '28px', height: '28px', color: '#ffffff' }} />
                 </div>
                 <div>
-                  <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#ffffff', margin: 0 }}>8+</p>
-                  <p style={{ fontSize: '14px', color: '#bbf7d0', marginTop: '4px' }}>Anos de Dados</p>
+                  <p style={{ fontSize: '16px', fontWeight: 'bold', color: '#ffffff', margin: 0, lineHeight: '1.3' }}>Capacitação</p>
+                  <p style={{ fontSize: '14px', color: '#bbf7d0', marginTop: '4px' }}>presencial inclusa</p>
                 </div>
               </div>
             </div>
