@@ -19,8 +19,7 @@ import {
   Menu,
   X,
   ChevronDown,
-  User,
-  ExternalLink
+  User
 } from 'lucide-react'
 import { Toaster } from 'sonner'
 
@@ -44,259 +43,206 @@ export default function DashboardLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [isLargeScreen, setIsLargeScreen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
-  const { user, tenant, setUser, setTenant, setLoading, isLoading } = useAuthStore()
+  
+  const { user, tenant, setUser, setTenant, clearAuth } = useAuthStore()
 
   useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [pathname])
+    const checkAuth = async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      
+      if (!authUser) {
+        router.push('/login')
+        return
+      }
 
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsLargeScreen(window.innerWidth >= 1024)
-    }
-    checkScreenSize()
-    window.addEventListener('resize', checkScreenSize)
-    return () => window.removeEventListener('resize', checkScreenSize)
-  }, [])
+      // Buscar dados do usuário
+      const { data: userData } = await supabase
+        .from('users')
+        .select('*, tenant:tenants(*)')
+        .eq('id', authUser.id)
+        .single()
 
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const { data: { user: authUser } } = await supabase.auth.getUser()
-        
-        if (!authUser) {
-          router.push('/login')
-          return
+      if (userData) {
+        setUser(userData)
+        if (userData.tenant) {
+          setTenant(userData.tenant)
         }
-
-        const { data: userData } = await supabase
-          .from('users')
-          .select('*, tenants(*)')
-          .eq('id', authUser.id)
-          .single()
-
-        if (userData) {
-          setUser(userData)
-          setTenant(userData.tenants)
-        }
-      } catch (error) {
-        console.error('Error loading user data:', error)
-      } finally {
-        setLoading(false)
       }
     }
 
-    loadUserData()
-  }, [supabase, router, setUser, setTenant, setLoading])
+    checkAuth()
+  }, [])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
+    clearAuth()
     router.push('/login')
-    router.refresh()
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-3 border-green-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-[var(--muted-foreground)]">Carregando...</p>
-        </div>
-      </div>
-    )
+  const isActive = (href: string) => {
+    if (href === '/dashboard') {
+      return pathname === '/dashboard'
+    }
+    return pathname.startsWith(href)
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background-secondary)] transition-colors">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Toaster position="top-right" richColors />
       
-      {/* Mobile sidebar backdrop */}
+      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full w-72 bg-[var(--sidebar-bg)] border-r border-[var(--sidebar-border)]
-        transition-transform duration-300 ease-in-out
+        fixed top-0 left-0 z-50 h-full w-64 
+        bg-gray-900 dark:bg-gray-950
+        transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0
+        md:translate-x-0
       `}>
         <div className="flex flex-col h-full">
-          {/* Logo Section */}
-          <div className="flex items-center justify-between h-20 px-6 border-b border-[var(--sidebar-border)]">
+          {/* Logo */}
+          <div className="p-4 border-b border-gray-800">
             <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-white shadow-lg">
-                <Image 
-                  src="/providata-logo-final.png" 
-                  alt="ProviDATA" 
-                  fill 
-                  className="object-contain p-1"
+              <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center overflow-hidden">
+                <Image
+                  src="/providata-logo-final.png"
+                  alt="ProviDATA"
+                  width={32}
+                  height={32}
+                  className="object-contain"
                 />
               </div>
-              <div>
-                <span className="font-bold text-lg text-[var(--foreground)]">ProviDATA</span>
-                <p className="text-[10px] text-[var(--muted-foreground)] -mt-0.5">Gestão de Providências</p>
-              </div>
+              <span className="text-lg font-bold text-white">ProviDATA</span>
             </Link>
-            <button 
-              className="lg:hidden p-2 hover:bg-[var(--sidebar-item-hover)] rounded-lg transition-colors"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <X className="w-5 h-5 text-[var(--muted-foreground)]" />
-            </button>
           </div>
 
           {/* Tenant Info */}
-          {tenant && (
-            <div className="px-6 py-5 border-b border-[var(--sidebar-border)] bg-[var(--primary-muted)]">
-              <p className="text-sm font-semibold text-[var(--foreground)] truncate">
-                {tenant.parlamentar_name}
-              </p>
-              <p className="text-xs text-[var(--muted-foreground)] truncate mt-1">
-                {tenant.cargo === 'vereador' ? 'Vereador(a)' : 
-                 tenant.cargo === 'deputado_estadual' ? 'Deputado(a) Estadual' :
-                 tenant.cargo === 'deputado_federal' ? 'Deputado(a) Federal' : 'Senador(a)'}
-                {tenant.partido && ` · ${tenant.partido}`}
-              </p>
-            </div>
-          )}
-
-          {/* Main Navigation */}
-          <nav className="flex-1 px-4 py-6 overflow-y-auto">
-            <p className="px-3 mb-3 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
-              Menu Principal
+          <div className="px-4 py-3 border-b border-gray-800">
+            <p className="text-sm font-medium text-white truncate">
+              {tenant?.parlamentar_name || 'Carregando...'}
             </p>
-            <div className="space-y-1.5">
-              {navigation.map((item) => {
-                const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`
-                      flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
-                      ${isActive 
-                        ? 'bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg shadow-green-600/25' 
-                        : 'text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--sidebar-item-hover)]'
-                      }
-                    `}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <item.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-[var(--muted-foreground)]'}`} />
-                    {item.name}
-                  </Link>
-                )
-              })}
-            </div>
+            <p className="text-xs text-gray-400 truncate">
+              {tenant?.tipo_mandato || 'Deputado(a)'} · {tenant?.uf || 'RO'}
+            </p>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            {navigation.map((item) => {
+              const Icon = item.icon
+              const active = isActive(item.href)
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`
+                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
+                    transition-colors duration-200
+                    ${active 
+                      ? 'bg-green-600 text-white' 
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }
+                  `}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span>{item.name}</span>
+                </Link>
+              )
+            })}
           </nav>
 
           {/* Bottom Navigation */}
-          <div className="px-4 py-4 border-t border-[var(--sidebar-border)]">
-            <p className="px-3 mb-3 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
-              Sistema
-            </p>
-            <div className="space-y-1.5">
-              {bottomNavigation.map((item) => {
-                const isActive = pathname === item.href
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`
-                      flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
-                      ${isActive 
-                        ? 'bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg shadow-green-600/25' 
-                        : 'text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--sidebar-item-hover)]'
-                      }
-                    `}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <item.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-[var(--muted-foreground)]'}`} />
-                    {item.name}
-                  </Link>
-                )
-              })}
-            </div>
+          <div className="px-3 py-4 border-t border-gray-800 space-y-1">
+            {bottomNavigation.map((item) => {
+              const Icon = item.icon
+              const active = isActive(item.href)
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`
+                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
+                    transition-colors duration-200
+                    ${active 
+                      ? 'bg-green-600 text-white' 
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }
+                  `}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span>{item.name}</span>
+                </Link>
+              )
+            })}
           </div>
 
-          {/* Footer with DATA-RO */}
-          <div className="px-6 py-4 border-t border-[var(--sidebar-border)]">
+          {/* Footer */}
+          <div className="px-4 py-3 border-t border-gray-800">
             <a 
               href="https://dataro-it.com.br" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+              className="text-xs text-gray-500 hover:text-gray-400 transition-colors"
             >
-              <div className="relative w-6 h-6 rounded overflow-hidden bg-white">
-                <Image 
-                  src="/dataro-logo-final.png" 
-                  alt="DATA-RO" 
-                  fill 
-                  className="object-contain p-0.5"
-                />
-              </div>
-              <span>DATA-RO Inteligência</span>
-              <ExternalLink className="w-3 h-3 ml-auto" />
+              DATA-RO Inteligência Territorial
             </a>
           </div>
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="min-w-0 transition-all duration-300" style={{ paddingLeft: isLargeScreen ? '288px' : '0' }}>
+      {/* Main content wrapper */}
+      <div className="md:ml-64 min-h-screen flex flex-col">
         {/* Header */}
-        <header className="sticky top-0 z-30 h-16 bg-[var(--background)]/80 backdrop-blur-lg border-b border-[var(--border)]">
-          <div className="flex items-center justify-between h-full px-4 md:px-6">
+        <header className="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between h-16 px-4">
             {/* Mobile menu button */}
             <button
-              className="lg:hidden p-2.5 hover:bg-[var(--muted)] rounded-xl transition-colors"
               onClick={() => setSidebarOpen(true)}
+              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 md:hidden"
             >
-              <Menu className="w-5 h-5 text-[var(--foreground)]" />
+              <Menu className="w-6 h-6" />
             </button>
 
-            <div className="flex-1" />
+            {/* Spacer for desktop */}
+            <div className="hidden md:block" />
 
-            {/* Right side actions */}
-            <div className="flex items-center gap-2">
-              {/* Theme Toggle */}
+            {/* Right side */}
+            <div className="flex items-center gap-3">
               <ThemeToggle />
-
+              
               {/* Notifications */}
-              <Link
+              <Link 
                 href="/dashboard/notificacoes"
-                className="relative p-2.5 hover:bg-[var(--muted)] rounded-xl transition-colors hidden sm:flex"
+                className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 relative"
               >
-                <Bell className="w-5 h-5 text-[var(--muted-foreground)]" />
-                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-green-500 rounded-full ring-2 ring-[var(--background)]" />
+                <Bell className="w-5 h-5" />
               </Link>
 
               {/* User menu */}
-              <div className="relative ml-1">
+              <div className="relative">
                 <button
-                  className="flex items-center gap-2.5 p-2 hover:bg-[var(--muted)] rounded-xl transition-colors"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg shadow-green-500/20">
-                    <User className="w-5 h-5 text-white" />
+                  <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" />
                   </div>
-                  <div className="hidden sm:block text-left">
-                    <p className="text-sm font-medium text-[var(--foreground)] max-w-[100px] truncate">
-                      {user?.nome?.split(' ')[0]}
-                    </p>
-                    <p className="text-[10px] text-[var(--muted-foreground)]">
-                      {user?.role === 'super_admin' ? 'Super Admin' : 'Usuário'}
-                    </p>
-                  </div>
-                  <ChevronDown className="w-4 h-4 text-[var(--muted-foreground)] hidden sm:block" />
+                  <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-200">
+                    {user?.name?.split(' ')[0] || 'Usuário'}
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
                 </button>
 
                 {userMenuOpen && (
@@ -305,26 +251,30 @@ export default function DashboardLayout({
                       className="fixed inset-0 z-40"
                       onClick={() => setUserMenuOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-64 bg-[var(--background)] border border-[var(--border)] rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
-                      <div className="p-4 bg-gradient-to-br from-green-500/10 to-green-600/5 border-b border-[var(--border)]">
-                        <p className="text-sm font-semibold text-[var(--foreground)] truncate">{user?.nome}</p>
-                        <p className="text-xs text-[var(--muted-foreground)] truncate mt-0.5">{user?.email}</p>
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                      <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {user?.name || 'Usuário'}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {user?.email}
+                        </p>
                       </div>
-                      <div className="p-2">
+                      <div className="p-1">
                         <Link
                           href="/dashboard/configuracoes"
-                          className="flex items-center gap-3 px-4 py-3 text-sm text-[var(--foreground)] rounded-xl hover:bg-[var(--muted)] transition-colors"
                           onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
                         >
-                          <Settings className="w-4 h-4 text-[var(--muted-foreground)]" />
+                          <Settings className="w-4 h-4" />
                           Configurações
                         </Link>
                         <button
-                          className="flex items-center gap-3 w-full px-4 py-3 text-sm rounded-xl text-red-500 hover:bg-red-500/10 transition-colors"
                           onClick={handleLogout}
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md w-full"
                         >
                           <LogOut className="w-4 h-4" />
-                          Sair da conta
+                          Sair
                         </button>
                       </div>
                     </div>
@@ -336,24 +286,9 @@ export default function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main className="p-4 md:p-6 lg:p-8 overflow-x-hidden">
+        <main className="flex-1 p-4 md:p-6">
           {children}
         </main>
-
-        {/* Footer */}
-        <footer className="px-4 md:px-6 lg:px-8 py-6 border-t border-[var(--border)] text-center">
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Desenvolvido por{' '}
-            <a 
-              href="https://dataro-it.com.br" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="font-medium text-green-600 dark:text-green-400 hover:underline"
-            >
-              DATA-RO INTELIGÊNCIA TERRITORIAL
-            </a>
-          </p>
-        </footer>
       </div>
     </div>
   )
