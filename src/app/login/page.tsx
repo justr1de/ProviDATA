@@ -91,7 +91,7 @@ export default function LoginPage() {
                 justifyContent: 'center',
                 overflow: 'hidden',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                padding: '8px',
+                padding: '4px',
                 flexShrink: 0
               }}
             >
@@ -298,7 +298,7 @@ export default function LoginPage() {
                 justifyContent: 'center',
                 overflow: 'hidden',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                padding: '6px'
+                padding: '3px'
               }}
             >
               <img 
