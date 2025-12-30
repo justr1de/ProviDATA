@@ -202,7 +202,7 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main content */}
-      <div className="lg:pl-64 min-w-0">
+      <div className="lg:pl-[256px] min-w-0">
         {/* Header */}
         <header className="sticky top-0 z-30 h-16 bg-[var(--background)] border-b border-[var(--border)]">
           <div className="flex items-center justify-between h-full px-4 md:px-6">
