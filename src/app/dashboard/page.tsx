@@ -16,8 +16,7 @@ import {
   Users,
   Building2,
   BarChart3,
-  PieChart,
-  Filter
+  PieChart
 } from 'lucide-react'
 import type { Providencia, DashboardStats } from '@/types/database'
 import { format } from 'date-fns'
@@ -67,7 +66,6 @@ export default function DashboardPage() {
       if (!tenant) return
 
       try {
-        // Carregar estatísticas
         const { data: statsData } = await supabase
           .from('dashboard_stats')
           .select('*')
@@ -77,7 +75,6 @@ export default function DashboardPage() {
         if (statsData) {
           setStats(statsData)
         } else {
-          // Se não houver dados, criar estatísticas zeradas
           setStats({
             tenant_id: tenant.id,
             total_providencias: 0,
@@ -93,7 +90,6 @@ export default function DashboardPage() {
           })
         }
 
-        // Carregar providências recentes
         const { data: providenciasData } = await supabase
           .from('providencias')
           .select(`
@@ -121,10 +117,17 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-[var(--muted-foreground)]">Carregando dashboard...</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+          <div style={{ 
+            width: '48px', 
+            height: '48px', 
+            border: '4px solid #22c55e', 
+            borderTopColor: 'transparent', 
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
+          <p style={{ fontSize: '14px', color: 'var(--muted-foreground)' }}>Carregando dashboard...</p>
         </div>
       </div>
     )
@@ -134,110 +137,222 @@ export default function DashboardPage() {
   const concluidas = stats?.concluidas || 0
   const taxaConclusao = totalProvidencias > 0 ? Math.round((concluidas / totalProvidencias) * 100) : 0
 
-  // Dados para o gráfico de barras (simulado)
   const statusData = [
-    { label: 'Pendentes', value: stats?.pendentes || 0, color: 'bg-amber-500' },
-    { label: 'Em Análise', value: stats?.em_analise || 0, color: 'bg-blue-500' },
-    { label: 'Encaminhadas', value: stats?.encaminhadas || 0, color: 'bg-purple-500' },
-    { label: 'Em Andamento', value: stats?.em_andamento || 0, color: 'bg-indigo-500' },
-    { label: 'Concluídas', value: stats?.concluidas || 0, color: 'bg-green-500' },
+    { label: 'Pendentes', value: stats?.pendentes || 0, color: '#f59e0b' },
+    { label: 'Em Análise', value: stats?.em_analise || 0, color: '#3b82f6' },
+    { label: 'Encaminhadas', value: stats?.encaminhadas || 0, color: '#a855f7' },
+    { label: 'Em Andamento', value: stats?.em_andamento || 0, color: '#6366f1' },
+    { label: 'Concluídas', value: stats?.concluidas || 0, color: '#22c55e' },
   ]
 
   const maxValue = Math.max(...statusData.map(d => d.value), 1)
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-4 border-b border-[var(--border)]">
+      <div style={{ 
+        display: 'flex', 
+        flexWrap: 'wrap',
+        alignItems: 'center', 
+        justifyContent: 'space-between', 
+        gap: '16px',
+        paddingBottom: '16px',
+        borderBottom: '1px solid var(--border)'
+      }}>
         <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">Dashboard de Providências</h1>
-          <p className="text-sm text-[var(--muted-foreground)] mt-1">
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--foreground)', margin: 0 }}>
+            Dashboard de Providências
+          </h1>
+          <p style={{ fontSize: '14px', color: 'var(--muted-foreground)', marginTop: '4px' }}>
             Visão geral das demandas do gabinete · {tenant?.parlamentar_name || 'Gabinete'}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <select className="px-4 py-2 text-sm bg-[var(--background)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <select style={{ 
+            padding: '8px 16px', 
+            fontSize: '14px', 
+            backgroundColor: 'var(--background)', 
+            border: '1px solid var(--border)', 
+            borderRadius: '8px',
+            color: 'var(--foreground)'
+          }}>
             <option>2025</option>
             <option>2024</option>
           </select>
           <Link href="/dashboard/providencias/nova">
-            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
-              <Plus className="w-4 h-4" />
+            <button style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              padding: '8px 16px', 
+              backgroundColor: '#16a34a', 
+              color: 'white', 
+              fontSize: '14px', 
+              fontWeight: '500', 
+              borderRadius: '8px', 
+              border: 'none',
+              cursor: 'pointer'
+            }}>
+              <Plus style={{ width: '16px', height: '16px' }} />
               Nova Providência
             </button>
           </Link>
         </div>
       </div>
 
-      {/* Stats Cards - Row 1 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Stats Cards */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+        gap: '16px' 
+      }}>
         {/* Total de Providências */}
-        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5 hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">Total de Providências</span>
-            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+        <div style={{ 
+          backgroundColor: 'var(--background)', 
+          borderRadius: '12px', 
+          border: '1px solid var(--border)', 
+          padding: '20px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Total de Providências
+            </span>
+            <div style={{ 
+              width: '40px', 
+              height: '40px', 
+              borderRadius: '8px', 
+              backgroundColor: 'rgba(59, 130, 246, 0.1)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center' 
+            }}>
+              <FileText style={{ width: '20px', height: '20px', color: '#3b82f6' }} />
             </div>
           </div>
-          <p className="text-3xl font-bold text-[var(--foreground)]">{stats?.total_providencias?.toLocaleString() || 0}</p>
-          <p className="text-xs text-[var(--muted-foreground)] mt-1">Cadastradas no sistema</p>
+          <p style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--foreground)', margin: 0 }}>
+            {stats?.total_providencias?.toLocaleString() || 0}
+          </p>
+          <p style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '4px' }}>Cadastradas no sistema</p>
         </div>
 
         {/* Pendentes */}
-        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5 hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">Pendentes</span>
-            <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-              <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+        <div style={{ 
+          backgroundColor: 'var(--background)', 
+          borderRadius: '12px', 
+          border: '1px solid var(--border)', 
+          padding: '20px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Pendentes
+            </span>
+            <div style={{ 
+              width: '40px', 
+              height: '40px', 
+              borderRadius: '8px', 
+              backgroundColor: 'rgba(245, 158, 11, 0.1)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center' 
+            }}>
+              <Clock style={{ width: '20px', height: '20px', color: '#f59e0b' }} />
             </div>
           </div>
-          <p className="text-3xl font-bold text-[var(--foreground)]">{stats?.pendentes || 0}</p>
-          <p className="text-xs text-[var(--muted-foreground)] mt-1">Aguardando análise</p>
+          <p style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--foreground)', margin: 0 }}>
+            {stats?.pendentes || 0}
+          </p>
+          <p style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '4px' }}>Aguardando análise</p>
         </div>
 
         {/* Em Andamento */}
-        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5 hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">Em Andamento</span>
-            <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+        <div style={{ 
+          backgroundColor: 'var(--background)', 
+          borderRadius: '12px', 
+          border: '1px solid var(--border)', 
+          padding: '20px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Em Andamento
+            </span>
+            <div style={{ 
+              width: '40px', 
+              height: '40px', 
+              borderRadius: '8px', 
+              backgroundColor: 'rgba(168, 85, 247, 0.1)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center' 
+            }}>
+              <TrendingUp style={{ width: '20px', height: '20px', color: '#a855f7' }} />
             </div>
           </div>
-          <p className="text-3xl font-bold text-[var(--foreground)]">
+          <p style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--foreground)', margin: 0 }}>
             {(stats?.em_analise || 0) + (stats?.encaminhadas || 0) + (stats?.em_andamento || 0)}
           </p>
-          <p className="text-xs text-[var(--muted-foreground)] mt-1">Em processamento</p>
+          <p style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '4px' }}>Em processamento</p>
         </div>
 
         {/* Concluídas */}
-        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5 hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-[var(--muted-foreground)] uppercase tracking-wide">Concluídas</span>
-            <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+        <div style={{ 
+          backgroundColor: 'var(--background)', 
+          borderRadius: '12px', 
+          border: '1px solid var(--border)', 
+          padding: '20px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Concluídas
+            </span>
+            <div style={{ 
+              width: '40px', 
+              height: '40px', 
+              borderRadius: '8px', 
+              backgroundColor: 'rgba(34, 197, 94, 0.1)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center' 
+            }}>
+              <CheckCircle2 style={{ width: '20px', height: '20px', color: '#22c55e' }} />
             </div>
           </div>
-          <p className="text-3xl font-bold text-[var(--foreground)]">{stats?.concluidas || 0}</p>
-          <p className="text-xs text-[var(--muted-foreground)] mt-1">Finalizadas com sucesso</p>
+          <p style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--foreground)', margin: 0 }}>
+            {stats?.concluidas || 0}
+          </p>
+          <p style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '4px' }}>Finalizadas com sucesso</p>
         </div>
       </div>
 
       {/* Taxa de Conclusão */}
-      <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-5">
-        <div className="flex items-center justify-between mb-3">
+      <div style={{ 
+        backgroundColor: 'var(--background)', 
+        borderRadius: '12px', 
+        border: '1px solid var(--border)', 
+        padding: '20px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
           <div>
-            <h3 className="text-sm font-semibold text-[var(--foreground)]">Taxa de Conclusão</h3>
-            <p className="text-xs text-[var(--muted-foreground)]">Providências concluídas vs total</p>
+            <h3 style={{ fontSize: '14px', fontWeight: '600', color: 'var(--foreground)', margin: 0 }}>Taxa de Conclusão</h3>
+            <p style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '2px' }}>Providências concluídas vs total</p>
           </div>
-          <span className="text-2xl font-bold text-green-600">{taxaConclusao}%</span>
+          <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#22c55e' }}>{taxaConclusao}%</span>
         </div>
-        <div className="w-full h-3 bg-[var(--muted)] rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500"
-            style={{ width: `${taxaConclusao}%` }}
-          />
+        <div style={{ 
+          width: '100%', 
+          height: '12px', 
+          backgroundColor: 'var(--muted)', 
+          borderRadius: '6px', 
+          overflow: 'hidden' 
+        }}>
+          <div style={{ 
+            height: '100%', 
+            width: `${taxaConclusao}%`, 
+            background: 'linear-gradient(to right, #22c55e, #16a34a)', 
+            borderRadius: '6px',
+            transition: 'width 0.5s ease'
+          }} />
         </div>
-        <div className="flex justify-between mt-2 text-xs text-[var(--muted-foreground)]">
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: 'var(--muted-foreground)' }}>
           <span>Concluídas: {concluidas}</span>
           <span>Total: {totalProvidencias}</span>
         </div>
@@ -245,23 +360,46 @@ export default function DashboardPage() {
 
       {/* Alertas */}
       {((stats?.atrasadas || 0) > 0 || (stats?.urgentes || 0) > 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
           {(stats?.urgentes || 0) > 0 && (
-            <div className="bg-red-50 dark:bg-red-950/30 rounded-xl border border-red-200 dark:border-red-800 p-5">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/50 flex items-center justify-center flex-shrink-0">
-                  <AlertTriangle className="w-5 h-5 text-red-600" />
+            <div style={{ 
+              backgroundColor: 'rgba(239, 68, 68, 0.05)', 
+              borderRadius: '12px', 
+              border: '1px solid rgba(239, 68, 68, 0.2)', 
+              padding: '20px' 
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                <div style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  borderRadius: '8px', 
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <AlertTriangle style={{ width: '20px', height: '20px', color: '#dc2626' }} />
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-red-800 dark:text-red-200">
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ fontWeight: '600', color: '#991b1b', margin: 0 }}>
                     {stats?.urgentes} Providência(s) Urgente(s)
                   </h4>
-                  <p className="text-sm text-red-600 dark:text-red-300 mt-1">
+                  <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '4px' }}>
                     Requerem atenção imediata
                   </p>
                 </div>
                 <Link href="/dashboard/providencias?prioridade=urgente">
-                  <button className="px-3 py-1.5 text-sm font-medium text-red-700 dark:text-red-300 border border-red-300 dark:border-red-700 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors">
+                  <button style={{ 
+                    padding: '6px 12px', 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    color: '#b91c1c', 
+                    border: '1px solid rgba(185, 28, 28, 0.3)', 
+                    borderRadius: '8px', 
+                    backgroundColor: 'transparent',
+                    cursor: 'pointer'
+                  }}>
                     Ver
                   </button>
                 </Link>
@@ -269,21 +407,44 @@ export default function DashboardPage() {
             </div>
           )}
           {(stats?.atrasadas || 0) > 0 && (
-            <div className="bg-orange-50 dark:bg-orange-950/30 rounded-xl border border-orange-200 dark:border-orange-800 p-5">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-5 h-5 text-orange-600" />
+            <div style={{ 
+              backgroundColor: 'rgba(249, 115, 22, 0.05)', 
+              borderRadius: '12px', 
+              border: '1px solid rgba(249, 115, 22, 0.2)', 
+              padding: '20px' 
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                <div style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  borderRadius: '8px', 
+                  backgroundColor: 'rgba(249, 115, 22, 0.1)', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Clock style={{ width: '20px', height: '20px', color: '#ea580c' }} />
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-orange-800 dark:text-orange-200">
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ fontWeight: '600', color: '#9a3412', margin: 0 }}>
                     {stats?.atrasadas} Providência(s) Atrasada(s)
                   </h4>
-                  <p className="text-sm text-orange-600 dark:text-orange-300 mt-1">
+                  <p style={{ fontSize: '14px', color: '#ea580c', marginTop: '4px' }}>
                     Prazo vencido, verificar situação
                   </p>
                 </div>
                 <Link href="/dashboard/providencias?status=atrasadas">
-                  <button className="px-3 py-1.5 text-sm font-medium text-orange-700 dark:text-orange-300 border border-orange-300 dark:border-orange-700 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors">
+                  <button style={{ 
+                    padding: '6px 12px', 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    color: '#c2410c', 
+                    border: '1px solid rgba(194, 65, 12, 0.3)', 
+                    borderRadius: '8px', 
+                    backgroundColor: 'transparent',
+                    cursor: 'pointer'
+                  }}>
                     Ver
                   </button>
                 </Link>
@@ -294,45 +455,62 @@ export default function DashboardPage() {
       )}
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Gráfico de Barras - Status */}
-        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <BarChart3 className="w-5 h-5 text-[var(--muted-foreground)]" />
-            <h3 className="font-semibold text-[var(--foreground)]">Providências por Status</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+        {/* Gráfico de Barras */}
+        <div style={{ 
+          backgroundColor: 'var(--background)', 
+          borderRadius: '12px', 
+          border: '1px solid var(--border)', 
+          padding: '24px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
+            <BarChart3 style={{ width: '20px', height: '20px', color: 'var(--muted-foreground)' }} />
+            <h3 style={{ fontWeight: '600', color: 'var(--foreground)', margin: 0 }}>Providências por Status</h3>
           </div>
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {statusData.map((item, index) => (
-              <div key={index} className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-[var(--foreground)]">{item.label}</span>
-                  <span className="font-medium text-[var(--foreground)]">{item.value}</span>
+              <div key={index}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '14px', color: 'var(--foreground)' }}>{item.label}</span>
+                  <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)' }}>{item.value}</span>
                 </div>
-                <div className="w-full h-2.5 bg-[var(--muted)] rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full ${item.color} rounded-full transition-all duration-500`}
-                    style={{ width: `${(item.value / maxValue) * 100}%` }}
-                  />
+                <div style={{ 
+                  width: '100%', 
+                  height: '10px', 
+                  backgroundColor: 'var(--muted)', 
+                  borderRadius: '5px', 
+                  overflow: 'hidden' 
+                }}>
+                  <div style={{ 
+                    height: '100%', 
+                    width: `${(item.value / maxValue) * 100}%`, 
+                    backgroundColor: item.color, 
+                    borderRadius: '5px',
+                    transition: 'width 0.5s ease'
+                  }} />
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Gráfico de Pizza - Distribuição */}
-        <div className="bg-[var(--background)] rounded-xl border border-[var(--border)] p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <PieChart className="w-5 h-5 text-[var(--muted-foreground)]" />
-            <h3 className="font-semibold text-[var(--foreground)]">Distribuição de Status</h3>
+        {/* Gráfico de Pizza */}
+        <div style={{ 
+          backgroundColor: 'var(--background)', 
+          borderRadius: '12px', 
+          border: '1px solid var(--border)', 
+          padding: '24px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
+            <PieChart style={{ width: '20px', height: '20px', color: 'var(--muted-foreground)' }} />
+            <h3 style={{ fontWeight: '600', color: 'var(--foreground)', margin: 0 }}>Distribuição de Status</h3>
           </div>
-          <div className="flex items-center justify-center">
-            {/* Gráfico de Pizza SVG */}
-            <div className="relative w-48 h-48">
-              <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ position: 'relative', width: '180px', height: '180px' }}>
+              <svg viewBox="0 0 100 100" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
                 {(() => {
                   const total = statusData.reduce((acc, item) => acc + item.value, 0) || 1
                   let currentAngle = 0
-                  const colors = ['#f59e0b', '#3b82f6', '#a855f7', '#6366f1', '#22c55e']
                   
                   return statusData.map((item, index) => {
                     const percentage = (item.value / total) * 100
@@ -352,29 +530,35 @@ export default function DashboardPage() {
                       <path
                         key={index}
                         d={`M 50 50 L ${x1} ${y1} A 40 40 0 ${largeArc} 1 ${x2} ${y2} Z`}
-                        fill={colors[index]}
-                        className="hover:opacity-80 transition-opacity cursor-pointer"
+                        fill={item.color}
+                        style={{ cursor: 'pointer', transition: 'opacity 0.2s' }}
                       />
                     )
                   })
                 })()}
                 <circle cx="50" cy="50" r="25" fill="var(--background)" />
               </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-[var(--foreground)]">{totalProvidencias}</p>
-                  <p className="text-xs text-[var(--muted-foreground)]">Total</p>
+              <div style={{ 
+                position: 'absolute', 
+                inset: 0, 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center' 
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--foreground)', margin: 0 }}>{totalProvidencias}</p>
+                  <p style={{ fontSize: '12px', color: 'var(--muted-foreground)' }}>Total</p>
                 </div>
               </div>
             </div>
           </div>
           {/* Legenda */}
-          <div className="grid grid-cols-2 gap-2 mt-6">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '24px' }}>
             {statusData.map((item, index) => (
-              <div key={index} className="flex items-center gap-2 text-sm">
-                <div className={`w-3 h-3 rounded-full ${item.color}`} />
-                <span className="text-[var(--muted-foreground)]">{item.label}</span>
-                <span className="font-medium text-[var(--foreground)] ml-auto">{item.value}</span>
+              <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: item.color }} />
+                <span style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>{item.label}</span>
+                <span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--foreground)', marginLeft: 'auto' }}>{item.value}</span>
               </div>
             ))}
           </div>
@@ -382,84 +566,170 @@ export default function DashboardPage() {
       </div>
 
       {/* Providências Recentes */}
-      <div className="bg-[var(--background)] rounded-xl border border-[var(--border)]">
-        <div className="flex items-center justify-between p-6 border-b border-[var(--border)]">
-          <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-[var(--muted-foreground)]" />
-            <h3 className="font-semibold text-[var(--foreground)]">Providências Recentes</h3>
+      <div style={{ 
+        backgroundColor: 'var(--background)', 
+        borderRadius: '12px', 
+        border: '1px solid var(--border)'
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          padding: '20px 24px', 
+          borderBottom: '1px solid var(--border)' 
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FileText style={{ width: '20px', height: '20px', color: 'var(--muted-foreground)' }} />
+            <h3 style={{ fontWeight: '600', color: 'var(--foreground)', margin: 0 }}>Providências Recentes</h3>
           </div>
           <Link href="/dashboard/providencias">
-            <button className="flex items-center gap-1 text-sm text-green-600 hover:text-green-700 font-medium transition-colors">
+            <button style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '4px', 
+              fontSize: '14px', 
+              color: '#16a34a', 
+              fontWeight: '500', 
+              background: 'none', 
+              border: 'none',
+              cursor: 'pointer'
+            }}>
               Ver Todas
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight style={{ width: '16px', height: '16px' }} />
             </button>
           </Link>
         </div>
         
         {recentProvidencias.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-[var(--muted)] flex items-center justify-center mx-auto mb-4">
-              <FileText className="w-8 h-8 text-[var(--muted-foreground)]" />
+          <div style={{ padding: '48px 24px', textAlign: 'center' }}>
+            <div style={{ 
+              width: '64px', 
+              height: '64px', 
+              borderRadius: '50%', 
+              backgroundColor: 'var(--muted)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              margin: '0 auto 16px' 
+            }}>
+              <FileText style={{ width: '32px', height: '32px', color: 'var(--muted-foreground)' }} />
             </div>
-            <h4 className="font-medium text-[var(--foreground)] mb-2">Nenhuma providência cadastrada</h4>
-            <p className="text-sm text-[var(--muted-foreground)] mb-4">
+            <h4 style={{ fontWeight: '500', color: 'var(--foreground)', marginBottom: '8px' }}>Nenhuma providência cadastrada</h4>
+            <p style={{ fontSize: '14px', color: 'var(--muted-foreground)', marginBottom: '16px' }}>
               Comece cadastrando a primeira providência do gabinete
             </p>
             <Link href="/dashboard/providencias/nova">
-              <button className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
-                <Plus className="w-4 h-4" />
+              <button style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: '8px', 
+                padding: '8px 16px', 
+                backgroundColor: '#16a34a', 
+                color: 'white', 
+                fontSize: '14px', 
+                fontWeight: '500', 
+                borderRadius: '8px', 
+                border: 'none',
+                cursor: 'pointer'
+              }}>
+                <Plus style={{ width: '16px', height: '16px' }} />
                 Nova Providência
               </button>
             </Link>
           </div>
         ) : (
-          <div className="divide-y divide-[var(--border)]">
-            {recentProvidencias.map((providencia) => (
+          <div>
+            {recentProvidencias.map((providencia, index) => (
               <Link
                 key={providencia.id}
                 href={`/dashboard/providencias/${providencia.id}`}
-                className="flex items-center gap-4 p-4 hover:bg-[var(--muted)] transition-colors"
+                style={{ textDecoration: 'none' }}
               >
-                <div className={`w-2 h-12 rounded-full ${statusColors[providencia.status]}`} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-mono text-[var(--muted-foreground)]">
-                      {providencia.numero_protocolo}
-                    </span>
-                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${priorityColors[providencia.prioridade]}`}>
-                      {priorityLabels[providencia.prioridade]}
-                    </span>
-                  </div>
-                  <h4 className="font-medium text-[var(--foreground)] truncate">{providencia.titulo}</h4>
-                  <div className="flex items-center gap-4 mt-1 text-xs text-[var(--muted-foreground)]">
-                    {providencia.cidadao && (
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        {providencia.cidadao.nome}
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '16px', 
+                  padding: '16px 24px',
+                  borderBottom: index < recentProvidencias.length - 1 ? '1px solid var(--border)' : 'none',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}>
+                  <div style={{ 
+                    width: '4px', 
+                    height: '48px', 
+                    borderRadius: '2px', 
+                    backgroundColor: statusColors[providencia.status]?.replace('bg-', '') || '#6b7280'
+                  }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'var(--muted-foreground)' }}>
+                        {providencia.numero_protocolo}
                       </span>
-                    )}
-                    {providencia.orgao_destino && (
-                      <span className="flex items-center gap-1">
-                        <Building2 className="w-3 h-3" />
-                        {providencia.orgao_destino.sigla || providencia.orgao_destino.nome}
+                      <span style={{ 
+                        padding: '2px 8px', 
+                        fontSize: '11px', 
+                        fontWeight: '500', 
+                        borderRadius: '9999px',
+                        backgroundColor: priorityColors[providencia.prioridade]?.includes('gray') ? 'rgba(107, 114, 128, 0.1)' :
+                                        priorityColors[providencia.prioridade]?.includes('blue') ? 'rgba(59, 130, 246, 0.1)' :
+                                        priorityColors[providencia.prioridade]?.includes('orange') ? 'rgba(249, 115, 22, 0.1)' :
+                                        'rgba(239, 68, 68, 0.1)',
+                        color: priorityColors[providencia.prioridade]?.includes('gray') ? '#4b5563' :
+                               priorityColors[providencia.prioridade]?.includes('blue') ? '#2563eb' :
+                               priorityColors[providencia.prioridade]?.includes('orange') ? '#ea580c' :
+                               '#dc2626'
+                      }}>
+                        {priorityLabels[providencia.prioridade]}
                       </span>
-                    )}
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {format(new Date(providencia.created_at), "dd/MM/yyyy", { locale: ptBR })}
-                    </span>
+                    </div>
+                    <h4 style={{ 
+                      fontWeight: '500', 
+                      color: 'var(--foreground)', 
+                      margin: 0,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {providencia.titulo}
+                    </h4>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '4px' }}>
+                      {providencia.cidadao && (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--muted-foreground)' }}>
+                          <Users style={{ width: '12px', height: '12px' }} />
+                          {providencia.cidadao.nome}
+                        </span>
+                      )}
+                      {providencia.orgao_destino && (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--muted-foreground)' }}>
+                          <Building2 style={{ width: '12px', height: '12px' }} />
+                          {providencia.orgao_destino.sigla || providencia.orgao_destino.nome}
+                        </span>
+                      )}
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--muted-foreground)' }}>
+                        <Calendar style={{ width: '12px', height: '12px' }} />
+                        {format(new Date(providencia.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className={`px-3 py-1 text-xs font-medium rounded-lg ${
-                    providencia.status === 'concluido' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                    providencia.status === 'pendente' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                    providencia.status === 'em_andamento' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' :
-                    'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-                  }`}>
-                    {statusLabels[providencia.status]}
-                  </span>
-                  <ArrowRight className="w-4 h-4 text-[var(--muted-foreground)]" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ 
+                      padding: '4px 12px', 
+                      fontSize: '12px', 
+                      fontWeight: '500', 
+                      borderRadius: '8px',
+                      backgroundColor: providencia.status === 'concluido' ? 'rgba(34, 197, 94, 0.1)' :
+                                      providencia.status === 'pendente' ? 'rgba(245, 158, 11, 0.1)' :
+                                      providencia.status === 'em_andamento' ? 'rgba(99, 102, 241, 0.1)' :
+                                      'rgba(107, 114, 128, 0.1)',
+                      color: providencia.status === 'concluido' ? '#16a34a' :
+                             providencia.status === 'pendente' ? '#d97706' :
+                             providencia.status === 'em_andamento' ? '#4f46e5' :
+                             '#4b5563'
+                    }}>
+                      {statusLabels[providencia.status]}
+                    </span>
+                    <ArrowRight style={{ width: '16px', height: '16px', color: 'var(--muted-foreground)' }} />
+                  </div>
                 </div>
               </Link>
             ))}
@@ -468,23 +738,27 @@ export default function DashboardPage() {
       </div>
 
       {/* Fonte dos Dados */}
-      <div className="bg-[var(--muted)] rounded-xl p-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+      <div style={{ 
+        backgroundColor: 'var(--muted)', 
+        borderRadius: '12px', 
+        padding: '16px 24px'
+      }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
           <div>
-            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide mb-1">Sistema</p>
-            <p className="font-medium text-[var(--foreground)]">ProviDATA</p>
+            <p style={{ fontSize: '11px', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Sistema</p>
+            <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)', margin: 0 }}>ProviDATA</p>
           </div>
           <div>
-            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide mb-1">Gabinete</p>
-            <p className="font-medium text-[var(--foreground)]">{tenant?.parlamentar_name || 'Não definido'}</p>
+            <p style={{ fontSize: '11px', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Gabinete</p>
+            <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)', margin: 0 }}>{tenant?.parlamentar_name || 'Não definido'}</p>
           </div>
           <div>
-            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide mb-1">Período</p>
-            <p className="font-medium text-[var(--foreground)]">2024 - 2025</p>
+            <p style={{ fontSize: '11px', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Período</p>
+            <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)', margin: 0 }}>2024 - 2025</p>
           </div>
           <div>
-            <p className="text-xs text-[var(--muted-foreground)] uppercase tracking-wide mb-1">Última Atualização</p>
-            <p className="font-medium text-[var(--foreground)]">{format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+            <p style={{ fontSize: '11px', color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Última Atualização</p>
+            <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--foreground)', margin: 0 }}>{format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
           </div>
         </div>
       </div>
