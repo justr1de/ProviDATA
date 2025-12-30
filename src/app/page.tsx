@@ -218,30 +218,54 @@ export default function HomePage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '96px' }}>
             
-            {/* Logos - Mesmo tamanho */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-	              {/* Logo DATA-RO - Fundo removido (v3 - Quebra de Cache) */}
-	              <Link href="https://dataro-it.com.br" target="_blank" rel="noopener noreferrer">
-	                <Image 
-	                  src="/dataro-logo-final.png" 
-	                  alt="DATA-RO" 
-width={56} 
-		                  height={56}
-style={{ objectFit: 'contain', borderRadius: '12px', backgroundColor: '#ffffff', padding: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
-                />
+            {/* Logos - Mesmo tamanho de caixa */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              {/* Logo DATA-RO */}
+              <Link href="https://dataro-it.com.br" target="_blank" rel="noopener noreferrer">
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  backgroundColor: '#ffffff', 
+                  borderRadius: '12px', 
+                  padding: '6px', 
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Image 
+                    src="/dataro-logo-final.png" 
+                    alt="DATA-RO" 
+                    width={52} 
+                    height={52}
+                    style={{ objectFit: 'contain' }}
+                  />
+                </div>
               </Link>
               
-	              {/* Logo ProviDATA - Aumentado e Fundo removido (v3 - Quebra de Cache) */}
-	              <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-	                <Image 
-	                  src="/providata-logo-final.png" 
-	                  alt="ProviDATA" 
-width={56} 
-		                  height={56}
-style={{ objectFit: 'contain', borderRadius: '12px', backgroundColor: '#ffffff', padding: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
-	                />
-	                <span className="text-providata-gradient" style={{ fontWeight: 800, fontSize: '32px', letterSpacing: '-0.02em' }}>ProviDATA</span>
-	              </Link>
+              {/* Logo ProviDATA */}
+              <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  backgroundColor: '#ffffff', 
+                  borderRadius: '12px', 
+                  padding: '6px', 
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Image 
+                    src="/providata-logo-final.png" 
+                    alt="ProviDATA" 
+                    width={52} 
+                    height={52}
+                    style={{ objectFit: 'contain' }}
+                  />
+                </div>
+                <span className="text-providata-gradient" style={{ fontWeight: 800, fontSize: '32px', letterSpacing: '-0.02em' }}>ProviDATA</span>
+              </Link>
             </div>
 
             {/* Nav - Botões com efeito espelho */}
@@ -838,12 +862,30 @@ style={{ objectFit: 'contain', borderRadius: '12px', backgroundColor: '#ffffff',
             atendimento ao cidadão. Nossa plataforma permite que vereadores, deputados e senadores 
             gerenciem todas as demandas de forma organizada e profissional.
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-              <Image src="/providata-logo-final.png" alt="ProviDATA" width={64} height={64} />
-              <span style={{ fontWeight: 600, color: isDark ? '#9ca3af' : '#4b5563' }}>
-                Desenvolvido por DATA-RO INTELIGÊNCIA TERRITORIAL
-              </span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+            <div style={{ 
+              width: '64px', 
+              height: '64px', 
+              backgroundColor: '#ffffff', 
+              borderRadius: '12px', 
+              padding: '6px', 
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Image 
+                src="/providata-logo-final.png" 
+                alt="ProviDATA" 
+                width={52} 
+                height={52} 
+                style={{ objectFit: 'contain' }}
+              />
             </div>
+            <span style={{ fontWeight: 600, color: isDark ? '#9ca3af' : '#4b5563' }}>
+              Desenvolvido por DATA-RO INTELIGÊNCIA TERRITORIAL
+            </span>
+          </div>
         </div>
       </section>
 
@@ -944,24 +986,48 @@ style={{ objectFit: 'contain', borderRadius: '12px', backgroundColor: '#ffffff',
         backgroundColor: isDark ? '#0f172a' : '#ffffff'
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-          {/* Logos centralizadas */}
+          {/* Logos centralizadas - Mesmo tamanho de caixa */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', marginBottom: '16px' }}>
             <Link href="https://dataro-it.com.br" target="_blank" rel="noopener noreferrer">
-              <Image 
-                src="/dataro-logo-final.png" 
-                alt="DATA-RO" 
-                width={44} 
-                height={44} 
-                style={{ borderRadius: '10px' }}
-              />
+              <div style={{ 
+                width: '48px', 
+                height: '48px', 
+                backgroundColor: '#ffffff', 
+                borderRadius: '10px', 
+                padding: '4px', 
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Image 
+                  src="/dataro-logo-final.png" 
+                  alt="DATA-RO" 
+                  width={40} 
+                  height={40} 
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
             </Link>
-            <Image 
-              src="/providata-logo-final.png" 
-              alt="ProviDATA" 
-              width={44} 
-              height={44} 
-              style={{ borderRadius: '10px', objectFit: 'contain' }}
-            />
+            <div style={{ 
+              width: '48px', 
+              height: '48px', 
+              backgroundColor: '#ffffff', 
+              borderRadius: '10px', 
+              padding: '4px', 
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Image 
+                src="/providata-logo-final.png" 
+                alt="ProviDATA" 
+                width={40} 
+                height={40} 
+                style={{ objectFit: 'contain' }}
+              />
+            </div>
             <span style={{ fontWeight: 700, color: isDark ? '#f1f5f9' : '#1e293b' }}>ProviDATA</span>
           </div>
           {/* Texto centralizado */}
