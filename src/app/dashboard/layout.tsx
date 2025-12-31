@@ -25,7 +25,8 @@ import {
   Shield,
   Palette,
   Copyright,
-  MapPin
+  MapPin,
+  Files
 } from 'lucide-react'
 import { Toaster } from 'sonner'
 
@@ -38,6 +39,7 @@ const navigation = [
   { name: 'Órgãos', href: '/dashboard/orgaos', icon: Building2 },
   { name: 'Categorias', href: '/dashboard/categorias', icon: FolderOpen },
   { name: 'Relatórios', href: '/dashboard/relatorios', icon: FileBarChart },
+  { name: 'Documentos', href: '/dashboard/documentos', icon: Files },
   { name: 'Mapa de Calor', href: '/dashboard/mapa-calor', icon: MapPin },
 ]
 
