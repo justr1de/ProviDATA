@@ -173,10 +173,9 @@ export default function HomePage() {
       {/* Mapa do Brasil como background gigante de toda a página */}
       <div style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
         width: '100vw',
         height: '100vh',
         pointerEvents: 'none',
@@ -184,8 +183,8 @@ export default function HomePage() {
         backgroundImage: 'url(/brazil-map.png)',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
-        backgroundSize: 'cover',
-        opacity: isDark ? 0.06 : 0.10,
+        backgroundSize: 'contain',
+        opacity: isDark ? 0.08 : 0.12,
         filter: isDark ? 'invert(0.8) sepia(0.3) hue-rotate(90deg)' : 'sepia(0.2) hue-rotate(80deg)'
       }} />
       
