@@ -3,6 +3,7 @@ export interface Tenant {
   name: string
   slug: string
   parlamentar_name: string
+  parlamentar_nickname?: string
   cargo: 'vereador' | 'deputado_estadual' | 'deputado_federal' | 'senador'
   partido?: string
   uf?: string

@@ -211,10 +211,19 @@ export default function RelatoriosPage() {
       // Informação do Gabinete do Parlamentar
       doc.setFontSize(11)
       doc.setTextColor(60)
-      const cargoFormatado = tenant?.cargo ? tenant.cargo.replace('_', ' ').charAt(0).toUpperCase() + tenant.cargo.replace('_', ' ').slice(1) : 'Parlamentar'
-      const nomeParlamentar = tenant?.parlamentar_name || 'Não informado'
+      console.log('Tenant para relatório:', tenant)
+      const cargoMap: Record<string, string> = {
+        'vereador': 'Vereador',
+        'deputado_estadual': 'Deputado Estadual',
+        'deputado_federal': 'Deputado Federal',
+        'senador': 'Senador'
+      }
+      const cargoFormatado = tenant?.cargo ? cargoMap[tenant.cargo] || 'Parlamentar' : 'Parlamentar'
+      const nomeParlamentar = tenant?.parlamentar_name || ''
       const apelidoParlamentar = tenant?.parlamentar_nickname ? `"${tenant.parlamentar_nickname}"` : ''
-      const gabineteText = `Gabinete do ${cargoFormatado} ${nomeParlamentar} ${apelidoParlamentar}`.trim()
+      const gabineteText = nomeParlamentar 
+        ? `Gabinete do ${cargoFormatado} ${nomeParlamentar} ${apelidoParlamentar}`.trim()
+        : `Gabinete do ${cargoFormatado}`
       doc.text(gabineteText, 14, 52)
       
       // Período
