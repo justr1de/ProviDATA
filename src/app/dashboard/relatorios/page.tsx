@@ -82,7 +82,7 @@ export default function RelatoriosPage() {
   const [dateRange, setDateRange] = useState({ start: '', end: '' })
   const [isGenerating, setIsGenerating] = useState(false)
   const [activeShortcut, setActiveShortcut] = useState<string | null>(null)
-  const { user } = useAuthStore()
+  const { user, tenant } = useAuthStore()
   const supabase = createClient()
 
   // Função para formatar data no formato YYYY-MM-DD
@@ -208,14 +208,23 @@ export default function RelatoriosPage() {
       doc.setTextColor(0)
       doc.text(reportType?.name || 'Relatório', 14, 45)
       
+      // Informação do Gabinete do Parlamentar
+      doc.setFontSize(11)
+      doc.setTextColor(60)
+      const cargoFormatado = tenant?.cargo ? tenant.cargo.replace('_', ' ').charAt(0).toUpperCase() + tenant.cargo.replace('_', ' ').slice(1) : 'Parlamentar'
+      const nomeParlamentar = tenant?.parlamentar_name || 'Não informado'
+      const apelidoParlamentar = tenant?.parlamentar_nickname ? `"${tenant.parlamentar_nickname}"` : ''
+      const gabineteText = `Gabinete do ${cargoFormatado} ${nomeParlamentar} ${apelidoParlamentar}`.trim()
+      doc.text(gabineteText, 14, 52)
+      
       // Período
       doc.setFontSize(10)
       doc.setTextColor(100)
       const periodoText = dateRange.start && dateRange.end 
         ? `Período: ${formatDateDisplay(dateRange.start)} a ${formatDateDisplay(dateRange.end)}`
         : 'Período: Todos os registros'
-      doc.text(periodoText, 14, 52)
-      doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 58)
+      doc.text(periodoText, 14, 59)
+      doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 65)
       
       // Gerar conteúdo baseado no tipo de relatório
       switch (selectedReport) {
@@ -276,7 +285,7 @@ export default function RelatoriosPage() {
     ])
 
     autoTable(doc, {
-      startY: 65,
+      startY: 72,
       head: [['Protocolo', 'Título', 'Cidadão', 'Status', 'Data']],
       body: tableData,
       theme: 'striped',
@@ -313,7 +322,7 @@ export default function RelatoriosPage() {
     ])
 
     autoTable(doc, {
-      startY: 65,
+      startY: 72,
       head: [['Status', 'Quantidade', 'Percentual']],
       body: tableData,
       theme: 'striped',
@@ -343,7 +352,7 @@ export default function RelatoriosPage() {
       ])
 
     autoTable(doc, {
-      startY: 65,
+      startY: 72,
       head: [['Órgão', 'Quantidade', 'Percentual']],
       body: tableData,
       theme: 'striped',
@@ -366,7 +375,7 @@ export default function RelatoriosPage() {
       .map(([cidadao, count]) => [cidadao, count.toString()])
 
     autoTable(doc, {
-      startY: 65,
+      startY: 72,
       head: [['Cidadão', 'Atendimentos']],
       body: tableData,
       theme: 'striped',
@@ -393,7 +402,7 @@ export default function RelatoriosPage() {
     const tempoMedio = concluidas.length > 0 ? tempoTotal / concluidas.length : 0
 
     doc.setFontSize(12)
-    doc.text('Análise de Tempo de Resolução', 14, 70)
+    doc.text('Análise de Tempo de Resolução', 14, 77)
     
     const tableData = [
       ['Total de providências', providencias.length.toString()],
@@ -403,7 +412,7 @@ export default function RelatoriosPage() {
     ]
 
     autoTable(doc, {
-      startY: 75,
+      startY: 82,
       head: [['Métrica', 'Valor']],
       body: tableData,
       theme: 'striped',
@@ -423,10 +432,10 @@ export default function RelatoriosPage() {
     })
 
     doc.setFontSize(12)
-    doc.text('Resumo por Status', 14, 70)
+    doc.text('Resumo por Status', 14, 77)
 
     autoTable(doc, {
-      startY: 75,
+      startY: 82,
       head: [['Status', 'Quantidade']],
       body: Object.entries(statusCount).map(([k, v]) => [k, v.toString()]),
       theme: 'striped',
