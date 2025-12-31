@@ -192,7 +192,7 @@ export default function HomePage() {
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center center',
           backgroundSize: 'contain',
-          opacity: isDark ? 0.06 : 0.08,
+          opacity: isDark ? 0.12 : 0.15,
           maskImage: 'url(/brazil-map.png)',
           maskRepeat: 'no-repeat',
           maskPosition: 'center center',
@@ -608,7 +608,7 @@ export default function HomePage() {
       </section>
 
       {/* RECURSOS */}
-      <section id="recursos" style={{ padding: '80px 16px', backgroundColor: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(241, 245, 249, 0.5)', position: 'relative', zIndex: 1 }}>
+      <section id="recursos" style={{ padding: '80px 16px', position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '60px' }}>
             <h2 style={{ fontSize: 'clamp(28px, 6vw, 40px)', fontWeight: 800, marginBottom: '16px' }}>
@@ -771,7 +771,7 @@ export default function HomePage() {
       </section>
 
       {/* SOBRE */}
-      <section id="sobre" style={{ padding: '80px 16px', backgroundColor: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(241, 245, 249, 0.5)', position: 'relative', zIndex: 1 }}>
+      <section id="sobre" style={{ padding: '80px 16px', position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ fontSize: 'clamp(28px, 6vw, 40px)', fontWeight: 800, marginBottom: '24px' }}>
             Sobre o <span style={{ color: '#16a34a' }}>ProviDATA</span>
