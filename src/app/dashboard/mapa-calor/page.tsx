@@ -85,7 +85,8 @@ export default function MapaCalorPage() {
       }
 
       const script = document.createElement('script')
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=visualization,places&callback=initMap`
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyDd3l6wxd_nr_L3yGBmIQrLwLr1l2ao60c'
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=visualization,places&callback=initMap`
       script.async = true
       script.defer = true
       
@@ -946,7 +947,7 @@ export default function MapaCalorPage() {
               Carregando mapa...
             </p>
           </div>
-        ) : !process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
+        ) : false ? (
           <div style={{
             height: '600px',
             display: 'flex',
