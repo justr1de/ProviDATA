@@ -24,6 +24,8 @@ export default function ConfiguracoesPage() {
   const [tenantData, setTenantData] = useState({
     name: '',
     parlamentar_name: '',
+    parlamentar_nickname: '',
+    cargo: '',
     partido: '',
     email_contato: '',
     telefone_contato: '',
@@ -39,6 +41,8 @@ export default function ConfiguracoesPage() {
       setTenantData({
         name: tenant.name || '',
         parlamentar_name: tenant.parlamentar_name || '',
+        parlamentar_nickname: tenant.parlamentar_nickname || '',
+        cargo: tenant.cargo || '',
         partido: tenant.partido || '',
         email_contato: tenant.email_contato || '',
         telefone_contato: tenant.telefone_contato || '',
@@ -57,6 +61,8 @@ export default function ConfiguracoesPage() {
         .update({
           name: tenantData.name,
           parlamentar_name: tenantData.parlamentar_name,
+          parlamentar_nickname: tenantData.parlamentar_nickname || null,
+          cargo: tenantData.cargo || null,
           partido: tenantData.partido || null,
           email_contato: tenantData.email_contato || null,
           telefone_contato: tenantData.telefone_contato || null,
@@ -393,6 +399,33 @@ export default function ConfiguracoesPage() {
                     style={inputStyle}
                     placeholder="Digite o nome do parlamentar"
                   />
+                </div>
+                
+                <div>
+                  <label style={labelStyle}>Apelido do Parlamentar</label>
+                  <input
+                    value={tenantData.parlamentar_nickname}
+                    onChange={(e) => setTenantData({ ...tenantData, parlamentar_nickname: e.target.value })}
+                    style={inputStyle}
+                    placeholder="Ex: O médico do povo"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px' }}>
+                <div>
+                  <label style={labelStyle}>Cargo</label>
+                  <select
+                    value={tenantData.cargo}
+                    onChange={(e) => setTenantData({ ...tenantData, cargo: e.target.value })}
+                    style={{ ...inputStyle, cursor: 'pointer' }}
+                  >
+                    <option value="">Selecione o cargo</option>
+                    <option value="vereador">Vereador</option>
+                    <option value="deputado_estadual">Deputado Estadual</option>
+                    <option value="deputado_federal">Deputado Federal</option>
+                    <option value="senador">Senador</option>
+                  </select>
                 </div>
                 
                 <div>
