@@ -23,6 +23,10 @@ const tipoLabels: Record<string, string> = {
   mp_federal: 'Ministério Público Federal',
   defensoria: 'Defensoria Pública',
   tribunal_contas: 'Tribunal de Contas',
+  empresa_privada: 'Empresa Privada',
+  autarquia_municipal: 'Autarquia Municipal',
+  autarquia_estadual: 'Autarquia Estadual',
+  autarquia_federal: 'Autarquia Federal',
   outros: 'Outros',
 }
 

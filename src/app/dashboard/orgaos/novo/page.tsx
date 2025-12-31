@@ -15,6 +15,10 @@ const tipoOptions = [
   { value: 'mp_federal', label: 'Ministério Público Federal' },
   { value: 'defensoria', label: 'Defensoria Pública' },
   { value: 'tribunal_contas', label: 'Tribunal de Contas' },
+  { value: 'empresa_privada', label: 'Empresa Privada' },
+  { value: 'autarquia_municipal', label: 'Autarquia Municipal' },
+  { value: 'autarquia_estadual', label: 'Autarquia Estadual' },
+  { value: 'autarquia_federal', label: 'Autarquia Federal' },
   { value: 'outros', label: 'Outros' },
 ]
 
