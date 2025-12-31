@@ -92,7 +92,7 @@ export default function OrgaosPage() {
   }
 
   const cardHeaderStyle: React.CSSProperties = {
-    padding: '16px',
+    padding: '20px 24px',
     borderBottom: '1px solid var(--border)',
     display: 'flex',
     flexDirection: 'column',
@@ -100,7 +100,7 @@ export default function OrgaosPage() {
   }
 
   const cardContentStyle: React.CSSProperties = {
-    padding: '16px'
+    padding: '24px'
   }
 
   const inputStyle: React.CSSProperties = {
@@ -155,17 +155,24 @@ export default function OrgaosPage() {
   }
 
   return (
-    <div className="px-1 md:px-2">
+    <div style={{ padding: '0 24px' }}>
       {/* Header */}
-      <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'row',
+        alignItems: 'flex-start', 
+        justifyContent: 'space-between', 
+        gap: '16px',
+        marginBottom: '32px'
+      }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
             <Building2 style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
-            <h1 className="text-xl md:text-2xl lg:text-[28px] font-bold" style={{ color: 'var(--foreground)' }}>
+            <h1 style={{ fontSize: '28px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>
               Órgãos
             </h1>
           </div>
-          <p className="text-sm md:text-base" style={{ color: 'var(--foreground-muted)' }}>
+          <p style={{ fontSize: '15px', color: 'var(--foreground-muted)', margin: 0, paddingLeft: '44px' }}>
             Gerencie os órgãos destinatários das providências
           </p>
         </div>
@@ -181,7 +188,7 @@ export default function OrgaosPage() {
       <div style={cardStyle}>
         {/* Card Header with Search */}
         <div style={cardHeaderStyle}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', width: '100%' }}>
             <div style={{ position: 'relative', flex: 1, maxWidth: '400px' }}>
               <Search style={{ 
                 position: 'absolute', 
@@ -200,9 +207,7 @@ export default function OrgaosPage() {
                 style={inputStyle}
               />
             </div>
-          </div>
-          <div>
-            <span style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>
+            <span style={{ fontSize: '14px', color: 'var(--foreground-muted)', whiteSpace: 'nowrap' }}>
               {orgaos.length} órgão{orgaos.length !== 1 ? 's' : ''} cadastrado{orgaos.length !== 1 ? 's' : ''}
             </span>
           </div>
