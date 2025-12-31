@@ -170,22 +170,22 @@ export default function HomePage() {
       color: isDark ? '#f1f5f9' : '#1e293b',
       position: 'relative'
     }}>
-      {/* Mapa do Brasil como marca d'água de fundo */}
+      {/* Mapa do Brasil como background gigante de toda a página */}
       <div style={{
         position: 'fixed',
-        top: '72px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '80%',
-        maxWidth: '800px',
-        height: 'calc(100vh - 100px)',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
         pointerEvents: 'none',
         zIndex: 0,
         backgroundImage: 'url(/brazil-map.png)',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
-        backgroundSize: 'contain',
-        opacity: isDark ? 0.08 : 0.12,
+        backgroundSize: 'cover',
+        opacity: isDark ? 0.06 : 0.10,
         filter: isDark ? 'invert(0.8) sepia(0.3) hue-rotate(90deg)' : 'sepia(0.2) hue-rotate(80deg)'
       }} />
       
