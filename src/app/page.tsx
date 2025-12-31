@@ -170,42 +170,24 @@ export default function HomePage() {
       color: isDark ? '#f1f5f9' : '#1e293b',
       position: 'relative'
     }}>
-      {/* Mapa do Brasil como marca d'água de fundo com cores DATA-RO */}
+      {/* Mapa do Brasil como marca d'água de fundo */}
       <div style={{
         position: 'fixed',
-        top: '96px',
+        top: '72px',
         left: '50%',
         transform: 'translateX(-50%)',
-        width: '120%',
-        height: 'calc(100vh - 50px)',
+        width: '80%',
+        maxWidth: '800px',
+        height: 'calc(100vh - 100px)',
         pointerEvents: 'none',
         zIndex: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        {/* Camada do mapa com gradiente colorido */}
-        <div style={{
-          width: '100%',
-          height: '100%',
-          backgroundImage: 'url(/brazil-map.png)',
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center center',
-          backgroundSize: 'contain',
-          opacity: isDark ? 0.12 : 0.15,
-          maskImage: 'url(/brazil-map.png)',
-          maskRepeat: 'no-repeat',
-          maskPosition: 'center center',
-          maskSize: 'contain',
-          WebkitMaskImage: 'url(/brazil-map.png)',
-          WebkitMaskRepeat: 'no-repeat',
-          WebkitMaskPosition: 'center center',
-          WebkitMaskSize: 'contain',
-          background: isDark 
-            ? 'linear-gradient(180deg, #FFD700 0%, #22c55e 40%, #16a34a 60%, #2563eb 100%)'
-            : 'linear-gradient(180deg, #FFD700 0%, #22c55e 40%, #16a34a 60%, #1e40af 100%)'
-        } as React.CSSProperties} />
-      </div>
+        backgroundImage: 'url(/brazil-map.png)',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center center',
+        backgroundSize: 'contain',
+        opacity: isDark ? 0.08 : 0.12,
+        filter: isDark ? 'invert(0.8) sepia(0.3) hue-rotate(90deg)' : 'sepia(0.2) hue-rotate(80deg)'
+      }} />
       
       {/* HEADER RESPONSIVO */}
       <header style={{ 
