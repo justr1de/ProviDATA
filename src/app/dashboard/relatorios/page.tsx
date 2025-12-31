@@ -487,7 +487,7 @@ export default function RelatoriosPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4 lg:gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4 lg:gap-6 items-stretch">
         {/* Report Types Card */}
         <div style={cardStyle}>
           <div style={cardHeaderStyle}>
@@ -549,7 +549,7 @@ export default function RelatoriosPage() {
         </div>
 
         {/* Filters Card */}
-        <div style={cardStyle}>
+        <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column' }}>
           <div style={cardHeaderStyle}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <Filter style={{ width: '20px', height: '20px', color: 'var(--primary)' }} />
@@ -558,10 +558,10 @@ export default function RelatoriosPage() {
               </h2>
             </div>
           </div>
-          <div style={cardContentStyle}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ ...cardContentStyle, flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
               {/* Date Range */}
-              <div>
+              <div style={{ marginBottom: '24px' }}>
                 <label style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
@@ -613,7 +613,7 @@ export default function RelatoriosPage() {
               </div>
 
               {/* Quick Date Filters */}
-              <div>
+              <div style={{ marginBottom: '24px' }}>
                 <label style={{ 
                   display: 'block', 
                   fontSize: '14px', 
@@ -645,6 +645,9 @@ export default function RelatoriosPage() {
                 </div>
               </div>
 
+              {/* Spacer to push button to bottom */}
+              <div style={{ flex: 1 }} />
+
               {/* Generate Button */}
               <button
                 onClick={generatePDF}
@@ -662,7 +665,6 @@ export default function RelatoriosPage() {
                   fontSize: '15px',
                   fontWeight: '600',
                   cursor: selectedReport ? 'pointer' : 'not-allowed',
-                  marginTop: '4px',
                   transition: 'all 0.2s ease'
                 }}
               >
