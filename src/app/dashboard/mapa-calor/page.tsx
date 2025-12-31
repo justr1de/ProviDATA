@@ -168,7 +168,13 @@ export default function MapaCalorPage() {
 
   // Inicializar mapa quando carregado
   useEffect(() => {
-    if (!mapLoaded || !mapRef.current || mapInstanceRef.current) return
+    console.log('Tentando inicializar mapa:', { mapLoaded, mapRef: !!mapRef.current, mapInstance: !!mapInstanceRef.current })
+    if (!mapLoaded || !mapRef.current) return
+    
+    // Se já existe uma instância, não reinicializar
+    if (mapInstanceRef.current) return
+    
+    console.log('Inicializando mapa...')
 
     // Centro padrão (Brasil)
     let centerLat = -14.235
@@ -272,7 +278,7 @@ export default function MapaCalorPage() {
       heatmapRef.current = heatmap
     }
 
-  }, [mapLoaded, providencias, tenant?.uf])
+  }, [mapLoaded, providencias, tenant?.uf, loading])
 
   // Atualizar heatmap quando filtros mudarem
   const atualizarMapa = useCallback(() => {
