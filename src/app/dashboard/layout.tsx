@@ -613,6 +613,23 @@ export default function DashboardLayout({
 
         {/* Page content */}
         <main style={{ flex: 1, padding: isDesktop ? '32px' : '20px', paddingBottom: '40px' }}>
+          {/* Slogan */}
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '8px'
+          }}>
+            <p style={{
+              fontSize: isDesktop ? '13px' : '11px',
+              fontWeight: '500',
+              color: 'var(--foreground-muted)',
+              margin: 0,
+              letterSpacing: '0.5px',
+              fontStyle: 'italic'
+            }}>
+              A <span style={{ fontWeight: '700', color: 'var(--primary)' }}>EVOLUÇÃO</span> da OUVIDORIA, em <span style={{ fontWeight: '700', color: 'var(--primary)' }}>QUALQUER LUGAR</span> e à <span style={{ fontWeight: '700', color: 'var(--primary)' }}>QUALQUER HORA</span>
+            </p>
+          </div>
+
           {/* Cabeçalho Global - ProviDATA - CENTRALIZADO */}
           <div style={{
             marginBottom: '24px',

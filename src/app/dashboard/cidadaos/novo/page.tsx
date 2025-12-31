@@ -16,7 +16,11 @@ import {
   User, 
   MapPin,
   Phone,
-  Info
+  Info,
+  Search,
+  CheckCircle2,
+  XCircle,
+  Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -59,8 +63,42 @@ const ufOptions = [
   { value: 'TO', label: 'TO' },
 ]
 
+// Função para validar CPF
+const validateCPF = (cpf: string): boolean => {
+  // Remove caracteres não numéricos
+  const cleanCPF = cpf.replace(/\D/g, '')
+  
+  // Verifica se tem 11 dígitos
+  if (cleanCPF.length !== 11) return false
+  
+  // Verifica se todos os dígitos são iguais
+  if (/^(\d)\1+$/.test(cleanCPF)) return false
+  
+  // Validação do primeiro dígito verificador
+  let sum = 0
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(cleanCPF.charAt(i)) * (10 - i)
+  }
+  let remainder = (sum * 10) % 11
+  if (remainder === 10 || remainder === 11) remainder = 0
+  if (remainder !== parseInt(cleanCPF.charAt(9))) return false
+  
+  // Validação do segundo dígito verificador
+  sum = 0
+  for (let i = 0; i < 10; i++) {
+    sum += parseInt(cleanCPF.charAt(i)) * (11 - i)
+  }
+  remainder = (sum * 10) % 11
+  if (remainder === 10 || remainder === 11) remainder = 0
+  if (remainder !== parseInt(cleanCPF.charAt(10))) return false
+  
+  return true
+}
+
 function NovoCidadaoForm() {
   const [isLoading, setIsLoading] = useState(false)
+  const [isSearchingCEP, setIsSearchingCEP] = useState(false)
+  const [cpfValid, setCpfValid] = useState<boolean | null>(null)
   const [formData, setFormData] = useState({
     nome: '',
     cpf: '',
@@ -100,6 +138,18 @@ function NovoCidadaoForm() {
       .replace(/(-\d{2})\d+?$/, '$1')
   }
 
+  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedCPF = formatCPF(e.target.value)
+    setFormData({ ...formData, cpf: formattedCPF })
+    
+    // Valida o CPF quando tiver 14 caracteres (formato completo)
+    if (formattedCPF.length === 14) {
+      setCpfValid(validateCPF(formattedCPF))
+    } else {
+      setCpfValid(null)
+    }
+  }
+
   const formatPhone = (value: string) => {
     return value
       .replace(/\D/g, '')
@@ -115,6 +165,54 @@ function NovoCidadaoForm() {
       .replace(/(-\d{3})\d+?$/, '$1')
   }
 
+  // Função para buscar endereço pelo CEP
+  const searchCEP = async (cep: string) => {
+    const cleanCEP = cep.replace(/\D/g, '')
+    
+    if (cleanCEP.length !== 8) {
+      toast.error('CEP deve ter 8 dígitos')
+      return
+    }
+
+    setIsSearchingCEP(true)
+    
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`)
+      const data = await response.json()
+      
+      if (data.erro) {
+        toast.error('CEP não encontrado')
+        return
+      }
+      
+      setFormData(prev => ({
+        ...prev,
+        endereco: data.logradouro || '',
+        bairro: data.bairro || '',
+        cidade: data.localidade || '',
+        uf: data.uf || '',
+        complemento: data.complemento || prev.complemento,
+      }))
+      
+      toast.success('Endereço encontrado!')
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error)
+      toast.error('Erro ao buscar CEP. Tente novamente.')
+    } finally {
+      setIsSearchingCEP(false)
+    }
+  }
+
+  const handleCEPChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedCEP = formatCEP(e.target.value)
+    setFormData({ ...formData, cep: formattedCEP })
+    
+    // Busca automática quando o CEP estiver completo
+    if (formattedCEP.replace(/\D/g, '').length === 8) {
+      await searchCEP(formattedCEP)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -125,6 +223,12 @@ function NovoCidadaoForm() {
 
     if (!formData.nome) {
       toast.error('O nome é obrigatório')
+      return
+    }
+
+    // Validar CPF se preenchido
+    if (formData.cpf && !validateCPF(formData.cpf)) {
+      toast.error('CPF inválido. Por favor, verifique o número informado.')
       return
     }
 
@@ -240,6 +344,11 @@ function NovoCidadaoForm() {
     transition: 'border-color 0.2s, box-shadow 0.2s',
   }
 
+  const inputWithIconStyle = {
+    ...inputStyle,
+    paddingRight: '44px',
+  }
+
   const selectStyle = {
     ...inputStyle,
     appearance: 'none' as const,
@@ -330,15 +439,39 @@ function NovoCidadaoForm() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '20px' }}>
               <div>
                 <label style={labelStyle}>CPF</label>
-                <input
-                  type="text"
-                  name="cpf"
-                  placeholder="000.000.000-00"
-                  value={formData.cpf}
-                  onChange={(e) => setFormData({ ...formData, cpf: formatCPF(e.target.value) })}
-                  maxLength={14}
-                  style={inputStyle}
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    name="cpf"
+                    placeholder="000.000.000-00"
+                    value={formData.cpf}
+                    onChange={handleCPFChange}
+                    maxLength={14}
+                    style={{
+                      ...inputWithIconStyle,
+                      borderColor: cpfValid === false ? '#ef4444' : cpfValid === true ? '#22c55e' : 'var(--border)',
+                    }}
+                  />
+                  {cpfValid !== null && (
+                    <div style={{
+                      position: 'absolute',
+                      right: '12px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                    }}>
+                      {cpfValid ? (
+                        <CheckCircle2 style={{ width: '20px', height: '20px', color: '#22c55e' }} />
+                      ) : (
+                        <XCircle style={{ width: '20px', height: '20px', color: '#ef4444' }} />
+                      )}
+                    </div>
+                  )}
+                </div>
+                {cpfValid === false && (
+                  <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
+                    CPF inválido
+                  </p>
+                )}
               </div>
               
               <div>
@@ -445,17 +578,56 @@ function NovoCidadaoForm() {
             </h2>
           </div>
           <div style={cardContentStyle}>
-            <div style={{ maxWidth: '200px', marginBottom: '20px' }}>
-              <label style={labelStyle}>CEP</label>
-              <input
-                type="text"
-                name="cep"
-                placeholder="00000-000"
-                value={formData.cep}
-                onChange={(e) => setFormData({ ...formData, cep: formatCEP(e.target.value) })}
-                maxLength={9}
-                style={inputStyle}
-              />
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', marginBottom: '20px' }}>
+              <div style={{ width: '200px' }}>
+                <label style={labelStyle}>CEP</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    name="cep"
+                    placeholder="00000-000"
+                    value={formData.cep}
+                    onChange={handleCEPChange}
+                    maxLength={9}
+                    style={inputWithIconStyle}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                  }}>
+                    {isSearchingCEP ? (
+                      <Loader2 style={{ width: '20px', height: '20px', color: 'var(--primary)', animation: 'spin 1s linear infinite' }} />
+                    ) : (
+                      <Search style={{ width: '20px', height: '20px', color: 'var(--muted-foreground)' }} />
+                    )}
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => searchCEP(formData.cep)}
+                disabled={isSearchingCEP || formData.cep.replace(/\D/g, '').length !== 8}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '12px 20px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border)',
+                  backgroundColor: 'var(--card)',
+                  color: 'var(--text-color)',
+                  cursor: isSearchingCEP || formData.cep.replace(/\D/g, '').length !== 8 ? 'not-allowed' : 'pointer',
+                  opacity: isSearchingCEP || formData.cep.replace(/\D/g, '').length !== 8 ? 0.5 : 1,
+                  transition: 'all 0.2s',
+                }}
+              >
+                <Search style={{ width: '16px', height: '16px' }} />
+                Buscar CEP
+              </button>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '20px', marginBottom: '20px' }}>
@@ -624,7 +796,7 @@ function NovoCidadaoForm() {
           </Link>
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || cpfValid === false}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -636,8 +808,8 @@ function NovoCidadaoForm() {
               border: 'none',
               backgroundColor: '#16a34a',
               color: 'white',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              opacity: isLoading ? 0.7 : 1,
+              cursor: isLoading || cpfValid === false ? 'not-allowed' : 'pointer',
+              opacity: isLoading || cpfValid === false ? 0.7 : 1,
               transition: 'all 0.2s',
             }}
           >
@@ -646,6 +818,13 @@ function NovoCidadaoForm() {
           </button>
         </div>
       </form>
+
+      <style jsx global>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }
