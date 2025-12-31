@@ -13,8 +13,8 @@ import {
   Clock,
   CheckCircle
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase'
-import { useAuth } from '@/contexts/AuthContext'
+import { createClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/store/auth-store'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -27,9 +27,9 @@ interface Providencia {
   prioridade: string
   created_at: string
   updated_at: string
-  cidadao?: { nome: string }
-  orgao?: { nome: string; sigla: string }
-  categoria?: { nome: string }
+  cidadao?: any
+  orgao?: any
+  categoria?: any
 }
 
 const reportTypes = [
@@ -82,7 +82,7 @@ export default function RelatoriosPage() {
   const [dateRange, setDateRange] = useState({ start: '', end: '' })
   const [isGenerating, setIsGenerating] = useState(false)
   const [activeShortcut, setActiveShortcut] = useState<string | null>(null)
-  const { user } = useAuth()
+  const { user } = useAuthStore()
   const supabase = createClient()
 
   // Função para formatar data no formato YYYY-MM-DD
@@ -163,7 +163,14 @@ export default function RelatoriosPage() {
       return []
     }
 
-    return data || []
+    // Mapear os dados para normalizar arrays em objetos
+    const mappedData = (data || []).map((item: any) => ({
+      ...item,
+      cidadao: Array.isArray(item.cidadao) ? item.cidadao[0] : item.cidadao,
+      orgao: Array.isArray(item.orgao) ? item.orgao[0] : item.orgao,
+      categoria: Array.isArray(item.categoria) ? item.categoria[0] : item.categoria
+    }))
+    return mappedData
   }
 
   // Função para gerar PDF

@@ -18,8 +18,8 @@ import {
   Calendar,
   Tag
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase'
-import { useAuth } from '@/contexts/AuthContext'
+import { createClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/store/auth-store'
 
 interface Documento {
   id: string
@@ -88,7 +88,7 @@ export default function DocumentosPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   
-  const { user } = useAuth()
+  const { user } = useAuthStore()
   const supabase = createClient()
 
   // Buscar documentos
