@@ -191,11 +191,11 @@ export default function MapaCalorPage() {
     let geocodificadas = 0
 
     for (const providencia of semCoordenadas) {
-      if (!providencia.endereco) continue
+      if (!providencia.localizacao_descricao) continue
 
       try {
         // Usar Nominatim (OpenStreetMap) para geocodificação gratuita
-        const endereco = encodeURIComponent(`${providencia.endereco}, Rondônia, Brasil`)
+        const endereco = encodeURIComponent(`${providencia.localizacao_descricao}, Rondônia, Brasil`)
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&q=${endereco}&limit=1`
         )

@@ -19,7 +19,7 @@ interface Providencia {
   longitude: number
   status: string
   prioridade: string
-  endereco?: string
+  localizacao_descricao?: string
   cidadao?: { nome: string } | null
   categoria?: { nome: string } | null
 }
@@ -167,7 +167,7 @@ export default function MapaLeaflet({ providencias, uf = 'RO' }: MapaLeafletProp
             </p>
             ${p.cidadao?.nome ? `<p style="margin: 0;"><strong>Cidadão:</strong> ${p.cidadao.nome}</p>` : ''}
             ${p.categoria?.nome ? `<p style="margin: 0;"><strong>Categoria:</strong> ${p.categoria.nome}</p>` : ''}
-            ${p.endereco ? `<p style="margin: 0;"><strong>Endereço:</strong> ${p.endereco}</p>` : ''}
+            ${p.localizacao_descricao ? `<p style="margin: 0;"><strong>Localização:</strong> ${p.localizacao_descricao}</p>` : ''}
           </div>
         </div>
       `
