@@ -63,6 +63,43 @@ export default function RelatoriosPage() {
   const [selectedReport, setSelectedReport] = useState<string | null>(null)
   const [dateRange, setDateRange] = useState({ start: '', end: '' })
   const [isGenerating, setIsGenerating] = useState(false)
+  const [activeShortcut, setActiveShortcut] = useState<string | null>(null)
+
+  // Função para formatar data no formato YYYY-MM-DD
+  const formatDate = (date: Date): string => {
+    return date.toISOString().split('T')[0]
+  }
+
+  // Função para aplicar atalhos de data
+  const applyDateShortcut = (shortcut: string) => {
+    const today = new Date()
+    let start: Date
+    let end: Date = today
+
+    switch (shortcut) {
+      case 'Hoje':
+        start = today
+        break
+      case 'Esta semana':
+        start = new Date(today)
+        start.setDate(today.getDate() - today.getDay()) // Domingo da semana atual
+        break
+      case 'Este mês':
+        start = new Date(today.getFullYear(), today.getMonth(), 1)
+        break
+      case 'Este ano':
+        start = new Date(today.getFullYear(), 0, 1)
+        break
+      default:
+        return
+    }
+
+    setDateRange({
+      start: formatDate(start),
+      end: formatDate(end)
+    })
+    setActiveShortcut(shortcut)
+  }
 
   const handleGenerateReport = async () => {
     if (!selectedReport) return
@@ -243,13 +280,14 @@ export default function RelatoriosPage() {
                   {['Hoje', 'Esta semana', 'Este mês', 'Este ano'].map((label) => (
                     <button
                       key={label}
+                      onClick={() => applyDateShortcut(label)}
                       style={{
                         padding: '8px 14px',
                         borderRadius: '8px',
-                        backgroundColor: 'var(--muted)',
-                        border: '1px solid var(--border)',
+                        backgroundColor: activeShortcut === label ? 'var(--primary)' : 'var(--muted)',
+                        border: `1px solid ${activeShortcut === label ? 'var(--primary)' : 'var(--border)'}`,
                         fontSize: '13px',
-                        color: 'var(--foreground)',
+                        color: activeShortcut === label ? 'white' : 'var(--foreground)',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease'
                       }}
