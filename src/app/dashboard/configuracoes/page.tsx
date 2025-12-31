@@ -134,15 +134,15 @@ export default function ConfiguracoesPage() {
   }
 
   const cardHeaderStyle: React.CSSProperties = {
-    padding: '16px',
+    padding: '20px 24px',
     borderBottom: '1px solid var(--border)',
     display: 'flex',
     alignItems: 'center',
-    gap: '10px'
+    gap: '12px'
   }
 
   const cardContentStyle: React.CSSProperties = {
-    padding: '16px'
+    padding: '24px'
   }
 
   const inputStyle: React.CSSProperties = {

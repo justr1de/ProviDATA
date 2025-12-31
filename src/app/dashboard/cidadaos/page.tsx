@@ -75,7 +75,7 @@ export default function CidadaosPage() {
   }
 
   const cardHeaderStyle: React.CSSProperties = {
-    padding: '16px',
+    padding: '20px 24px',
     borderBottom: '1px solid var(--border)',
     display: 'flex',
     flexDirection: 'column',
@@ -83,7 +83,7 @@ export default function CidadaosPage() {
   }
 
   const cardContentStyle: React.CSSProperties = {
-    padding: '16px'
+    padding: '24px'
   }
 
   const inputStyle: React.CSSProperties = {

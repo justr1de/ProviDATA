@@ -5,11 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Select } from '@/components/ui/select'
 import { ArrowLeft, Save, Building2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -84,108 +79,285 @@ export default function NovoOrgaoPage() {
     }
   }
 
+  // Estilos do formulário
+  const cardStyle: React.CSSProperties = {
+    backgroundColor: 'var(--card)',
+    borderRadius: '16px',
+    border: '1px solid var(--border)',
+    overflow: 'hidden',
+    marginBottom: '24px',
+  }
+
+  const cardHeaderStyle: React.CSSProperties = {
+    padding: '20px 24px',
+    borderBottom: '1px solid var(--border)',
+    backgroundColor: 'var(--muted)',
+  }
+
+  const cardContentStyle: React.CSSProperties = {
+    padding: '24px',
+  }
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: 'var(--foreground)',
+    marginBottom: '8px',
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '12px 16px',
+    fontSize: '14px',
+    border: '1px solid var(--border)',
+    borderRadius: '10px',
+    backgroundColor: 'var(--background)',
+    color: 'var(--foreground)',
+    outline: 'none',
+    transition: 'border-color 0.2s, box-shadow 0.2s',
+  }
+
+  const selectStyle: React.CSSProperties = {
+    ...inputStyle,
+    appearance: 'none',
+    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+    backgroundPosition: 'right 12px center',
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: '20px',
+    paddingRight: '40px',
+    cursor: 'pointer',
+  }
+
+  const textareaStyle: React.CSSProperties = {
+    ...inputStyle,
+    minHeight: '100px',
+    resize: 'vertical',
+  }
+
+  const inputGroupStyle: React.CSSProperties = {
+    marginBottom: '20px',
+  }
+
+  const iconContainerStyle: React.CSSProperties = {
+    width: '36px',
+    height: '36px',
+    borderRadius: '10px',
+    backgroundColor: 'rgba(22, 163, 74, 0.1)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+
+  const buttonStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    padding: '12px 24px',
+    fontSize: '14px',
+    fontWeight: '600',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    border: 'none',
+  }
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 24px' }}>
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link href="/dashboard/orgaos">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '16px', 
+        marginBottom: '32px',
+        paddingBottom: '24px',
+        borderBottom: '1px solid var(--border)'
+      }}>
+        <Link href="/dashboard/orgaos" style={{ textDecoration: 'none' }}>
+          <button style={{
+            width: '44px',
+            height: '44px',
+            borderRadius: '12px',
+            border: '1px solid var(--border)',
+            backgroundColor: 'var(--card)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            color: 'var(--foreground)',
+          }}>
+            <ArrowLeft style={{ width: '20px', height: '20px' }} />
+          </button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">Novo Órgão</h1>
-          <p className="text-[var(--muted-foreground)]">
+          <h1 style={{ 
+            fontSize: '28px', 
+            fontWeight: '700', 
+            color: 'var(--foreground)',
+            margin: '0 0 4px 0'
+          }}>
+            Novo Órgão
+          </h1>
+          <p style={{ 
+            fontSize: '15px', 
+            color: 'var(--foreground-muted)',
+            margin: 0
+          }}>
             Cadastre um novo órgão destinatário
           </p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Building2 className="w-5 h-5" />
-              Dados do Órgão
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Input
-              name="nome"
-              label="Nome do Órgão *"
-              placeholder="Ex: Secretaria Municipal de Obras"
-              value={formData.nome}
-              onChange={handleChange}
-              required
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Select
-                name="tipo"
-                label="Tipo *"
-                options={tipoOptions}
-                value={formData.tipo}
+      <form onSubmit={handleSubmit}>
+        {/* Dados do Órgão */}
+        <div style={cardStyle}>
+          <div style={cardHeaderStyle}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={iconContainerStyle}>
+                <Building2 style={{ width: '18px', height: '18px', color: '#16a34a' }} />
+              </div>
+              <h2 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--foreground)', margin: 0 }}>
+                Dados do Órgão
+              </h2>
+            </div>
+          </div>
+          <div style={cardContentStyle}>
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Nome do Órgão *</label>
+              <input
+                type="text"
+                name="nome"
+                placeholder="Ex: Secretaria Municipal de Obras"
+                value={formData.nome}
                 onChange={handleChange}
                 required
-              />
-              
-              <Input
-                name="sigla"
-                label="Sigla"
-                placeholder="Ex: SEMOB"
-                value={formData.sigla}
-                onChange={handleChange}
+                style={inputStyle}
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                type="email"
-                name="email"
-                label="E-mail"
-                placeholder="contato@orgao.gov.br"
-                value={formData.email}
-                onChange={handleChange}
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+              <div>
+                <label style={labelStyle}>Tipo *</label>
+                <select
+                  name="tipo"
+                  value={formData.tipo}
+                  onChange={handleChange}
+                  required
+                  style={selectStyle}
+                >
+                  {tipoOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
               
-              <Input
-                name="telefone"
-                label="Telefone"
-                placeholder="(00) 0000-0000"
-                value={formData.telefone}
+              <div>
+                <label style={labelStyle}>Sigla</label>
+                <input
+                  type="text"
+                  name="sigla"
+                  placeholder="Ex: SEMOB"
+                  value={formData.sigla}
+                  onChange={handleChange}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+              <div>
+                <label style={labelStyle}>E-mail</label>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="contato@orgao.gov.br"
+                  value={formData.email}
+                  onChange={handleChange}
+                  style={inputStyle}
+                />
+              </div>
+              
+              <div>
+                <label style={labelStyle}>Telefone</label>
+                <input
+                  type="text"
+                  name="telefone"
+                  placeholder="(00) 0000-0000"
+                  value={formData.telefone}
+                  onChange={handleChange}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+
+            <div style={inputGroupStyle}>
+              <label style={labelStyle}>Responsável</label>
+              <input
+                type="text"
+                name="responsavel"
+                placeholder="Nome do responsável pelo órgão"
+                value={formData.responsavel}
                 onChange={handleChange}
+                style={inputStyle}
               />
             </div>
 
-            <Input
-              name="responsavel"
-              label="Responsável"
-              placeholder="Nome do responsável pelo órgão"
-              value={formData.responsavel}
-              onChange={handleChange}
-            />
-
-            <Textarea
-              name="endereco"
-              label="Endereço"
-              placeholder="Endereço completo do órgão"
-              value={formData.endereco}
-              onChange={handleChange}
-            />
-          </CardContent>
-        </Card>
+            <div style={{ marginBottom: '0' }}>
+              <label style={labelStyle}>Endereço</label>
+              <textarea
+                name="endereco"
+                placeholder="Endereço completo do órgão"
+                value={formData.endereco}
+                onChange={handleChange}
+                style={textareaStyle}
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-4">
-          <Link href="/dashboard/orgaos">
-            <Button type="button" variant="outline">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '16px' }}>
+          <Link href="/dashboard/orgaos" style={{ textDecoration: 'none' }}>
+            <button 
+              type="button" 
+              style={{
+                ...buttonStyle,
+                backgroundColor: 'transparent',
+                border: '1px solid var(--border)',
+                color: 'var(--foreground)',
+              }}
+            >
               Cancelar
-            </Button>
+            </button>
           </Link>
-          <Button type="submit" isLoading={isLoading}>
-            <Save className="w-4 h-4" />
+          <button 
+            type="submit" 
+            disabled={isLoading}
+            style={{
+              ...buttonStyle,
+              backgroundColor: 'var(--primary)',
+              color: 'white',
+              opacity: isLoading ? 0.7 : 1,
+            }}
+          >
+            {isLoading ? (
+              <div style={{
+                width: '16px',
+                height: '16px',
+                border: '2px solid rgba(255,255,255,0.3)',
+                borderTopColor: 'white',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }} />
+            ) : (
+              <Save style={{ width: '16px', height: '16px' }} />
+            )}
             Cadastrar Órgão
-          </Button>
+          </button>
         </div>
       </form>
     </div>
