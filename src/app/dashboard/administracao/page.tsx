@@ -70,7 +70,7 @@ export default function AdministracaoPage() {
     setLoading(true)
     let query = supabase.from('users').select('*').order('created_at', { ascending: false })
     if (!(user?.role === 'super_admin' || user?.email === 'contato@dataro-it.com.br')) {
-      query = query.eq('gabinete_id', tenant?.id)
+      query = query.eq('tenant_id', tenant?.id)
     }
     const { data, error } = await query
     if (data) {

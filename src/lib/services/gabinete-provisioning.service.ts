@@ -237,11 +237,11 @@ export class GabineteProvisioningService {
         user_metadata: {
           full_name: request.admin_full_name || '',
           role: 'admin',
-          gabinete_id: gabinete.id,
+          tenant_id: gabinete.id,
         },
         app_metadata: {
           role: 'admin',
-          gabinete_id: gabinete.id,
+          tenant_id: gabinete.id,
         },
       });
       
@@ -262,11 +262,11 @@ export class GabineteProvisioningService {
           email: request.admin_email,
           full_name: request.admin_full_name || null,
           role: 'admin',
-          gabinete_id: gabinete.id,
+          tenant_id: gabinete.id,
           onboarding_completed: false,
           onboarding_step: 0,
           metadata: {
-            is_gabinete_creator: true,
+            is_tenant_creator: true,
             created_via: 'provisioning',
           },
         });

@@ -70,7 +70,7 @@ export default function NovaProvidenciaPage() {
       const { data: categoriasData } = await supabase
         .from('categorias')
         .select('*')
-        .eq('gabinete_id', tenant.id)
+        .eq('tenant_id', gabinete.id)
         .eq('ativo', true)
         .order('nome')
 
@@ -79,7 +79,7 @@ export default function NovaProvidenciaPage() {
       const { data: orgaosData } = await supabase
         .from('orgaos')
         .select('*')
-        .eq('gabinete_id', tenant.id)
+        .eq('tenant_id', gabinete.id)
         .eq('ativo', true)
         .order('nome')
 
@@ -99,7 +99,7 @@ export default function NovaProvidenciaPage() {
       const { data } = await supabase
         .from('cidadaos')
         .select('*')
-        .eq('gabinete_id', tenant.id)
+        .eq('tenant_id', gabinete.id)
         .or(`nome.ilike.%${searchCidadao}%,cpf.ilike.%${searchCidadao}%`)
         .limit(5)
 
@@ -121,7 +121,7 @@ export default function NovaProvidenciaPage() {
     const { count } = await supabase
       .from('providencias')
       .select('*', { count: 'exact', head: true })
-      .eq('gabinete_id', tenant.id)
+      .eq('tenant_id', gabinete.id)
       .like('numero_protocolo', `${ano}-%`)
 
     const sequencia = ((count || 0) + 1).toString().padStart(6, '0')
@@ -149,7 +149,7 @@ export default function NovaProvidenciaPage() {
       const { error } = await supabase
         .from('providencias')
         .insert({
-          gabinete_id: tenant.id,
+          gabinete_id: gabinete.id,
           numero_protocolo,
           cidadao_id: selectedCidadao?.id || null,
           categoria_id: formData.categoria_id || null,

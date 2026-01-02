@@ -60,7 +60,7 @@ export interface Profile {
   email: string;
   full_name: string | null;
   role: UserRole;
-  gabinete_id: string | null;
+  tenant_id: string | null;
   avatar_url: string | null;
   onboarding_completed: boolean;
   onboarding_step: number;
@@ -74,7 +74,7 @@ export interface Invite {
   id: string;
   email: string;
   role: UserRole;
-  gabinete_id: string | null;
+  tenant_id: string | null;
   invited_by: string | null;
   token: string;
   status: InviteStatus;
@@ -104,7 +104,7 @@ export interface AcceptInviteResponse {
   success: boolean;
   error?: string;
   role?: UserRole;
-  gabinete_id?: string;
+  tenant_id?: string;
 }
 
 export interface OnboardingStep {

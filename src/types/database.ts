@@ -52,7 +52,7 @@ export interface Gabinete {
 export interface Convite {
   id: string
   email: string
-  gabinete_id: string
+  tenant_id: string
   cargo: 'admin' | 'gestor' | 'assessor' | 'operador' | 'visualizador'
   token: string
   status: 'pendente' | 'aceito' | 'expirado' | 'revogado'
@@ -71,7 +71,7 @@ export interface Profile {
   email: string
   full_name?: string
   role: 'super_admin' | 'admin' | 'gestor' | 'assessor' | 'operador' | 'visualizador'
-  gabinete_id?: string
+  tenant_id?: string
   avatar_url?: string
   onboarding_completed: boolean
   onboarding_step: number

@@ -105,7 +105,7 @@ function ProvidenciasContent() {
             categoria:categorias(nome, cor),
             orgao_destino:orgaos(nome, sigla)
           `, { count: 'exact' })
-          .eq('gabinete_id', tenant.id)
+          .eq('tenant_id', gabinete.id)
           .order('created_at', { ascending: false })
 
         if (statusFilter) {

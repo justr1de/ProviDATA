@@ -51,7 +51,7 @@ export class OnboardingService {
       // Verificar se o usuário que está convidando é admin
       const { data: inviterProfile, error: inviterError } = await supabaseAdmin
         .from('profiles')
-        .select('role, gabinete_id')
+        .select('role, tenant_id')
         .eq('id', invitedBy)
         .single();
 
@@ -65,15 +65,15 @@ export class OnboardingService {
         return { data: null, error: 'Apenas administradores e gestores podem criar convites' };
       }
 
-      // Determinar gabinete_id: se fornecido no request, usar; senão, usar do perfil do convidador
-      const targetGabineteId = request.gabinete_id || request.organization_id || inviterProfile.gabinete_id;
+      // Determinar tenant_id: se fornecido no request, usar; senão, usar do perfil do convidador
+      const targetGabineteId = request.gabinete_id || inviterProfile.tenant_id;
 
       if (!targetGabineteId) {
-        return { data: null, error: 'gabinete_id é obrigatório' };
+        return { data: null, error: 'ID do gabinete é obrigatório' };
       }
 
       // Se não é super admin, validar que está convidando para seu próprio gabinete
-      if (!isSuperAdmin && targetGabineteId !== inviterProfile.gabinete_id) {
+      if (!isSuperAdmin && targetGabineteId !== inviterProfile.tenant_id) {
         return { data: null, error: 'Você só pode criar convites para seu próprio gabinete' };
       }
 
@@ -82,7 +82,7 @@ export class OnboardingService {
         .from('invites')
         .select('id, status')
         .eq('email', request.email)
-        .eq('gabinete_id', targetGabineteId)
+        .eq('tenant_id', targetGabineteId)
         .eq('status', 'pending')
         .single();
 
@@ -101,12 +101,12 @@ export class OnboardingService {
         .insert({
           email: request.email,
           role: request.role,
-          gabinete_id: targetGabineteId,
+          tenant_id: targetGabineteId,
           invited_by: invitedBy,
           expires_at: expiresAt.toISOString(),
           metadata: request.metadata || {},
         })
-        .select('*, gabinete:gabinetes(*), inviter:profiles!invited_by(*)')
+        .select('*, gabinete:tenants(*), inviter:profiles!invited_by(*)')
         .single();
 
       if (createError) {
@@ -135,7 +135,7 @@ export class OnboardingService {
       // Verificar se o usuário é admin/gestor do gabinete
       const { data: profile, error: profileError } = await supabaseAdmin
         .from('profiles')
-        .select('role, gabinete_id')
+        .select('role, tenant_id')
         .eq('id', userId)
         .single();
 
@@ -144,7 +144,7 @@ export class OnboardingService {
       }
 
       // Super admin pode listar convites de qualquer gabinete
-      if (!isSuperAdmin && (!['admin', 'gestor'].includes(profile.role) || profile.gabinete_id !== gabineteId)) {
+      if (!isSuperAdmin && (!['admin', 'gestor'].includes(profile.role) || profile.tenant_id !== gabineteId)) {
         return { data: null, error: 'Sem permissão para listar convites deste gabinete' };
       }
 
@@ -152,7 +152,7 @@ export class OnboardingService {
       const { data: invites, error: invitesError } = await supabaseAdmin
         .from('invites')
         .select('*, gabinete:gabinetes(*), inviter:profiles!invited_by(*)')
-        .eq('gabinete_id', gabineteId)
+        .eq('tenant_id', gabineteId)
         .order('created_at', { ascending: false });
 
       if (invitesError) {
@@ -252,7 +252,7 @@ export class OnboardingService {
       // Verificar se o usuário é admin/gestor
       const { data: profile, error: profileError } = await supabaseAdmin
         .from('profiles')
-        .select('role, gabinete_id')
+        .select('role, tenant_id')
         .eq('id', userId)
         .single();
 
@@ -273,7 +273,7 @@ export class OnboardingService {
 
       // Super admin pode revogar qualquer convite
       // Outros admins/gestores só podem revogar convites do seu gabinete
-      if (!isSuperAdmin && invite.gabinete_id !== profile.gabinete_id) {
+      if (!isSuperAdmin && invite.tenant_id !== profile.tenant_id) {
         return { success: false, error: 'Sem permissão para revogar este convite' };
       }
 
@@ -309,7 +309,7 @@ export class OnboardingService {
       // Verificar permissões
       const { data: profile, error: profileError } = await supabaseAdmin
         .from('profiles')
-        .select('role, gabinete_id')
+        .select('role, tenant_id')
         .eq('id', userId)
         .single();
 
@@ -330,7 +330,7 @@ export class OnboardingService {
 
       // Super admin pode reenviar qualquer convite
       // Outros admins/gestores só podem reenviar convites do seu gabinete
-      if (!isSuperAdmin && invite.gabinete_id !== profile.gabinete_id) {
+      if (!isSuperAdmin && invite.tenant_id !== profile.tenant_id) {
         return { data: null, error: 'Sem permissão para reenviar este convite' };
       }
 

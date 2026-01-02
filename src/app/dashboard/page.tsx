@@ -275,7 +275,7 @@ export default function DashboardPage() {
       const { data: providencias } = await supabase
         .from('providencias')
         .select('status, prioridade')
-        .eq('gabinete_id', tenant.id)
+        .eq('tenant_id', gabinete.id)
         .gte('created_at', startOfYear)
         .lte('created_at', endOfYear)
 
@@ -304,7 +304,7 @@ export default function DashboardPage() {
           cidadao:cidadaos(nome),
           orgao_destino:orgaos(nome, sigla)
         `)
-        .eq('gabinete_id', tenant.id)
+        .eq('tenant_id', gabinete.id)
         .order('created_at', { ascending: false })
         .limit(5)
 

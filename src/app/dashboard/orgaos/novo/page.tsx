@@ -61,7 +61,7 @@ export default function NovoOrgaoPage() {
       const { error } = await supabase
         .from('orgaos')
         .insert({
-          tenant_id: tenant.id,
+          tenant_id: gabinete.id,
           nome: formData.nome,
           tipo: formData.tipo,
           sigla: formData.sigla || null,
