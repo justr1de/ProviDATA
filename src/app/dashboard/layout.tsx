@@ -49,8 +49,27 @@ const adminNavigation = [
   { name: 'Configurações', href: '/dashboard/configuracoes', icon: Settings },
 ]
 
+// Cargo mapping constants for role display
+const PARLIAMENTARY_CARGO_LABELS: Record<string, string> = {
+  'deputado_estadual': 'Deputado',
+  'deputado_federal': 'Deputado',
+  'vereador': 'Vereador',
+  'senador': 'Senador',
+  'prefeito': 'Prefeito',
+  'governador': 'Governador'
+}
+
+const SYSTEM_ROLE_LABELS: Record<string, string> = {
+  'admin': 'Administrador',
+  'gestor': 'Gestor',
+  'assessor': 'Assessor',
+  'operador': 'Operador',
+  'visualizador': 'Visualizador'
+}
+
 // Helper function to get user display role/position
 // TODO: Consider extracting cargo mapping to shared utility if reused elsewhere
+// TODO: Move super admin email to environment variable for security
 function getUserDisplayRole(user: { role?: string; email?: string } | null, gabinete: { parlamentar_cargo?: string } | null): string {
   // Super Admin
   if (user?.role === 'super_admin' || user?.email === 'contato@dataro-it.com.br') {
@@ -59,26 +78,11 @@ function getUserDisplayRole(user: { role?: string; email?: string } | null, gabi
   
   // Parliamentary positions from gabinete
   if (gabinete?.parlamentar_cargo) {
-    const cargoMap: Record<string, string> = {
-      'deputado_estadual': 'Deputado',
-      'deputado_federal': 'Deputado',
-      'vereador': 'Vereador',
-      'senador': 'Senador',
-      'prefeito': 'Prefeito',
-      'governador': 'Governador'
-    }
-    return cargoMap[gabinete.parlamentar_cargo] || 'Parlamentar'
+    return PARLIAMENTARY_CARGO_LABELS[gabinete.parlamentar_cargo] || 'Parlamentar'
   }
   
   // Fallback to system role
-  const roleMap: Record<string, string> = {
-    'admin': 'Administrador',
-    'gestor': 'Gestor',
-    'assessor': 'Assessor',
-    'operador': 'Operador',
-    'visualizador': 'Visualizador'
-  }
-  return roleMap[user?.role || ''] || 'Usuário'
+  return SYSTEM_ROLE_LABELS[user?.role || ''] || 'Usuário'
 }
 
 export default function DashboardLayout({
