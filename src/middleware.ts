@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { env } from '@/lib/env'
 
 export async function middleware(request: NextRequest) {
   // 1. Prepara a resposta base (permite a requisição continuar por padrão)
@@ -11,8 +12,8 @@ export async function middleware(request: NextRequest) {
 
   // 2. Configura o cliente Supabase para manipular cookies
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    env.supabaseUrl,
+    env.supabaseAnonKey,
     {
       cookies: {
         getAll() {

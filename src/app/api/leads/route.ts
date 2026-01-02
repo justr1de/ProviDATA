@@ -1,57 +1,54 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerEnv, env } from '@/lib/env';
+import { validateLeadData } from '@/lib/validators';
 
 export async function POST(request: NextRequest) {
   try {
-    const { nome, cargo, email, telefone, mensagem } = await request.json();
+    const body = await request.json();
+    const { nome, cargo, email, telefone, mensagem } = body;
 
-    // Validar campos obrigatórios
-    if (!nome || !cargo || !email || !telefone || !mensagem) {
+    // Validar e sanitizar dados de entrada
+    const validation = validateLeadData({ nome, cargo, email, telefone, mensagem });
+    
+    if (!validation.valid) {
       return NextResponse.json(
-        { error: 'Todos os campos são obrigatórios' },
+        { 
+          error: 'Dados inválidos', 
+          details: validation.errors 
+        },
         { status: 400 }
       );
     }
 
-    // Validar e-mail
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'E-mail inválido' },
-        { status: 400 }
-      );
-    }
+    // Usar dados sanitizados
+    const sanitizedData = validation.sanitized!;
 
-    // Criar cliente Supabase
-    // Usar Service Role Key no lado do servidor para garantir permissões de escrita
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !supabaseServiceRoleKey) {
-      console.error('Variáveis de ambiente Supabase não configuradas corretamente no servidor');
-      return NextResponse.json(
-        { error: 'Erro de configuração do servidor' },
-        { status: 500 }
-      );
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
+    // Obter credenciais do servidor de forma segura
+    const serverEnv = getServerEnv();
+    
+    // Criar cliente Supabase com Service Role Key (server-only)
+    const supabase = createClient(
+      env.supabaseUrl,
+      serverEnv.supabaseServiceKey,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
       }
-    });
+    );
 
-    // Inserir lead no Supabase
+    // Inserir lead no Supabase com dados sanitizados
     const { data, error } = await supabase
       .from('leads')
       .insert([
         {
-          nome: nome.trim(),
-          cargo: cargo.trim(),
-          email: email.trim().toLowerCase(),
-          telefone: telefone.trim(),
-          mensagem: mensagem.trim(),
+          nome: sanitizedData.nome,
+          cargo: sanitizedData.cargo,
+          email: sanitizedData.email,
+          telefone: sanitizedData.telefone,
+          mensagem: sanitizedData.mensagem,
           status: 'novo',
         },
       ])
@@ -60,7 +57,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Erro ao inserir lead no Supabase:', error);
       return NextResponse.json(
-        { error: `Erro no Supabase: ${error.message}`, details: error },
+        { error: 'Erro ao processar solicitação' },
         { status: 500 }
       );
     }

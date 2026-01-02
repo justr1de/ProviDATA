@@ -45,14 +45,48 @@ src/
 
 ## Configuração
 
+### Pré-requisitos
+
+- Node.js 20+ e npm/pnpm
+- Conta no Supabase
+- Conta no Vercel (para deploy)
+
 ### Variáveis de Ambiente
 
-Crie um arquivo `.env.local` com:
+O sistema requer configuração de variáveis de ambiente para funcionar corretamente. 
+
+**⚠️ IMPORTANTE**: Copie o arquivo `.env.example` para `.env.local` e configure as variáveis necessárias:
+
+```bash
+cp .env.example .env.local
+```
+
+#### Variáveis Obrigatórias
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=sua_url_supabase
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima
+# Supabase - Obtenha em https://app.supabase.com/project/_/settings/api
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_publica_aqui
+
+# Service Role Key - CRÍTICO: Apenas servidor, NUNCA exponha no frontend
+SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key_aqui
+
+# Super Admin - Lista de emails separados por vírgula
+SUPER_ADMIN_EMAILS=contato@dataro-it.com.br
 ```
+
+#### Variáveis Opcionais
+
+```env
+# URL da aplicação (para links e redirecionamentos)
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Rate Limiting (Upstash Redis - opcional)
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+```
+
+📖 **Para instruções detalhadas de configuração**, consulte [docs/SETUP.md](docs/SETUP.md)
 
 ### Instalação
 

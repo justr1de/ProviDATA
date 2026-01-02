@@ -1,5 +1,7 @@
 // Serviço de Onboarding - Backend (Refatorado para tenant_id)
 import { createClient } from '@supabase/supabase-js';
+import { getServerEnv, env } from '@/lib/env';
+import { isSuperAdminEmail } from '@/lib/auth-helpers';
 import type {
   Invite,
   CreateInviteRequest,
@@ -8,14 +10,11 @@ import type {
   Tenant,
 } from '@/types/onboarding';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-// Email do super admin geral do sistema
-const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
+// Obter credenciais do servidor de forma segura
+const serverEnv = getServerEnv();
 
 // Cliente com service role para operações administrativas
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+const supabaseAdmin = createClient(env.supabaseUrl, serverEnv.supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
@@ -29,7 +28,7 @@ export class OnboardingService {
   private static async isSuperAdmin(userId: string): Promise<boolean> {
     try {
       const { data: user } = await supabaseAdmin.auth.admin.getUserById(userId);
-      return user?.user?.email === SUPER_ADMIN_EMAIL;
+      return isSuperAdminEmail(user?.user?.email);
     } catch (error) {
       console.error('Erro ao verificar super admin:', error);
       return false;

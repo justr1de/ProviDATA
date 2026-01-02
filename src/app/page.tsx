@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useTheme } from '@/providers/theme-provider';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@/lib/supabase/client';
 import { 
   FileText, 
   Users, 
@@ -28,10 +28,8 @@ import {
   Menu
 } from 'lucide-react';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
-const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
+// Criar cliente Supabase usando o helper validado
+const supabase = createClient();
 
 const features = [
   {
