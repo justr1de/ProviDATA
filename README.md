@@ -45,14 +45,51 @@ src/
 
 ## Configuração
 
+### Pré-requisitos
+
+- Node.js 18+ ou superior
+- pnpm (gerenciador de pacotes)
+- Conta no Supabase
+- Conta na Vercel (para deploy)
+
 ### Variáveis de Ambiente
 
-Crie um arquivo `.env.local` com:
+⚠️ **IMPORTANTE**: O sistema utiliza validação centralizada de variáveis de ambiente. Todas as variáveis obrigatórias devem estar configuradas antes de iniciar a aplicação.
+
+#### Passo 1: Copiar o arquivo de exemplo
+
+```bash
+cp .env.example .env.local
+```
+
+#### Passo 2: Configurar as variáveis obrigatórias
+
+Edite o arquivo `.env.local` e preencha os valores:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=sua_url_supabase
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima
+# Supabase - Configurações públicas (podem ser expostas ao navegador)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+
+# Supabase - Service Role Key (APENAS SERVER-SIDE)
+# ⚠️ NUNCA exponha esta chave ao navegador
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
+
+# Super Admins (lista separada por vírgulas)
+SUPER_ADMIN_EMAILS=admin@example.com,outro@example.com
+
+# URL da aplicação
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
+
+#### Onde encontrar as credenciais do Supabase:
+
+1. Acesse seu projeto no [Supabase Dashboard](https://app.supabase.com)
+2. Vá em **Settings** > **API**
+3. Copie:
+   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
+   - **anon/public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - **service_role key** → `SUPABASE_SERVICE_ROLE_KEY`
 
 ### Instalação
 
@@ -65,7 +102,15 @@ pnpm dev
 
 # Build para produção
 pnpm build
+
+# Iniciar servidor de produção
+pnpm start
+
+# Lint do código
+pnpm lint
 ```
+
+A aplicação estará disponível em [http://localhost:3000](http://localhost:3000)
 
 ## Banco de Dados
 
@@ -84,10 +129,61 @@ O sistema utiliza Supabase com as seguintes tabelas principais:
 
 ## Segurança
 
-- Row Level Security (RLS) habilitado em todas as tabelas
-- Isolamento de dados por tenant
-- Autenticação via Supabase Auth
-- Conformidade com LGPD
+O ProviDATA implementa múltiplas camadas de segurança para proteger os dados dos gabinetes:
+
+### 🔐 Autenticação e Autorização
+
+- **Supabase Auth**: Sistema robusto de autenticação com JWT
+- **Row Level Security (RLS)**: Habilitado em todas as tabelas do banco
+- **Multi-tenant**: Isolamento completo de dados por gabinete
+- **Roles**: Sistema de permissões (super_admin, admin, gestor, assessor)
+
+### 🛡️ Proteção de Dados
+
+- **Validação de Inputs**: Todos os inputs são validados e sanitizados
+- **Limitação de Campos**: Tamanho máximo definido para prevenir ataques
+- **SQL Injection**: Proteção via Supabase prepared statements
+- **XSS Protection**: Sanitização de HTML e scripts maliciosos
+
+### 🔑 Gerenciamento de Chaves
+
+#### ✅ Chaves Públicas (Seguras para o navegador)
+- `NEXT_PUBLIC_SUPABASE_URL`: URL do projeto Supabase
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Chave anônima (protegida por RLS)
+
+#### ⚠️ Chaves Privadas (APENAS server-side)
+- `SUPABASE_SERVICE_ROLE_KEY`: **NUNCA** exponha ao navegador
+  - Bypassa RLS
+  - Acesso total ao banco de dados
+  - Usada apenas em API Routes e Server Components
+  - Sistema valida automaticamente se está sendo usada no servidor
+
+### 🚨 Boas Práticas de Segurança
+
+1. **Variáveis de Ambiente**:
+   - Use `.env.local` para desenvolvimento
+   - Configure variáveis de ambiente na Vercel para produção
+   - Nunca commite arquivos `.env*` no Git
+
+2. **Service Role Key**:
+   - Use apenas em código server-side
+   - Arquivo `src/lib/env.ts` valida o contexto de uso
+   - Adicione comentários de segurança onde é usada
+
+3. **Super Admins**:
+   - Configure via `SUPER_ADMIN_EMAILS`
+   - Separe múltiplos emails com vírgulas
+   - Nunca hardcode emails no código
+
+4. **Rate Limiting**:
+   - Considere implementar para APIs públicas
+   - Opções: Upstash, Vercel KV, Cloudflare
+
+### 📋 Conformidade
+
+- **LGPD**: Sistema projetado para conformidade com a Lei Geral de Proteção de Dados
+- **Auditoria**: Histórico de alterações em tabelas críticas
+- **Backup**: Supabase realiza backups automáticos diários
 
 ## Licença
 

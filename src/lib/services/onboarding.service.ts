@@ -1,5 +1,6 @@
 // Serviço de Onboarding - Backend (Refatorado para tenant_id)
 import { createClient } from '@supabase/supabase-js';
+import { env, isSuperAdminEmail } from '@/lib/env';
 import type {
   Invite,
   CreateInviteRequest,
@@ -8,14 +9,16 @@ import type {
   Tenant,
 } from '@/types/onboarding';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-// Email do super admin geral do sistema
-const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
-
-// Cliente com service role para operações administrativas
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+/**
+ * Cliente Supabase com Service Role para operações administrativas
+ * 
+ * ⚠️ IMPORTANTE - SEGURANÇA:
+ * - Esta Service Role Key tem permissões TOTAIS no banco de dados
+ * - Deve ser usada APENAS em código server-side
+ * - NUNCA exponha esta chave ao navegador/cliente
+ * - Este serviço deve ser chamado apenas de API Routes ou Server Components
+ */
+const supabaseAdmin = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
@@ -25,11 +28,12 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 export class OnboardingService {
   /**
    * Verifica se o usuário é o super admin do sistema
+   * Usa a lista de emails configurada em SUPER_ADMIN_EMAILS
    */
   private static async isSuperAdmin(userId: string): Promise<boolean> {
     try {
       const { data: user } = await supabaseAdmin.auth.admin.getUserById(userId);
-      return user?.user?.email === SUPER_ADMIN_EMAIL;
+      return isSuperAdminEmail(user?.user?.email);
     } catch (error) {
       console.error('Erro ao verificar super admin:', error);
       return false;
