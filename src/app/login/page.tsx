@@ -32,7 +32,7 @@ export default function LoginPage() {
         return
       }
       toast.success('Login realizado com sucesso!')
-      router.push('/dashboard')
+      router.push('/admin/gabinetes')
       router.refresh()
     } catch {
       toast.error('Erro inesperado ao fazer login')
