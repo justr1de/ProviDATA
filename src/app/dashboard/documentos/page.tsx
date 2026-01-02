@@ -93,14 +93,14 @@ export default function DocumentosPage() {
 
   // Buscar documentos
   const fetchDocumentos = async () => {
-    if (!user?.tenant_id) return
+    if (!user?.gabinete_id) return
 
     setLoading(true)
     try {
       let query = supabase
         .from('documentos')
         .select('*')
-        .eq('tenant_id', user.tenant_id)
+        .eq('gabinete_id', user.gabinete_id)
         .order('created_at', { ascending: false })
 
       if (selectedCategoria) {
@@ -120,7 +120,7 @@ export default function DocumentosPage() {
 
   useEffect(() => {
     fetchDocumentos()
-  }, [user?.tenant_id, selectedCategoria])
+  }, [user?.gabinete_id, selectedCategoria])
 
   // Filtrar documentos por busca
   const filteredDocumentos = documentos.filter(doc => 
@@ -131,7 +131,7 @@ export default function DocumentosPage() {
 
   // Upload de arquivo
   const handleUpload = async () => {
-    if (!selectedFile || !user?.tenant_id || !uploadData.nome) {
+    if (!selectedFile || !user?.gabinete_id || !uploadData.nome) {
       alert('Preencha o nome e selecione um arquivo')
       return
     }
@@ -140,7 +140,7 @@ export default function DocumentosPage() {
     try {
       // Upload do arquivo para o storage
       const fileExt = selectedFile.name.split('.').pop()
-      const fileName = `${user.tenant_id}/${Date.now()}_${selectedFile.name}`
+      const fileName = `${user.gabinete_id}/${Date.now()}_${selectedFile.name}`
       
       const { data: uploadResult, error: uploadError } = await supabase.storage
         .from('documentos')
@@ -157,7 +157,7 @@ export default function DocumentosPage() {
       const { error: dbError } = await supabase
         .from('documentos')
         .insert({
-          tenant_id: user.tenant_id,
+          gabinete_id: user.gabinete_id,
           nome: uploadData.nome,
           descricao: uploadData.descricao || null,
           arquivo_url: urlData.publicUrl,

@@ -104,7 +104,7 @@ export class GabineteProvisioningService {
     
     // Verificar se o slug já existe
     const { data: existing } = await supabaseAdmin
-      .from('gabinetes')
+      .from('tenants')
       .select('id')
       .eq('slug', slug)
       .single();
@@ -116,7 +116,7 @@ export class GabineteProvisioningService {
       
       while (true) {
         const { data } = await supabaseAdmin
-          .from('gabinetes')
+          .from('tenants')
           .select('id')
           .eq('slug', newSlug)
           .single();
@@ -173,7 +173,7 @@ export class GabineteProvisioningService {
       
       // 1. Criar gabinete na tabela gabinetes
       const { data: gabinete, error: gabineteError } = await supabaseAdmin
-        .from('gabinetes')
+        .from('tenants')
         .insert({
           name: request.name,
           slug: slug,
@@ -231,7 +231,7 @@ export class GabineteProvisioningService {
         console.error('Erro ao criar usuário auth:', authError);
         
         // Rollback: Deletar gabinete criado
-        await supabaseAdmin.from('gabinetes').delete().eq('id', gabinete.id);
+        await supabaseAdmin.from('tenants').delete().eq('id', gabinete.id);
         
         return { success: false, error: 'Erro ao criar usuário de autenticação' };
       }
@@ -258,7 +258,7 @@ export class GabineteProvisioningService {
         
         // Rollback: Deletar usuário e gabinete
         await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
-        await supabaseAdmin.from('gabinetes').delete().eq('id', gabinete.id);
+        await supabaseAdmin.from('tenants').delete().eq('id', gabinete.id);
         
         return { success: false, error: 'Erro ao criar perfil do usuário' };
       }
@@ -289,7 +289,7 @@ export class GabineteProvisioningService {
     search?: string;
   }): Promise<{ data: Gabinete[] | null; error: string | null }> {
     try {
-      let query = supabaseAdmin.from('gabinetes').select('*');
+      let query = supabaseAdmin.from('tenants').select('*');
       
       // Aplicar filtros
       if (filters?.type) {
@@ -331,7 +331,7 @@ export class GabineteProvisioningService {
   static async getGabinete(gabineteId: string): Promise<{ data: Gabinete | null; error: string | null }> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('gabinetes')
+        .from('tenants')
         .select('*')
         .eq('id', gabineteId)
         .single();
@@ -357,7 +357,7 @@ export class GabineteProvisioningService {
   ): Promise<{ success: boolean; error?: string; gabinete?: Gabinete }> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('gabinetes')
+        .from('tenants')
         .update({
           name: updates.name,
           parlamentar_name: updates.parlamentar_name,
@@ -406,7 +406,7 @@ export class GabineteProvisioningService {
     try {
       // Buscar status atual
       const { data: currentGabinete } = await supabaseAdmin
-        .from('gabinetes')
+        .from('tenants')
         .select('ativo')
         .eq('id', gabineteId)
         .single();
@@ -417,7 +417,7 @@ export class GabineteProvisioningService {
       
       // Inverter status
       const { data, error } = await supabaseAdmin
-        .from('gabinetes')
+        .from('tenants')
         .update({ ativo: !currentGabinete.ativo, updated_at: new Date().toISOString() })
         .eq('id', gabineteId)
         .select()

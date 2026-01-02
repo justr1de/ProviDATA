@@ -57,7 +57,7 @@ export default function ConfiguracoesPage() {
     setIsLoading(true)
     try {
       const { data, error } = await supabase
-        .from('gabinetes')
+        .from('tenants')
         .update({
           name: gabineteData.name,
           parlamentar_name: gabineteData.parlamentar_name,

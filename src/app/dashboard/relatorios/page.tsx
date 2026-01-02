@@ -130,7 +130,7 @@ export default function RelatoriosPage() {
 
   // Função para buscar providências do banco
   const fetchProvidencias = async (): Promise<Providencia[]> => {
-    if (!user?.tenant_id) return []
+    if (!user?.gabinete_id) return []
 
     let query = supabase
       .from('providencias')
@@ -147,7 +147,7 @@ export default function RelatoriosPage() {
         orgao:orgaos(nome, sigla),
         categoria:categorias(nome)
       `)
-      .eq('tenant_id', user.tenant_id)
+      .eq('gabinete_id', user.gabinete_id)
 
     if (dateRange.start) {
       query = query.gte('created_at', dateRange.start)

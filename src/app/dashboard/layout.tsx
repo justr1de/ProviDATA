@@ -95,7 +95,7 @@ export default function DashboardLayout({
 
       const { data: userData } = await supabase
         .from('users')
-        .select('*, gabinete:gabinetes(*)')
+        .select('*, gabinete:tenants(*)')
         .eq('id', authUser.id)
         .single()
 
