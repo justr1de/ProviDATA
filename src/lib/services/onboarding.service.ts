@@ -1,370 +1,460 @@
-import { createClient } from '@/lib/supabase/server';
-import type { Database } from '@/types/supabase';
-import { cache } from 'react';
-import {
+// Serviço de Onboarding - Backend
+import { createClient } from '@supabase/supabase-js';
+import type {
+  Invite,
+  CreateInviteRequest,
+  AcceptInviteResponse,
   Profile,
-  GabineteInvite,
-  InviteEmailResponseDto,
   Gabinete,
-  ProfileWithGabinete,
-} from '@/types';
-import { formatReactEmailDate } from '@/lib/utils/date';
-import { GabineteRole } from '@/lib/enums';
-import { Resend } from 'resend';
-import InviteUserEmail from '@/emails/InviteUserEmail';
+} from '@/types/onboarding';
 
-type GabineteInviteCreateRequest = Database['public']['Tables']['gabinete_invites']['Insert'];
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-async function getLatestInvite(email: string): Promise<GabineteInvite | null> {
-  const supabase = await createClient();
+// Email do super admin geral do sistema
+const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
 
-  const { data, error } = await supabase
-    .from('gabinete_invites')
-    .select('*')
-    .eq('email', email)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
-
-  if (error) {
-    console.error('Error fetching latest invite:', error);
-    return null;
-  }
-
-  return data as GabineteInvite;
-}
-
-async function getProfile(userId: string): Promise<Profile | null> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .single();
-
-  if (error) {
-    console.error('Error fetching profile:', error);
-    return null;
-  }
-
-  return data as Profile;
-}
-
-async function createInvite(
-  request: GabineteInviteCreateRequest
-): Promise<GabineteInvite | null> {
-  const supabase = await createClient();
-
-  // Get the inviter's profile
-  const inviterProfile = await getProfile(request.inviter_id);
-  if (!inviterProfile) {
-    console.error('Inviter profile not found');
-    return null;
-  }
-
-  // Use gabinete_id from request or fall back to inviter's gabinete_id
-  const targetGabineteId = request.gabinete_id || inviterProfile.gabinete_id;
-
-  if (!targetGabineteId) {
-    console.error('No gabinete_id available');
-    return null;
-  }
-
-  const { data, error } = await supabase
-    .from('gabinete_invites')
-    .insert([
-      {
-        email: request.email,
-        role: request.role,
-        inviter_id: request.inviter_id,
-        gabinete_id: targetGabineteId,
-      },
-    ])
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error creating invite:', error);
-    return null;
-  }
-
-  return data as GabineteInvite;
-}
-
-async function deleteInvite(inviteId: string): Promise<boolean> {
-  const supabase = await createClient();
-
-  const { error } = await supabase.from('gabinete_invites').delete().eq('id', inviteId);
-
-  if (error) {
-    console.error('Error deleting invite:', error);
-    return false;
-  }
-
-  return true;
-}
-
-async function updateProfile(
-  userId: string,
-  updates: Partial<Profile>
-): Promise<Profile | null> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('profiles')
-    .update(updates)
-    .eq('id', userId)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error updating profile:', error);
-    return null;
-  }
-
-  return data as Profile;
-}
-
-const getProfileByIdCached = cache(async (id: string) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*, gabinetes(*)')
-    .eq('id', id)
-    .single();
-
-  if (error) {
-    console.error('Error in getProfileByIdCached:', error);
-    return null;
-  }
-
-  return data as ProfileWithGabinete;
+// Cliente com service role para operações administrativas
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
 });
 
-async function handleSignup(
-  userId: string,
-  email: string,
-  fullName?: string
-): Promise<Profile | null> {
-  const supabase = await createClient();
-
-  // Check if there's a pending invite for this email
-  const invite = await getLatestInvite(email);
-
-  if (invite) {
-    // Create profile with the invite's gabinete_id and role
-    const { data, error } = await supabase
-      .from('profiles')
-      .insert([
-        {
-          id: userId,
-          email: email,
-          full_name: fullName || '',
-          gabinete_id: invite.gabinete_id,
-          role: invite.role,
-        },
-      ])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating profile with invite:', error);
-      return null;
+export class OnboardingService {
+  /**
+   * Verifica se o usuário é o super admin do sistema
+   */
+  private static async isSuperAdmin(userId: string): Promise<boolean> {
+    try {
+      const { data: user } = await supabaseAdmin.auth.admin.getUserById(userId);
+      return user?.user?.email === SUPER_ADMIN_EMAIL;
+    } catch (error) {
+      console.error('Erro ao verificar super admin:', error);
+      return false;
     }
-
-    // Delete the invite after successful signup
-    await deleteInvite(invite.id);
-
-    return data as Profile;
-  } else {
-    // No invite found - create a new gabinete and profile
-    const { data: gabineteData, error: gabineteError } = await supabase
-      .from('gabinetes')
-      .insert([{ name: `${fullName || email}'s Gabinete` }])
-      .select()
-      .single();
-
-    if (gabineteError) {
-      console.error('Error creating gabinete:', gabineteError);
-      return null;
-    }
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .insert([
-        {
-          id: userId,
-          email: email,
-          full_name: fullName || '',
-          gabinete_id: gabineteData.id,
-          role: GabineteRole.OWNER,
-        },
-      ])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating profile:', error);
-      return null;
-    }
-
-    return data as Profile;
-  }
-}
-
-async function getInvitesByGabineteId(gabineteId: string): Promise<GabineteInvite[]> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('gabinete_invites')
-    .select('*')
-    .eq('gabinete_id', gabineteId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error fetching invites:', error);
-    return [];
   }
 
-  return data as GabineteInvite[];
-}
+  /**
+   * Cria um novo convite usando gabinete_id
+   */
+  static async createInvite(
+    request: CreateInviteRequest,
+    invitedBy: string
+  ): Promise<{ data: Invite | null; error: string | null }> {
+    try {
+      // Verificar se é super admin
+      const isSuperAdmin = await this.isSuperAdmin(invitedBy);
 
-async function getProfilesByGabineteId(gabineteId: string): Promise<Profile[]> {
-  const supabase = await createClient();
+      // Verificar se o usuário que está convidando é admin
+      const { data: inviterProfile, error: inviterError } = await supabaseAdmin
+        .from('profiles')
+        .select('role, gabinete_id')
+        .eq('id', invitedBy)
+        .single();
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('gabinete_id', gabineteId)
-    .order('created_at', { ascending: false });
+      if (inviterError || !inviterProfile) {
+        return { data: null, error: 'Usuário não encontrado' };
+      }
 
-  if (error) {
-    console.error('Error fetching profiles:', error);
-    return [];
-  }
+      // Super admin pode convidar para qualquer gabinete
+      // Outros admins/gestores só podem convidar para seu próprio gabinete
+      if (!isSuperAdmin && !['admin', 'gestor'].includes(inviterProfile.role)) {
+        return { data: null, error: 'Apenas administradores e gestores podem criar convites' };
+      }
 
-  return data as Profile[];
-}
+      // Determinar gabinete_id: se fornecido no request, usar; senão, usar do perfil do convidador
+      const targetGabineteId = request.gabinete_id || inviterProfile.gabinete_id;
 
-async function sendInviteEmail(
-  inviterName: string,
-  inviteeEmail: string,
-  gabineteId: string
-): Promise<InviteEmailResponseDto> {
-  try {
-    if (!process.env.RESEND_API_KEY) {
-      return {
-        success: false,
-        error: 'Resend API key not configured',
-      };
+      if (!targetGabineteId) {
+        return { data: null, error: 'gabinete_id é obrigatório' };
+      }
+
+      // Se não é super admin, validar que está convidando para seu próprio gabinete
+      if (!isSuperAdmin && targetGabineteId !== inviterProfile.gabinete_id) {
+        return { data: null, error: 'Você só pode criar convites para seu próprio gabinete' };
+      }
+
+      // Verificar se já existe convite pendente para este email no mesmo gabinete
+      const { data: existingInvite } = await supabaseAdmin
+        .from('invites')
+        .select('id, status')
+        .eq('email', request.email)
+        .eq('gabinete_id', targetGabineteId)
+        .eq('status', 'pending')
+        .single();
+
+      if (existingInvite) {
+        return { data: null, error: 'Já existe um convite pendente para este email neste gabinete' };
+      }
+
+      // Calcular data de expiração
+      const expiresInDays = request.expires_in_days || 7;
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + expiresInDays);
+
+      // Criar convite
+      const { data: invite, error: createError } = await supabaseAdmin
+        .from('invites')
+        .insert({
+          email: request.email,
+          role: request.role,
+          gabinete_id: targetGabineteId,
+          invited_by: invitedBy,
+          expires_at: expiresAt.toISOString(),
+          metadata: request.metadata || {},
+        })
+        .select('*, gabinete:tenants(*), inviter:profiles!invited_by(*)')
+        .single();
+
+      if (createError) {
+        console.error('Erro ao criar convite:', createError);
+        return { data: null, error: 'Erro ao criar convite' };
+      }
+
+      return { data: invite as Invite, error: null };
+    } catch (error) {
+      console.error('Erro no createInvite:', error);
+      return { data: null, error: 'Erro interno ao criar convite' };
     }
+  }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+  /**
+   * Lista convites de um gabinete
+   */
+  static async listInvites(
+    gabineteId: string,
+    userId: string
+  ): Promise<{ data: Invite[] | null; error: string | null }> {
+    try {
+      // Verificar se é super admin
+      const isSuperAdmin = await this.isSuperAdmin(userId);
 
-    // Get the gabinete name
-    const supabase = await createClient();
-    const { data: gabineteData, error: gabineteError } = await supabase
-      .from('gabinetes')
-      .select('name')
-      .eq('id', gabineteId)
-      .single();
+      // Verificar se o usuário é admin/gestor do gabinete
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .select('role, gabinete_id')
+        .eq('id', userId)
+        .single();
 
-    if (gabineteError) {
-      return {
-        success: false,
-        error: 'Failed to fetch gabinete information',
-      };
+      if (profileError || !profile) {
+        return { data: null, error: 'Usuário não encontrado' };
+      }
+
+      // Super admin pode listar convites de qualquer gabinete
+      if (!isSuperAdmin && (!['admin', 'gestor'].includes(profile.role) || profile.gabinete_id !== gabineteId)) {
+        return { data: null, error: 'Sem permissão para listar convites deste gabinete' };
+      }
+
+      // Buscar convites
+      const { data: invites, error: invitesError } = await supabaseAdmin
+        .from('invites')
+        .select('*, gabinete:tenants(*), inviter:profiles!invited_by(*)')
+        .eq('gabinete_id', gabineteId)
+        .order('created_at', { ascending: false });
+
+      if (invitesError) {
+        console.error('Erro ao listar convites:', invitesError);
+        return { data: null, error: 'Erro ao listar convites' };
+      }
+
+      return { data: invites as Invite[], error: null };
+    } catch (error) {
+      console.error('Erro no listInvites:', error);
+      return { data: null, error: 'Erro interno ao listar convites' };
     }
+  }
 
-    const gabineteName = gabineteData?.name || 'the gabinete';
+  /**
+   * Busca convite por token (público)
+   */
+  static async getInviteByToken(
+    token: string
+  ): Promise<{ data: Invite | null; error: string | null }> {
+    try {
+      const { data: invite, error: inviteError } = await supabaseAdmin
+        .from('invites')
+        .select('*, gabinete:tenants(*)')
+        .eq('token', token)
+        .eq('status', 'pending')
+        .single();
 
-    // Send the email
-    const { data, error } = await resend.emails.send({
-      from: 'ProviDATA <noreply@providata.com.br>',
-      to: inviteeEmail,
-      subject: `${inviterName} invited you to join ${gabineteName} on ProviDATA`,
-      react: InviteUserEmail({
-        inviterName,
-        inviteeEmail,
-        gabineteName,
-        inviteDate: formatReactEmailDate(new Date()),
-        inviteLink: `${process.env.NEXT_PUBLIC_APP_URL}/signup?email=${encodeURIComponent(inviteeEmail)}`,
-      }),
-    });
+      if (inviteError || !invite) {
+        return { data: null, error: 'Convite não encontrado ou expirado' };
+      }
 
-    if (error) {
-      console.error('Error sending invite email:', error);
-      return {
-        success: false,
-        error: error.message,
-      };
+      // Verificar se expirou
+      if (new Date(invite.expires_at) < new Date()) {
+        // Marcar como expirado
+        await supabaseAdmin
+          .from('invites')
+          .update({ status: 'expired' })
+          .eq('id', invite.id);
+
+        return { data: null, error: 'Convite expirado' };
+      }
+
+      return { data: invite as Invite, error: null };
+    } catch (error) {
+      console.error('Erro no getInviteByToken:', error);
+      return { data: null, error: 'Erro interno ao buscar convite' };
     }
-
-    return {
-      success: true,
-      data: {
-        id: data?.id || '',
-      },
-    };
-  } catch (error) {
-    console.error('Error in sendInviteEmail:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
-    };
-  }
-}
-
-async function updateGabinete(
-  gabineteId: string,
-  updates: { name?: string; cpf_cnpj?: string }
-): Promise<Gabinete | null> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('gabinetes')
-    .update(updates)
-    .eq('id', gabineteId)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error updating gabinete:', error);
-    return null;
   }
 
-  return data as Gabinete;
-}
+  /**
+   * Aceita um convite usando a função unificada do banco
+   */
+  static async acceptInvite(
+    token: string,
+    userId: string
+  ): Promise<AcceptInviteResponse> {
+    try {
+      // Usar a função SQL unificada para aceitar o convite
+      const { data, error } = await supabaseAdmin.rpc('accept_invite_unified', {
+        invite_token: token,
+        user_id: userId,
+      });
 
-async function getGabinete(gabineteId: string): Promise<Gabinete | null> {
-  const supabase = await createClient();
+      if (error) {
+        console.error('Erro ao aceitar convite:', error);
+        return { success: false, error: 'Erro ao aceitar convite' };
+      }
 
-  const { data, error } = await supabase
-    .from('gabinetes')
-    .select('*')
-    .eq('id', gabineteId)
-    .single();
+      // Converter gabinete_id para organization_id para compatibilidade
+      const response = data as AcceptInviteResponse;
+      if (response.success && response.gabinete_id) {
+        return {
+          ...response,
+          organization_id: response.gabinete_id, // Compatibilidade
+        };
+      }
 
-  if (error) {
-    console.error('Error in getGabinete:', error);
-    return null;
+      return response;
+    } catch (error) {
+      console.error('Erro no acceptInvite:', error);
+      return { success: false, error: 'Erro interno ao aceitar convite' };
+    }
   }
 
-  return data as Gabinete;
-}
+  /**
+   * Revoga um convite
+   */
+  static async revokeInvite(
+    inviteId: string,
+    userId: string
+  ): Promise<{ success: boolean; error: string | null }> {
+    try {
+      // Verificar se é super admin
+      const isSuperAdmin = await this.isSuperAdmin(userId);
 
-export const OnboardingService = {
-  getLatestInvite,
-  getProfile,
-  createInvite,
-  deleteInvite,
-  updateProfile,
-  handleSignup,
-  getInvitesByGabineteId,
-  getProfilesByGabineteId,
-  sendInviteEmail,
-  updateGabinete,
-  getGabinete,
-  getProfileByIdCached,
-};
+      // Verificar se o usuário é admin/gestor
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .select('role, gabinete_id')
+        .eq('id', userId)
+        .single();
+
+      if (profileError || !profile || (!isSuperAdmin && !['admin', 'gestor'].includes(profile.role))) {
+        return { success: false, error: 'Sem permissão para revogar convites' };
+      }
+
+      // Buscar convite
+      const { data: invite, error: inviteError } = await supabaseAdmin
+        .from('invites')
+        .select('gabinete_id')
+        .eq('id', inviteId)
+        .single();
+
+      if (inviteError || !invite) {
+        return { success: false, error: 'Convite não encontrado' };
+      }
+
+      // Super admin pode revogar qualquer convite
+      // Outros admins/gestores só podem revogar convites do seu gabinete
+      if (!isSuperAdmin && invite.gabinete_id !== profile.gabinete_id) {
+        return { success: false, error: 'Sem permissão para revogar este convite' };
+      }
+
+      // Revogar convite
+      const { error: updateError } = await supabaseAdmin
+        .from('invites')
+        .update({ status: 'revoked' })
+        .eq('id', inviteId);
+
+      if (updateError) {
+        console.error('Erro ao revogar convite:', updateError);
+        return { success: false, error: 'Erro ao revogar convite' };
+      }
+
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Erro no revokeInvite:', error);
+      return { success: false, error: 'Erro interno ao revogar convite' };
+    }
+  }
+
+  /**
+   * Reenvia um convite (cria novo token)
+   */
+  static async resendInvite(
+    inviteId: string,
+    userId: string
+  ): Promise<{ data: Invite | null; error: string | null }> {
+    try {
+      // Verificar se é super admin
+      const isSuperAdmin = await this.isSuperAdmin(userId);
+
+      // Verificar permissões
+      const { data: profile, error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .select('role, gabinete_id')
+        .eq('id', userId)
+        .single();
+
+      if (profileError || !profile || (!isSuperAdmin && !['admin', 'gestor'].includes(profile.role))) {
+        return { data: null, error: 'Sem permissão para reenviar convites' };
+      }
+
+      // Buscar convite
+      const { data: invite, error: inviteError } = await supabaseAdmin
+        .from('invites')
+        .select('*')
+        .eq('id', inviteId)
+        .single();
+
+      if (inviteError || !invite) {
+        return { data: null, error: 'Convite não encontrado' };
+      }
+
+      // Super admin pode reenviar qualquer convite
+      // Outros admins/gestores só podem reenviar convites do seu gabinete
+      if (!isSuperAdmin && invite.gabinete_id !== profile.gabinete_id) {
+        return { data: null, error: 'Sem permissão para reenviar este convite' };
+      }
+
+      // Gerar novo token e estender expiração
+      const newExpiresAt = new Date();
+      newExpiresAt.setDate(newExpiresAt.getDate() + 7);
+
+      const { data: updatedInvite, error: updateError } = await supabaseAdmin
+        .from('invites')
+        .update({
+          status: 'pending',
+          expires_at: newExpiresAt.toISOString(),
+          // O token será regenerado automaticamente pelo banco
+        })
+        .eq('id', inviteId)
+        .select('*, gabinete:tenants(*)')
+        .single();
+
+      if (updateError) {
+        console.error('Erro ao reenviar convite:', updateError);
+        return { data: null, error: 'Erro ao reenviar convite' };
+      }
+
+      return { data: updatedInvite as Invite, error: null };
+    } catch (error) {
+      console.error('Erro no resendInvite:', error);
+      return { data: null, error: 'Erro interno ao reenviar convite' };
+    }
+  }
+
+  /**
+   * Atualiza o progresso do onboarding
+   */
+  static async updateOnboardingProgress(
+    userId: string,
+    step: number,
+    completed: boolean = false
+  ): Promise<{ success: boolean; error: string | null }> {
+    try {
+      const { error } = await supabaseAdmin
+        .from('profiles')
+        .update({
+          onboarding_step: step,
+          onboarding_completed: completed,
+        })
+        .eq('id', userId);
+
+      if (error) {
+        console.error('Erro ao atualizar onboarding:', error);
+        return { success: false, error: 'Erro ao atualizar progresso' };
+      }
+
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Erro no updateOnboardingProgress:', error);
+      return { success: false, error: 'Erro interno ao atualizar progresso' };
+    }
+  }
+
+  /**
+   * Busca perfil do usuário com gabinete
+   */
+  static async getProfile(
+    userId: string
+  ): Promise<{ data: Profile | null; error: string | null }> {
+    try {
+      const { data: profile, error } = await supabaseAdmin
+        .from('profiles')
+        .select('*, gabinete:tenants(*)')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Erro ao buscar perfil:', error);
+        return { data: null, error: 'Erro ao buscar perfil' };
+      }
+
+      return { data: profile as Profile, error: null };
+    } catch (error) {
+      console.error('Erro no getProfile:', error);
+      return { data: null, error: 'Erro interno ao buscar perfil' };
+    }
+  }
+
+  /**
+   * Expira convites antigos (pode ser chamado por cron job)
+   */
+  static async expireOldInvites(): Promise<{ success: boolean; error: string | null }> {
+    try {
+      const { error } = await supabaseAdmin.rpc('expire_old_invites');
+
+      if (error) {
+        console.error('Erro ao expirar convites:', error);
+        return { success: false, error: 'Erro ao expirar convites' };
+      }
+
+      return { success: true, error: null };
+    } catch (error) {
+      console.error('Erro no expireOldInvites:', error);
+      return { success: false, error: 'Erro interno ao expirar convites' };
+    }
+  }
+
+  /**
+   * Busca gabinete por ID
+   */
+  static async getGabinete(
+    gabineteId: string
+  ): Promise<{ data: Gabinete | null; error: string | null }> {
+    try {
+      const { data: gabinete, error } = await supabaseAdmin
+        .from('tenants')
+        .select('*')
+        .eq('id', gabineteId)
+        .single();
+
+      if (error) {
+        console.error('Erro ao buscar gabinete:', error);
+        return { data: null, error: 'Erro ao buscar gabinete' };
+      }
+
+      return { data: gabinete as Gabinete, error: null };
+    } catch (error) {
+      console.error('Erro no getGabinete:', error);
+      return { data: null, error: 'Erro interno ao buscar gabinete' };
+    }
+  }
+}
