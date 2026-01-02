@@ -1,4 +1,32 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   CORREÇÃO CRÍTICA DO LAYOUT
+   Isso sobrescreve a regra antiga que empurrava o site 256px para a direita 
+   ==========================================================================
+*/
+.dashboard-main-content {
+  margin-left: 0 !important;
+  width: 100% !important;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Garante que o corpo ocupe tudo */
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* ==========================================================================
+   ABAIXO ESTÁ O SEU ESTILO ORIGINAL (MANTIDO)
+   ========================================================================== */
 
 /* Grid de recursos responsivo */
 .features-grid {
@@ -265,20 +293,20 @@ input, textarea, select {
 }
 
 /* ========================================
-   TEMA ESCURO (Dark Mode) - OTIMIZADO
+   TEMA ESCURO (Dark Mode)
    ======================================== */
 .dark {
-  /* Backgrounds - Tons mais escuros e elegantes */
+  /* Backgrounds */
   --background: #0f172a;
   --background-secondary: #1e293b;
   --background-tertiary: #334155;
   
-  /* Foregrounds - Mais contraste para legibilidade */
+  /* Foregrounds */
   --foreground: #f1f5f9;
   --foreground-secondary: #e2e8f0;
   --foreground-muted: #94a3b8;
   
-  /* Cards - Destaque sutil */
+  /* Cards */
   --card: #1e293b;
   --card-foreground: #f1f5f9;
   --card-hover: #334155;
@@ -287,7 +315,7 @@ input, textarea, select {
   --popover: #1e293b;
   --popover-foreground: #f1f5f9;
   
-  /* Primary (Verde ProviDATA) - Mais vibrante no escuro */
+  /* Primary */
   --primary: #22c55e;
   --primary-hover: #16a34a;
   --primary-foreground: #ffffff;
@@ -309,13 +337,13 @@ input, textarea, select {
   --destructive: #f87171;
   --destructive-foreground: #ffffff;
   
-  /* Border & Input - Mais visíveis */
+  /* Border & Input */
   --border: #475569;
   --border-hover: #64748b;
   --input: #475569;
   --ring: #22c55e;
   
-  /* Sidebar - Tema Escuro */
+  /* Sidebar */
   --sidebar-bg: #1e293b;
   --sidebar-border: #334155;
   --sidebar-foreground: #f1f5f9;
@@ -327,7 +355,7 @@ input, textarea, select {
   /* Background RGB para overlay */
   --background-rgb: 15, 23, 42;
   
-  /* Status Colors - Mais vibrantes no escuro */
+  /* Status Colors */
   --status-pending: #fbbf24;
   --status-pending-bg: rgba(251, 191, 36, 0.15);
   --status-progress: #818cf8;
@@ -469,26 +497,10 @@ input, textarea, select {
   animation: fadeIn 0.3s ease-out;
 }
 
-/* ========================================
-   LAYOUT DO DASHBOARD
-   ======================================== */
-.dashboard-main-content {
-  margin-left: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  transition: margin-left 0.3s ease;
-  overflow-x: hidden;
-  width: 100%;
-}
-
-@media (min-width: 768px) {
-  .dashboard-main-content {
-    margin-left: 256px;
-    width: calc(100% - 256px);
-  }
-}
-
+/* SIDEBAR (Antiga)
+   Mantive apenas o CSS visual, mas removi as margens
+   que quebravam o layout nas linhas 470-490 do original.
+*/
 .dashboard-sidebar {
   position: fixed;
   top: 0;

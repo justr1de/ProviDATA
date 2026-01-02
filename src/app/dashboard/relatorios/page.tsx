@@ -507,7 +507,7 @@ export default function RelatoriosPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4 lg:gap-6 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4 lg:gap-6 items-start">
         {/* Report Types Card */}
         <div style={cardStyle}>
           <div style={cardHeaderStyle}>
@@ -521,6 +521,7 @@ export default function RelatoriosPage() {
             </div>
           </div>
           <div style={cardContentStyle}>
+            {/* GRID ÚNICO COM TODOS OS 6 TIPOS DE RELATÓRIO */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
               {reportTypes.map((report) => {
                 const Icon = report.icon

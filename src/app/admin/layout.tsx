@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
 import { Copyright } from 'lucide-react'
+import { Toaster } from 'sonner'
 
 export default async function AdminLayout({
   children,
@@ -53,8 +54,10 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
-      {/* Cabeçalho com Logos */}
+    <>
+      <Toaster position="top-right" richColors />
+      <div className="flex min-h-screen flex-col bg-gray-50">
+        {/* Cabeçalho com Logos */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12 py-6 sm:py-8">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 mb-6 sm:mb-8">
@@ -126,6 +129,7 @@ export default async function AdminLayout({
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   )
 }
