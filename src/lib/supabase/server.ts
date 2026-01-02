@@ -1,12 +1,23 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { env } from '@/lib/env'
 
+/**
+ * Cria um cliente Supabase para uso no servidor (Server Components, API Routes)
+ * 
+ * IMPORTANTE:
+ * - Este cliente usa apenas chaves públicas (ANON_KEY)
+ * - Para operações administrativas, use Service Role Key em serviços dedicados
+ * - Row Level Security (RLS) protege os dados automaticamente
+ * 
+ * @returns Cliente Supabase configurado para o servidor
+ */
 export async function createClient() {
   const cookieStore = await cookies()
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    env.SUPABASE_URL,
+    env.SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {

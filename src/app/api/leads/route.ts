@@ -1,41 +1,129 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { env } from '@/lib/env';
+
+/**
+ * API Route: POST /api/leads
+ * 
+ * Registra leads de potenciais clientes no sistema
+ * 
+ * SEGURANÇA:
+ * - Validação robusta de inputs
+ * - Sanitização de dados
+ * - Limitação de tamanho de campos
+ * - Email com regex completo
+ * 
+ * NOTA SOBRE RATE LIMITING:
+ * Para produção, considere implementar rate limiting usando:
+ * - Middleware do Next.js com cache (Redis/Vercel KV)
+ * - Serviços externos como Upstash Rate Limit
+ * - Cloudflare Rate Limiting
+ */
+
+// Regex robusto para validação de email (RFC 5322 simplificado)
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
+/**
+ * Sanitiza uma string removendo caracteres potencialmente perigosos
+ */
+function sanitizeString(input: string, maxLength: number): string {
+  return input
+    .trim()
+    .substring(0, maxLength)
+    .replace(/[<>]/g, '') // Remove < e > para prevenir XSS básico
+}
+
+/**
+ * Sanitiza um telefone mantendo apenas números e caracteres permitidos
+ */
+function sanitizePhone(input: string): string {
+  return input
+    .trim()
+    .replace(/[^0-9+() -]/g, '') // Mantém apenas números e caracteres de formatação
+    .substring(0, 20)
+}
+
+/**
+ * Valida os dados do lead
+ */
+function validateLeadData(data: {
+  nome: string;
+  cargo: string;
+  email: string;
+  telefone: string;
+  mensagem: string;
+}): { valid: boolean; error?: string } {
+  // Validar campos obrigatórios
+  if (!data.nome || data.nome.trim().length === 0) {
+    return { valid: false, error: 'Nome é obrigatório' };
+  }
+  
+  if (!data.cargo || data.cargo.trim().length === 0) {
+    return { valid: false, error: 'Cargo é obrigatório' };
+  }
+  
+  if (!data.email || data.email.trim().length === 0) {
+    return { valid: false, error: 'E-mail é obrigatório' };
+  }
+  
+  if (!data.telefone || data.telefone.trim().length === 0) {
+    return { valid: false, error: 'Telefone é obrigatório' };
+  }
+  
+  if (!data.mensagem || data.mensagem.trim().length === 0) {
+    return { valid: false, error: 'Mensagem é obrigatória' };
+  }
+  
+  // Validar formato do email
+  if (!EMAIL_REGEX.test(data.email.trim())) {
+    return { valid: false, error: 'E-mail inválido' };
+  }
+  
+  // Validar tamanhos mínimos
+  if (data.nome.trim().length < 3) {
+    return { valid: false, error: 'Nome deve ter no mínimo 3 caracteres' };
+  }
+  
+  if (data.mensagem.trim().length < 10) {
+    return { valid: false, error: 'Mensagem deve ter no mínimo 10 caracteres' };
+  }
+  
+  return { valid: true };
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const { nome, cargo, email, telefone, mensagem } = await request.json();
+    const body = await request.json();
+    const { nome, cargo, email, telefone, mensagem } = body;
 
-    // Validar campos obrigatórios
-    if (!nome || !cargo || !email || !telefone || !mensagem) {
+    // Validar dados
+    const validation = validateLeadData({ nome, cargo, email, telefone, mensagem });
+    if (!validation.valid) {
       return NextResponse.json(
-        { error: 'Todos os campos são obrigatórios' },
+        { error: validation.error },
         { status: 400 }
       );
     }
 
-    // Validar e-mail
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'E-mail inválido' },
-        { status: 400 }
-      );
-    }
+    // Sanitizar dados de entrada
+    const sanitizedData = {
+      nome: sanitizeString(nome, 255),
+      cargo: sanitizeString(cargo, 100),
+      email: email.trim().toLowerCase().substring(0, 255),
+      telefone: sanitizePhone(telefone),
+      mensagem: sanitizeString(mensagem, 2000),
+      status: 'novo',
+    };
 
-    // Criar cliente Supabase
-    // Usar Service Role Key no lado do servidor para garantir permissões de escrita
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !supabaseServiceRoleKey) {
-      console.error('Variáveis de ambiente Supabase não configuradas corretamente no servidor');
-      return NextResponse.json(
-        { error: 'Erro de configuração do servidor' },
-        { status: 500 }
-      );
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+    /**
+     * Criar cliente Supabase com Service Role Key
+     * 
+     * ⚠️ SEGURANÇA:
+     * - Service Role Key usada APENAS no servidor para operações administrativas
+     * - Esta chave bypassa RLS e tem permissões totais
+     * - NUNCA exponha ao cliente/navegador
+     */
+    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
       auth: {
         autoRefreshToken: false,
         persistSession: false
@@ -45,22 +133,13 @@ export async function POST(request: NextRequest) {
     // Inserir lead no Supabase
     const { data, error } = await supabase
       .from('leads')
-      .insert([
-        {
-          nome: nome.trim(),
-          cargo: cargo.trim(),
-          email: email.trim().toLowerCase(),
-          telefone: telefone.trim(),
-          mensagem: mensagem.trim(),
-          status: 'novo',
-        },
-      ])
+      .insert([sanitizedData])
       .select();
 
     if (error) {
       console.error('Erro ao inserir lead no Supabase:', error);
       return NextResponse.json(
-        { error: `Erro no Supabase: ${error.message}`, details: error },
+        { error: 'Erro ao processar solicitação. Tente novamente.' },
         { status: 500 }
       );
     }

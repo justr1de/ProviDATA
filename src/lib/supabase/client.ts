@@ -1,28 +1,45 @@
 import { createBrowserClient } from '@supabase/ssr'
+import { env } from '@/lib/env'
 
-import { useAuthStore } from '@/store/auth-store'
-
+/**
+ * Cria um cliente Supabase para uso no navegador
+ * 
+ * IMPORTANTE:
+ * - Este cliente usa apenas chaves públicas (ANON_KEY)
+ * - Filtros por tenant devem ser aplicados nas queries, não no cliente
+ * - Row Level Security (RLS) do Supabase garante isolamento de dados
+ * 
+ * @returns Cliente Supabase configurado para o navegador
+ */
 export function createClient() {
-  const client = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  return createBrowserClient(
+    env.SUPABASE_URL,
+    env.SUPABASE_ANON_KEY
   )
-
-  // Wrapper para ignorar gabinete_id para super_admins
-  const { user } = typeof window !== 'undefined' ? require('@/store/auth-store').useAuthStore.getState() : { user: null }
-  const isSuperAdmin = user && (user.role === 'super_admin' || ['contato@dataro-it.com.br','ranieri.braga@hotmail.com'].includes(user.email))
-
-  // Monkey patch from() para queries
-  const originalFrom = client.from.bind(client)
-  client.from = (table) => {
-    const query = originalFrom(table)
-    // Se não for super_admin, filtra por gabinete_id normalmente
-    if (!isSuperAdmin) {
-      // O filtro por gabinete_id deve ser aplicado nas páginas normalmente
-      return query
-    }
-    // Para super_admin, retorna query sem filtro
-    return query
-  }
-  return client
 }
+
+/**
+ * NOTA SOBRE FILTROS DE TENANT:
+ * 
+ * A implementação anterior tentava fazer "monkey patching" do método from()
+ * para aplicar filtros automaticamente. Isso causava problemas de:
+ * 
+ * 1. Race conditions: usar require() dinâmico com window !== 'undefined'
+ * 2. Complexidade: dificultar manutenção e debugging
+ * 3. Super admin emails hardcoded no código do cliente
+ * 
+ * NOVA ABORDAGEM:
+ * - Aplicar filtros explicitamente nas queries quando necessário
+ * - Usar RLS (Row Level Security) do Supabase para garantir isolamento
+ * - Verificações de super admin devem ser feitas no servidor, não no cliente
+ * 
+ * Exemplo de uso correto:
+ * 
+ * ```typescript
+ * const supabase = createClient()
+ * const { data } = await supabase
+ *   .from('providencias')
+ *   .select('*')
+ *   .eq('gabinete_id', gabineteId) // Filtro explícito
+ * ```
+ */
