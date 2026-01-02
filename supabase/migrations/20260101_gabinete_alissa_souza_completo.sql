@@ -27,7 +27,7 @@ INSERT INTO public.gabinetes (
     telefone_adicional,
     email_parlamentar,
     email_gabinete,
-    assessor_1,
+    chefe_de_gabinete,
     assessor_2,
     -- Campos legados (por compatibilidade)
     telefone,
@@ -48,7 +48,7 @@ VALUES (
     '69 984834481',                              -- telefone_adicional
     'aliissasouzaa@gmail.com',                   -- email_parlamentar
     'alissa.souza@estudante.ifro.edu.br',       -- email_gabinete
-    'Amanda de Souza Lopes',                     -- assessor_1
+    'Amanda de Souza Lopes',                     -- chefe_de_gabinete
     'Isadora de Oliveira Salvaterra',            -- assessor_2
     -- Campos legados
     '69 984834481',                              -- telefone (compatibilidade)
@@ -74,7 +74,7 @@ ON CONFLICT (nome, municipio, uf) DO UPDATE SET
     telefone_adicional = EXCLUDED.telefone_adicional,
     email_parlamentar = EXCLUDED.email_parlamentar,
     email_gabinete = EXCLUDED.email_gabinete,
-    assessor_1 = EXCLUDED.assessor_1,
+    chefe_de_gabinete = EXCLUDED.chefe_de_gabinete,
     assessor_2 = EXCLUDED.assessor_2,
     telefone = EXCLUDED.telefone,
     email = EXCLUDED.email,
@@ -167,7 +167,7 @@ SELECT
     telefone_adicional,
     email_parlamentar,
     email_gabinete,
-    assessor_1,
+    chefe_de_gabinete,
     assessor_2,
     ativo,
     created_at

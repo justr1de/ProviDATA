@@ -17,7 +17,7 @@ ADD COLUMN IF NOT EXISTS email_gabinete TEXT;
 
 -- Adicionar campos de assessores (não obrigatórios)
 ALTER TABLE public.gabinetes
-ADD COLUMN IF NOT EXISTS assessor_1 TEXT,
+ADD COLUMN IF NOT EXISTS chefe_de_gabinete TEXT,
 ADD COLUMN IF NOT EXISTS assessor_2 TEXT;
 
 -- Migrar dados existentes
@@ -37,5 +37,5 @@ COMMENT ON COLUMN public.gabinetes.telefone_gabinete IS 'Telefone principal do g
 COMMENT ON COLUMN public.gabinetes.telefone_adicional IS 'Telefone adicional/alternativo do gabinete';
 COMMENT ON COLUMN public.gabinetes.email_parlamentar IS 'E-mail pessoal do parlamentar';
 COMMENT ON COLUMN public.gabinetes.email_gabinete IS 'E-mail institucional do gabinete';
-COMMENT ON COLUMN public.gabinetes.assessor_1 IS 'Nome do primeiro assessor (opcional)';
+COMMENT ON COLUMN public.gabinetes.chefe_de_gabinete IS 'Nome do Chefe de Gabinete (opcional)';
 COMMENT ON COLUMN public.gabinetes.assessor_2 IS 'Nome do segundo assessor (opcional)';

@@ -49,7 +49,7 @@ export default function GabinetesPage() {
     nome: '', municipio: '', uf: 'RO', parlamentar_nome: '',
     parlamentar_cargo: 'deputado_estadual' as const, partido: '',
     telefone_parlamentar: '', telefone_gabinete: '', telefone_adicional: '',
-    email_parlamentar: '', email_gabinete: '', assessor_1: '', assessor_2: ''
+    email_parlamentar: '', email_gabinete: '', chefe_de_gabinete: '', assessor_2: ''
   })
 
   // --- EFEITOS ---
@@ -116,7 +116,7 @@ export default function GabinetesPage() {
         telefone_adicional: formData.telefone_adicional || null,
         email_parlamentar: formData.email_parlamentar || null,
         email_gabinete: formData.email_gabinete || null,
-        assessor_1: formData.assessor_1 || null,
+        chefe_de_gabinete: formData.chefe_de_gabinete || null,
         assessor_2: formData.assessor_2 || null,
         ativo: true
       }
@@ -131,7 +131,7 @@ export default function GabinetesPage() {
         nome: '', municipio: '', uf: 'RO', parlamentar_nome: '',
         parlamentar_cargo: 'deputado_estadual', partido: '',
         telefone_parlamentar: '', telefone_gabinete: '', telefone_adicional: '',
-        email_parlamentar: '', email_gabinete: '', assessor_1: '', assessor_2: ''
+        email_parlamentar: '', email_gabinete: '', chefe_de_gabinete: '', assessor_2: ''
       })
       carregarGabinetes()
     } catch (error) {
@@ -519,7 +519,7 @@ export default function GabinetesPage() {
                <div className="space-y-4 pt-4">
                 <h4 className="text-sm font-semibold text-gray-900 dark:text-white border-b pb-2">Assessores (Opcional)</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div><label className={labelClassName}>Assessor 1</label><input type="text" value={formData.assessor_1} onChange={(e) => setFormData({ ...formData, assessor_1: e.target.value })} className={inputClassName} /></div>
+                  <div><label className={labelClassName}>Chefe de Gabinete</label><input type="text" value={formData.chefe_de_gabinete} onChange={(e) => setFormData({ ...formData, chefe_de_gabinete: e.target.value })} className={inputClassName} /></div>
                   <div><label className={labelClassName}>Assessor 2</label><input type="text" value={formData.assessor_2} onChange={(e) => setFormData({ ...formData, assessor_2: e.target.value })} className={inputClassName} /></div>
                 </div>
               </div>

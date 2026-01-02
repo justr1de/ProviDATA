@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 // OTIMIZAÇÃO: Cache simples para reduzir chamadas desnecessárias
 // Em produção, considere usar Redis ou outro cache distribuído
-const userCache = new Map<string, { user: any; timestamp: number }>()
+import type { User } from '@/types/database';
+const userCache = new Map<string, { user: User; timestamp: number }>()
 const CACHE_TTL = 60000 // 1 minuto
 
 export async function updateSession(request: NextRequest) {
@@ -18,7 +19,7 @@ export async function updateSession(request: NextRequest) {
       cookies: {
         getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
         },

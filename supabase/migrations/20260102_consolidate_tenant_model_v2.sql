@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS public.tenants (
     email_gabinete TEXT,
     
     -- Assessores
-    assessor_1 TEXT,
+    chefe_de_gabinete TEXT,
     assessor_2 TEXT,
     
     -- Configurações
@@ -85,7 +85,7 @@ BEGIN
             uf, municipio, endereco,
             telefone, telefone_parlamentar, telefone_gabinete, telefone_adicional,
             email, email_parlamentar, email_gabinete,
-            assessor_1, assessor_2,
+            chefe_de_gabinete, assessor_2,
             logo_url, settings, ativo,
             created_at, updated_at,
             metadata
@@ -108,7 +108,7 @@ BEGIN
             g.email,
             g.email_parlamentar,
             g.email_gabinete,
-            g.assessor_1,
+            g.chefe_de_gabinete,
             g.assessor_2,
             g.logo_url,
             g.settings,
@@ -509,7 +509,7 @@ SELECT
     email,
     email_parlamentar,
     email_gabinete,
-    assessor_1,
+    chefe_de_gabinete,
     assessor_2,
     endereco,
     logo_url,

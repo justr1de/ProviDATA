@@ -30,7 +30,7 @@ export interface Tenant {
   email_gabinete?: string
   
   // Assessores
-  assessor_1?: string
+  chefe_de_gabinete?: string
   assessor_2?: string
   
   // Configurações
@@ -65,7 +65,7 @@ export interface Gabinete {
   telefone_adicional?: string
   email_parlamentar?: string
   email_gabinete?: string
-  assessor_1?: string
+  chefe_de_gabinete?: string
   assessor_2?: string
   endereco?: string
   logo_url?: string
@@ -323,7 +323,7 @@ export interface GabineteFormData {
   telefone_adicional?: string
   email_parlamentar?: string
   email_gabinete?: string
-  assessor_1?: string
+  chefe_de_gabinete?: string
   assessor_2?: string
   endereco?: string
   logo_url?: string

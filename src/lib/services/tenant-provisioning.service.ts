@@ -41,7 +41,7 @@ export interface CreateTenantRequest {
   email_gabinete?: string;
   
   // Assessores
-  assessor_1?: string;
+  chefe_de_gabinete?: string;
   assessor_2?: string;
   
   // Configurações
@@ -192,7 +192,7 @@ export class TenantProvisioningService {
           email: request.email || null,
           email_parlamentar: request.email_parlamentar || null,
           email_gabinete: request.email_gabinete || null,
-          assessor_1: request.assessor_1 || null,
+          chefe_de_gabinete: request.chefe_de_gabinete || null,
           assessor_2: request.assessor_2 || null,
           logo_url: request.logo_url || null,
           plano: request.plano || 'basico',
@@ -374,7 +374,7 @@ export class TenantProvisioningService {
           email: updates.email,
           email_parlamentar: updates.email_parlamentar,
           email_gabinete: updates.email_gabinete,
-          assessor_1: updates.assessor_1,
+          chefe_de_gabinete: updates.chefe_de_gabinete,
           assessor_2: updates.assessor_2,
           logo_url: updates.logo_url,
           plano: updates.plano,

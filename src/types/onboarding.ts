@@ -36,7 +36,7 @@ export interface Tenant {
   email_gabinete?: string;
   
   // Assessores
-  assessor_1?: string;
+  chefe_de_gabinete?: string;
   assessor_2?: string;
   
   // Configurações
