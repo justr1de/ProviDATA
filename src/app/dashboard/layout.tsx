@@ -36,11 +36,11 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Providências', href: '/dashboard/providencias', icon: FileText },
   { name: 'Cidadãos', href: '/dashboard/cidadaos', icon: Users },
-  { name: 'Órgãos', href: '/dashboard/orgaos', icon: Building2 },
-  { name: 'Categorias', href: '/dashboard/categorias', icon: FolderOpen },
-  { name: 'Relatórios', href: '/dashboard/relatorios', icon: FileBarChart },
   { name: 'Documentos', href: '/dashboard/documentos', icon: Files },
+  { name: 'Relatórios', href: '/dashboard/relatorios', icon: FileBarChart },
   { name: 'Mapa de Calor', href: '/dashboard/mapa-calor', icon: MapPin },
+  { name: 'Categorias', href: '/dashboard/categorias', icon: FolderOpen },
+  { name: 'Órgãos', href: '/dashboard/orgaos', icon: Building2 },
 ]
 
 const adminNavigation = [
@@ -48,6 +48,37 @@ const adminNavigation = [
   { name: 'Administração', href: '/dashboard/administracao', icon: Shield },
   { name: 'Configurações', href: '/dashboard/configuracoes', icon: Settings },
 ]
+
+// Helper function to get user display role/position
+function getUserDisplayRole(user: any, gabinete: any): string {
+  // Super Admin
+  if (user?.role === 'super_admin' || user?.email === 'contato@dataro-it.com.br') {
+    return 'Administrador'
+  }
+  
+  // Parliamentary positions from gabinete
+  if (gabinete?.parlamentar_cargo) {
+    const cargoMap: Record<string, string> = {
+      'deputado_estadual': 'Deputado',
+      'deputado_federal': 'Deputado',
+      'vereador': 'Vereador',
+      'senador': 'Senador',
+      'prefeito': 'Prefeito',
+      'governador': 'Governador'
+    }
+    return cargoMap[gabinete.parlamentar_cargo] || 'Parlamentar'
+  }
+  
+  // Fallback to system role
+  const roleMap: Record<string, string> = {
+    'admin': 'Administrador',
+    'gestor': 'Gestor',
+    'assessor': 'Assessor',
+    'operador': 'Operador',
+    'visualizador': 'Visualizador'
+  }
+  return roleMap[user?.role] || 'Usuário'
+}
 
 export default function DashboardLayout({
   children,
@@ -514,9 +545,14 @@ export default function DashboardLayout({
                     <User style={{ width: '18px', height: '18px', color: 'white' }} />
                   </div>
                   {isDesktop && (
-                    <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--foreground)' }}>
-                      {user?.nome?.split(' ')[0] || 'Usuário'}
-                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--foreground)', lineHeight: '1.2' }}>
+                        {user?.nome?.split(' ')[0] || 'Usuário'}
+                      </span>
+                      <span style={{ fontSize: '11px', fontWeight: '500', color: 'var(--foreground-muted)', lineHeight: '1.2' }}>
+                        {getUserDisplayRole(user, gabinete)}
+                      </span>
+                    </div>
                   )}
                   <ChevronDown style={{ width: '18px', height: '18px', color: 'var(--foreground-muted)' }} />
                 </button>
@@ -542,6 +578,9 @@ export default function DashboardLayout({
                       <div style={{ padding: '16px', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--muted)' }}>
                         <p style={{ fontSize: '15px', fontWeight: '600', color: 'var(--foreground)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: 0 }}>
                           {user?.nome || 'Usuário'}
+                        </p>
+                        <p style={{ fontSize: '12px', color: customPrimaryColor, fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: '4px 0 0 0' }}>
+                          {getUserDisplayRole(user, gabinete)}
                         </p>
                         <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', margin: '2px 0 0 0' }}>
                           {user?.email}
