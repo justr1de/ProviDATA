@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# supabase - local configuration files with credentials
+# Keep .template files, but ignore real config files
+supabase/migrations/.local/*.sql
+!supabase/migrations/.local/*.template
+supabase/.env.local
+supabase/config.local.json

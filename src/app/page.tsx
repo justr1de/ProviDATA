@@ -180,12 +180,14 @@ export default function HomePage() {
         height: '100vh',
         pointerEvents: 'none',
         zIndex: 0,
+        backgroundColor: isDark ? '#0f172a' : '#ffffff',
         backgroundImage: 'url(/brazil-map.png)',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
         backgroundSize: 'contain',
-        opacity: isDark ? 0.08 : 0.12,
-        filter: isDark ? 'invert(0.8) sepia(0.3) hue-rotate(90deg)' : 'sepia(0.2) hue-rotate(80deg)'
+        opacity: isDark ? 0.15 : 0.12,
+        filter: isDark ? 'brightness(1.5) grayscale(0.3)' : 'sepia(0.2) hue-rotate(80deg)',
+        mixBlendMode: isDark ? 'lighten' : 'normal'
       }} />
       
       {/* HEADER RESPONSIVO */}
@@ -298,11 +300,12 @@ export default function HomePage() {
             {/* Nav Desktop - Escondido em mobile */}
             <nav className="nav-desktop" style={{ display: 'none', alignItems: 'center', gap: '12px' }}>
               {navItems.map((item) => (
-                <a 
+                <a
                   key={item.name}
-                  href={item.href} 
-                  style={{ 
-                    fontSize: '13px', 
+                  href={item.href}
+                  className="nav-item"
+                  style={{
+                    fontSize: '13px',
                     fontWeight: 600,
                     color: isDark ? '#e2e8f0' : '#374151',
                     textDecoration: 'none',
@@ -310,10 +313,9 @@ export default function HomePage() {
                     borderRadius: '8px',
                     backgroundColor: isDark ? '#1e293b' : '#f3f4f6',
                     border: `1px solid ${isDark ? '#4b5563' : '#cbd5e1'}`,
-                    boxShadow: isDark 
-                      ? '0 2px 4px rgba(0,0,0,0.3)' 
+                    boxShadow: isDark
+                      ? '0 2px 4px rgba(0,0,0,0.3)'
                       : '0 2px 4px rgba(0,0,0,0.05)',
-                    transition: 'all 0.2s ease',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px'
@@ -328,9 +330,10 @@ export default function HomePage() {
             {/* Actions - Sempre visíveis */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               {/* Botão Entrar - SEMPRE VISÍVEL */}
-              <Link 
-                href="/login" 
-                style={{ 
+              <Link
+                href="/login"
+                className="login-button"
+                style={{
                   padding: '10px 16px',
                   borderRadius: '8px',
                   backgroundColor: '#16a34a',
@@ -481,6 +484,96 @@ export default function HomePage() {
             font-size: 28px !important;
           }
         }
+
+        /* Efeitos de Hover */
+        
+        /* Cards de Recursos */
+        .feature-card {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .feature-card:hover {
+          transform: translateY(-4px) scale(1.02);
+          box-shadow: 0 20px 40px rgba(22, 163, 74, 0.25) !important;
+        }
+
+        /* Card Plano Básico */
+        .plan-card-basic {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .plan-card-basic:hover {
+          transform: translateY(-6px) scale(1.03);
+          background-color: #16a34a !important;
+          color: white !important;
+          box-shadow: 0 25px 50px rgba(22, 163, 74, 0.4) !important;
+        }
+        .plan-card-basic:hover * {
+          color: white !important;
+        }
+        .plan-card-basic:hover .check-icon {
+          color: white !important;
+        }
+        .plan-card-basic:hover button {
+          background-color: white !important;
+          color: #16a34a !important;
+        }
+
+        /* Card Plano Ilimitado */
+        .plan-card-premium {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .plan-card-premium:hover {
+          transform: translateY(-6px) scale(1.03);
+          background-color: #16a34a !important;
+          color: white !important;
+          box-shadow: 0 30px 60px rgba(22, 163, 74, 0.6) !important;
+          filter: brightness(1.1);
+        }
+        .plan-card-premium:hover * {
+          color: white !important;
+        }
+        .plan-card-premium:hover button {
+          background-color: white !important;
+          color: #16a34a !important;
+        }
+
+        /* Botões CTA */
+        .cta-button {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .cta-button:hover {
+          transform: scale(1.05);
+          box-shadow: 0 8px 24px rgba(22, 163, 74, 0.6) !important;
+          filter: brightness(1.1);
+        }
+
+        /* Botão WhatsApp */
+        .whatsapp-button {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .whatsapp-button:hover {
+          transform: scale(1.05);
+          box-shadow: 0 8px 24px rgba(37, 211, 102, 0.6) !important;
+          filter: brightness(1.1);
+        }
+
+        /* Botão Entrar */
+        .login-button {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .login-button:hover {
+          transform: scale(1.05);
+          box-shadow: 0 4px 16px rgba(22, 163, 74, 0.5) !important;
+          filter: brightness(1.15);
+        }
+
+        /* Botão nav items */
+        .nav-item {
+          transition: all 0.2s ease;
+        }
+        .nav-item:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3) !important;
+        }
       `}</style>
 
       {/* HERO */}
@@ -538,7 +631,8 @@ export default function HomePage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
             <button
               onClick={() => setShowContactForm(true)}
-              style={{ 
+              className="cta-button"
+              style={{
                 padding: '16px 32px',
                 borderRadius: '12px',
                 backgroundColor: '#16a34a',
@@ -564,7 +658,8 @@ export default function HomePage() {
               href={whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ 
+              className="whatsapp-button"
+              style={{
                 padding: '16px 32px',
                 borderRadius: '12px',
                 backgroundColor: '#25D366',
@@ -605,9 +700,10 @@ export default function HomePage() {
             gap: '24px'
           }}>
             {features.map((feature, index) => (
-              <div 
+              <div
                 key={index}
-                style={{ 
+                className="feature-card"
+                style={{
                   padding: '32px',
                   borderRadius: '20px',
                   backgroundColor: isDark ? '#1e293b' : '#ffffff',
@@ -656,7 +752,7 @@ export default function HomePage() {
             gap: '24px' 
           }}>
             {/* Plano Básico */}
-            <div style={{ 
+            <div className="plan-card-basic" style={{
               padding: '32px',
               borderRadius: '20px',
               backgroundColor: isDark ? '#1e293b' : '#ffffff',
@@ -671,7 +767,7 @@ export default function HomePage() {
               <ul style={{ listStyle: 'none', padding: 0, marginBottom: '24px' }}>
                 {planoBasico.map((item, index) => (
                   <li key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', fontSize: '15px' }}>
-                    <Check style={{ width: '18px', height: '18px', color: '#16a34a' }} />
+                    <Check className="check-icon" style={{ width: '18px', height: '18px', color: '#16a34a' }} />
                     {item}
                   </li>
                 ))}
@@ -695,30 +791,30 @@ export default function HomePage() {
             </div>
 
             {/* Plano Ilimitado */}
-            <div style={{ 
+            <div className="plan-card-premium" style={{
               padding: '32px',
               borderRadius: '20px',
-              backgroundColor: '#16a34a',
-              color: 'white',
-              boxShadow: '0 8px 30px rgba(22, 163, 74, 0.4)',
+              backgroundColor: isDark ? '#1e293b' : '#ffffff',
+              border: `2px solid #16a34a`,
+              boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(22, 163, 74, 0.15)',
               position: 'relative',
               overflow: 'hidden'
             }}>
-              <div style={{ 
-                position: 'absolute', 
-                top: '16px', 
-                right: '16px', 
-                backgroundColor: '#fbbf24', 
-                color: '#1e293b', 
-                padding: '4px 12px', 
-                borderRadius: '9999px', 
-                fontSize: '12px', 
-                fontWeight: 700 
+              <div style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                backgroundColor: '#fbbf24',
+                color: '#1e293b',
+                padding: '4px 12px',
+                borderRadius: '9999px',
+                fontSize: '12px',
+                fontWeight: 700
               }}>
                 POPULAR
               </div>
               <h3 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Ilimitado</h3>
-              <p style={{ fontSize: '14px', opacity: 0.9, marginBottom: '24px' }}>Para gabinetes de qualquer porte</p>
+              <p style={{ fontSize: '14px', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '24px' }}>Para gabinetes de qualquer porte</p>
               <div style={{ marginBottom: '24px' }}>
                 <span style={{ fontSize: '24px', fontWeight: 700 }}>Consulte</span>
               </div>
@@ -732,12 +828,12 @@ export default function HomePage() {
               </ul>
               <button
                 onClick={() => setShowContactForm(true)}
-                style={{ 
+                style={{
                   width: '100%',
                   padding: '14px',
                   borderRadius: '10px',
-                  backgroundColor: 'white',
-                  color: '#16a34a',
+                  backgroundColor: '#16a34a',
+                  color: 'white',
                   fontWeight: 700,
                   fontSize: '15px',
                   border: 'none',
@@ -781,7 +877,8 @@ export default function HomePage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
             <button
               onClick={() => setShowContactForm(true)}
-              style={{ 
+              className="cta-button"
+              style={{
                 padding: '16px 32px',
                 borderRadius: '12px',
                 backgroundColor: '#16a34a',
@@ -807,7 +904,8 @@ export default function HomePage() {
               href={whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ 
+              className="whatsapp-button"
+              style={{
                 padding: '16px 32px',
                 borderRadius: '12px',
                 backgroundColor: '#25D366',

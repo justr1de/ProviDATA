@@ -1,0 +1,121 @@
+-- ============================================================================
+-- FOREIGN DATA WRAPPER SETUP - S3 Vectors (Supabase Storage)
+-- ============================================================================
+--
+-- Este arquivo é um TEMPLATE para configuração do Foreign Data Wrapper.
+-- NÃO deve ser commitado com credenciais reais.
+--
+-- ⚠️ IMPORTANTE: 
+-- - Copie este arquivo para: setup_fdw_server.sql
+-- - Substitua os placeholders <...> pelas credenciais reais
+-- - Adicione setup_fdw_server.sql ao .gitignore
+--
+-- 🔒 SEGURANÇA:
+-- - Use credenciais do Supabase Vault
+-- - Credenciais diferentes para cada ambiente (dev/staging/prod)
+-- - Rotacione credenciais periodicamente
+--
+-- 📋 Consulte: docs/FDW_SETUP.md para instruções completas
+-- ============================================================================
+
+-- Pré-requisito: Extension wrappers (já instalada via migration principal)
+-- CREATE EXTENSION IF NOT EXISTS "wrappers" WITH SCHEMA "extensions";
+
+-- 1. Criar Foreign Data Wrapper
+CREATE FOREIGN DATA WRAPPER IF NOT EXISTS "dataro_it_fdw" 
+  HANDLER "extensions"."s3_vectors_fdw_handler" 
+  VALIDATOR "extensions"."s3_vectors_fdw_validator";
+
+-- 2. Criar Server com credenciais específicas do ambiente
+CREATE SERVER IF NOT EXISTS "dataro_it_fdw_server" 
+  FOREIGN DATA WRAPPER "dataro_it_fdw" 
+  OPTIONS (
+    "aws_region" 'us-west-2',
+    "endpoint_url" 'https://wntiupkhjtgiaxiicxeq.storage.supabase.co/storage/v1/vector',
+    "vault_access_key_id" '<SEU_VAULT_ACCESS_KEY_ID>',      -- ⚠️ SUBSTITUIR
+    "vault_secret_access_key" '<SEU_VAULT_SECRET_ACCESS_KEY>' -- ⚠️ SUBSTITUIR
+  );
+
+-- 3. Definir owner como postgres
+ALTER SERVER "dataro_it_fdw_server" OWNER TO "postgres";
+
+-- ============================================================================
+-- VALIDAÇÃO
+-- ============================================================================
+
+-- Verificar se FDW foi criado
+SELECT 
+  fdwname as "Foreign Data Wrapper",
+  fdwhandler::regproc as "Handler",
+  fdwvalidator::regproc as "Validator"
+FROM pg_foreign_data_wrapper 
+WHERE fdwname = 'dataro_it_fdw';
+
+-- Verificar se Server foi criado
+SELECT 
+  srvname as "Server Name",
+  srvoptions as "Options"
+FROM pg_foreign_server 
+WHERE srvname = 'dataro_it_fdw_server';
+
+-- ============================================================================
+-- INSTRUÇÕES DE USO
+-- ============================================================================
+--
+-- PASSO 1: Obter credenciais
+-- -------------------------
+-- Dashboard: Supabase Dashboard > Settings > Vault
+-- CLI:       supabase secrets list
+--
+-- PASSO 2: Copiar e configurar
+-- -------------------------
+-- $ cp supabase/migrations/.local/setup_fdw_server.sql.template \
+--      supabase/migrations/.local/setup_fdw_server.sql
+--
+-- PASSO 3: Editar e substituir placeholders
+-- -------------------------
+-- Substitua <SEU_VAULT_ACCESS_KEY_ID> e <SEU_VAULT_SECRET_ACCESS_KEY>
+-- pelas credenciais obtidas no Passo 1
+--
+-- PASSO 4: Aplicar no banco de dados
+-- -------------------------
+-- Opção A - Supabase Dashboard:
+--   1. Acesse SQL Editor
+--   2. Cole o conteúdo do arquivo editado
+--   3. Execute
+--
+-- Opção B - Supabase CLI (local):
+--   $ supabase db execute --file supabase/migrations/.local/setup_fdw_server.sql
+--
+-- PASSO 5: Validar
+-- -------------------------
+-- Execute as queries de validação acima para confirmar que o FDW
+-- foi criado corretamente
+--
+-- ============================================================================
+-- ROLLBACK (Se necessário)
+-- ============================================================================
+--
+-- DROP SERVER IF EXISTS dataro_it_fdw_server CASCADE;
+-- DROP FOREIGN DATA WRAPPER IF EXISTS dataro_it_fdw CASCADE;
+--
+-- ============================================================================
+-- SEGURANÇA
+-- ============================================================================
+--
+-- ✅ FAZER:
+-- - Usar credenciais do Vault específicas do ambiente
+-- - Rotacionar credenciais periodicamente
+-- - Adicionar setup_fdw_server.sql ao .gitignore
+-- - Documentar credenciais em gerenciador de senhas
+--
+-- ❌ NÃO FAZER:
+-- - Commitar credenciais no Git
+-- - Compartilhar credenciais em Slack/Email/Docs
+-- - Usar mesmas credenciais em todos os ambientes
+-- - Copiar credenciais em logs ou documentação pública
+--
+-- ============================================================================
+
+-- Última atualização: 2026-01-02T19:17:00Z
+-- Responsável: DevOps/Backend Team

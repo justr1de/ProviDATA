@@ -7,6 +7,9 @@ import { createClient } from '@/lib/supabase/client'
 import { ArrowRight, Eye, EyeOff, Shield, BarChart, Map, FileText, Users, Building, MapPin, Sparkles, Lock, RefreshCw, Clock, Zap, Headphones, GraduationCap, BookOpen } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
 
+// Email do super admin geral do sistema
+const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br'
+
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -24,15 +27,33 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
         toast.error('Erro ao fazer login', {
           description: error.message === 'Invalid login credentials' ? 'E-mail ou senha incorretos' : error.message,
         })
         return
       }
+
+      // Buscar o perfil do usuário para verificar o role
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role, tenant_id')
+        .eq('id', data.user?.id)
+        .single()
+
       toast.success('Login realizado com sucesso!')
-      router.push('/admin/gabinetes')
+
+      // Verificar se é super admin
+      const isSuperAdmin = data.user?.email === SUPER_ADMIN_EMAIL || profile?.role === 'super_admin'
+
+      // Redirecionar baseado no role
+      if (isSuperAdmin) {
+        router.push('/admin/gabinetes')
+      } else {
+        router.push('/dashboard')
+      }
+      
       router.refresh()
     } catch {
       toast.error('Erro inesperado ao fazer login')

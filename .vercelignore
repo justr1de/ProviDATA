@@ -1,0 +1,35 @@
+# Arquivos para ignorar no deploy da Vercel
+node_modules
+.env.local
+.next
+.git
+.vscode
+.roo
+
+# Backups e arquivos temporários
+supabase/backups_old
+*.log
+*.bak
+*.tmp
+
+# Arquivos de desenvolvimento
+.DS_Store
+*.swp
+*.swo
+
+# Documentação de desenvolvimento local
+supabase/migrations/.local/*.sql
+!supabase/migrations/.local/*.template
+supabase/.env.local
+supabase/config.local.json
+
+# Testes
+coverage
+*.test.ts
+*.spec.ts
+__tests__
+
+# Arquivos desnecessários em produção
+README.md
+SECURITY.md
+docs/*.md

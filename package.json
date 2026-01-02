@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy:preview": "vercel",
+    "deploy:prod": "vercel --prod",
+    "deploy": "./scripts/deploy-vercel.sh",
+    "vercel:env": "vercel env pull .env.local",
+    "prebuild": "echo '⚡ Iniciando build...'",
+    "postbuild": "echo '✅ Build concluído!'"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -20,6 +26,7 @@
     "leaflet.heat": "^0.2.0",
     "lucide-react": "^0.562.0",
     "next": "16.1.1",
+    "openai": "^6.15.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.69.0",
