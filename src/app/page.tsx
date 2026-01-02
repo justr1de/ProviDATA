@@ -531,6 +531,9 @@ export default function HomePage() {
         .plan-card-premium:hover * {
           color: white !important;
         }
+        .plan-card-premium:hover .check-icon {
+          color: white !important;
+        }
         .plan-card-premium:hover button {
           background-color: white !important;
           color: #16a34a !important;
@@ -795,8 +798,8 @@ export default function HomePage() {
               padding: '32px',
               borderRadius: '20px',
               backgroundColor: isDark ? '#1e293b' : '#ffffff',
-              border: `2px solid #16a34a`,
-              boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(22, 163, 74, 0.15)',
+              border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+              boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.05)',
               position: 'relative',
               overflow: 'hidden'
             }}>
@@ -821,7 +824,7 @@ export default function HomePage() {
               <ul style={{ listStyle: 'none', padding: 0, marginBottom: '24px' }}>
                 {planoIlimitado.map((item, index) => (
                   <li key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', fontSize: '15px' }}>
-                    <Check style={{ width: '18px', height: '18px' }} />
+                    <Check className="check-icon" style={{ width: '18px', height: '18px', color: '#16a34a' }} />
                     {item}
                   </li>
                 ))}
@@ -832,9 +835,9 @@ export default function HomePage() {
                   width: '100%',
                   padding: '14px',
                   borderRadius: '10px',
-                  backgroundColor: '#16a34a',
-                  color: 'white',
-                  fontWeight: 700,
+                  backgroundColor: isDark ? '#334155' : '#f1f5f9',
+                  color: isDark ? '#f1f5f9' : '#1e293b',
+                  fontWeight: 600,
                   fontSize: '15px',
                   border: 'none',
                   cursor: 'pointer'
