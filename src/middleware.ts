@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { validateEnv } from '@/lib/env-validation'
 
 export async function middleware(request: NextRequest) {
   // 1. Prepara a resposta base (permite a requisição continuar por padrão)
@@ -9,10 +10,13 @@ export async function middleware(request: NextRequest) {
     },
   })
 
-  // 2. Configura o cliente Supabase para manipular cookies
+  // 2. Valida variáveis de ambiente
+  const env = validateEnv()
+
+  // 3. Configura o cliente Supabase para manipular cookies
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -33,11 +37,11 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // 3. Verifica a sessão do usuário
+  // 4. Verifica a sessão do usuário
   // IMPORTANTE: Isso renova o token se ele estiver expirando
   const { data: { user } } = await supabase.auth.getUser()
 
-  // 4. Regras de Proteção de Rotas
+  // 5. Regras de Proteção de Rotas
   const path = request.nextUrl.pathname
 
   // Regra A: Protege a área /admin

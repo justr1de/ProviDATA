@@ -39,7 +39,7 @@ export default function ConfiguracoesPage() {
   useEffect(() => {
     if (tenant) {
       setTenantData({
-        name: tenant.name || '',
+        name: gabinete.name || '',
         parlamentar_name: tenant.parlamentar_name || '',
         parlamentar_nickname: tenant.parlamentar_nickname || '',
         cargo: tenant.cargo || '',
@@ -67,7 +67,7 @@ export default function ConfiguracoesPage() {
           email_contato: tenantData.email_contato || null,
           telefone_contato: tenantData.telefone_contato || null,
         })
-        .eq('id', tenant.id)
+        .eq('id', gabinete.id)
         .select()
         .single()
 
@@ -100,7 +100,7 @@ export default function ConfiguracoesPage() {
     setIsUploading(true)
     try {
       const fileExt = file.name.split('.').pop()
-      const fileName = `${tenant.id}/logo.${fileExt}`
+      const fileName = `${gabinete.id}/logo.${fileExt}`
 
       const { error: uploadError } = await supabase.storage
         .from('tenant-assets')

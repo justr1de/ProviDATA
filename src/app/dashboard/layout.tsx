@@ -64,7 +64,7 @@ export default function DashboardLayout({
   const pathname = usePathname()
   const supabase = createClient()
   
-  const { user, tenant, setUser, setTenant, reset } = useAuthStore()
+  const { user, gabinete, setUser, setGabinete, reset } = useAuthStore()
 
   useEffect(() => {
     const checkWidth = () => {
@@ -95,14 +95,14 @@ export default function DashboardLayout({
 
       const { data: userData } = await supabase
         .from('users')
-        .select('*, tenant:tenants(*)')
+        .select('*, gabinete:gabinete?s(*)')
         .eq('id', authUser.id)
         .single()
 
       if (userData) {
         setUser(userData)
-        if (userData.tenant) {
-          setTenant(userData.tenant)
+        if (userData.gabinete) {
+          setGabinete(userData.gabinete)
         }
       }
     }
@@ -234,10 +234,10 @@ export default function DashboardLayout({
         </div>
 
         {/* Tenant Info */}
-        <div className="sidebar-tenant" style={{ 
+        <div className="sidebar-gabinete?" style={{ 
           padding: '16px 20px'
         }}>
-          <p className="sidebar-tenant-name" style={{ 
+          <p className="sidebar-gabinete?-name" style={{ 
             fontSize: '11px', 
             fontWeight: '600', 
             overflow: 'visible', 
@@ -247,7 +247,7 @@ export default function DashboardLayout({
             marginBottom: '4px',
             margin: 0
           }}>
-            {tenant ? `Gabinete do ${(tenant.cargo?.replace('_', ' ') || 'deputado estadual').charAt(0).toUpperCase() + (tenant.cargo?.replace('_', ' ') || 'deputado estadual').slice(1)} ${tenant.parlamentar_name}` : 'Carregando...'}
+            {gabinete ? `Gabinete do ${(gabinete.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual').charAt(0).toUpperCase() + (gabinete.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual').slice(1)} ${gabinete.parlamentar_name}` : 'Carregando...'}
           </p>
           <p className="sidebar-tenant-cargo" style={{ 
             fontSize: '13px', 
@@ -257,7 +257,7 @@ export default function DashboardLayout({
             margin: '4px 0 0 0'
           }}>
             {(() => {
-              const cargo = tenant?.cargo?.replace('_', ' ') || 'deputado estadual';
+              const cargo = gabinete?.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual';
               return cargo.charAt(0).toUpperCase() + cargo.slice(1);
             })()}
           </p>

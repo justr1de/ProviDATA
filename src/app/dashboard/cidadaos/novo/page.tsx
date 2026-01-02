@@ -238,7 +238,7 @@ function NovoCidadaoForm() {
       const { error } = await supabase
         .from('cidadaos')
         .insert({
-          tenant_id: tenant.id,
+          tenant_id: gabinete.id,
           nome: formData.nome,
           cpf: formData.cpf || null,
           rg: formData.rg || null,

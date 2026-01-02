@@ -45,7 +45,7 @@ export default function OrgaosPage() {
       let query = supabase
         .from('orgaos')
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', gabinete.id)
         .order('nome')
 
       if (search) {

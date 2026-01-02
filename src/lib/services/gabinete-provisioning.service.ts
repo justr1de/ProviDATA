@@ -1,21 +1,22 @@
-// Serviço de Provisionamento de Tenants
-// Responsável por criar tenants e seus usuários admin iniciais
+// Serviço de Provisionamento de Gabinetes
+// Responsável por criar gabinetes e seus usuários admin iniciais
 import { createClient } from '@supabase/supabase-js';
-import type { Tenant } from '@/types/onboarding';
+import type { Gabinete } from '@/types/onboarding';
+import { validateEnv, validateServerEnv } from '@/lib/env-validation';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const env = validateEnv();
+const serverEnv = validateServerEnv();
 
 // Cliente com service role para operações administrativas
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+const supabaseAdmin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, serverEnv.SUPABASE_SERVICE_ROLE_KEY, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
   },
 });
 
-export interface CreateTenantRequest {
-  // Dados básicos do tenant
+export interface CreateGabineteRequest {
+  // Dados básicos do gabinete
   name: string;
   slug?: string;
   type: 'gabinete' | 'organization' | 'municipal' | 'estadual' | 'federal';
@@ -56,10 +57,10 @@ export interface CreateTenantRequest {
   metadata?: Record<string, unknown>;
 }
 
-export interface CreateTenantResponse {
+export interface CreateGabineteResponse {
   success: boolean;
   error?: string;
-  tenant?: Tenant;
+  gabinete?: Gabinete;
   admin_user?: {
     id: string;
     email: string;
@@ -67,28 +68,45 @@ export interface CreateTenantResponse {
   };
 }
 
-export class TenantProvisioningService {
+export class GabineteProvisioningService {
   /**
-   * Gera uma senha temporária segura
+   * Gera uma senha temporária segura usando aleatoriedade criptográfica
    */
   private static generateTemporaryPassword(): string {
-    const length = 12;
+    const length = 16;
     const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*';
-    let password = '';
     
-    // Garantir pelo menos 1 maiúscula, 1 minúscula, 1 número e 1 especial
-    password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
-    password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
-    password += '0123456789'[Math.floor(Math.random() * 10)];
-    password += '!@#$%&*'[Math.floor(Math.random() * 7)];
-    
-    // Completar o resto
-    for (let i = password.length; i < length; i++) {
-      password += charset[Math.floor(Math.random() * charset.length)];
+    // Usar crypto.getRandomValues para aleatoriedade criptográfica
+    const randomValues = new Uint8Array(length * 2);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      crypto.getRandomValues(randomValues);
+    } else {
+      // Fallback para Node.js
+      const nodeCrypto = require('crypto');
+      nodeCrypto.randomFillSync(randomValues);
     }
     
-    // Embaralhar
-    return password.split('').sort(() => Math.random() - 0.5).join('');
+    let password = '';
+    
+    // Garantir pelo menos 1 de cada tipo
+    password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[randomValues[0] % 26];
+    password += 'abcdefghijklmnopqrstuvwxyz'[randomValues[1] % 26];
+    password += '0123456789'[randomValues[2] % 10];
+    password += '!@#$%&*'[randomValues[3] % 7];
+    
+    // Completar o resto com caracteres aleatórios
+    for (let i = 4; i < length; i++) {
+      password += charset[randomValues[i] % charset.length];
+    }
+    
+    // Embaralhar usando Fisher-Yates
+    const chars = password.split('');
+    for (let i = chars.length - 1; i > 0; i--) {
+      const j = randomValues[i + length] % (i + 1);
+      [chars[i], chars[j]] = [chars[j], chars[i]];
+    }
+    
+    return chars.join('');
   }
 
   /**
@@ -104,7 +122,7 @@ export class TenantProvisioningService {
     
     // Verificar se o slug já existe
     const { data: existing } = await supabaseAdmin
-      .from('tenants')
+      .from('gabinetes')
       .select('id')
       .eq('slug', slug)
       .single();
@@ -116,7 +134,7 @@ export class TenantProvisioningService {
       
       while (true) {
         const { data } = await supabaseAdmin
-          .from('tenants')
+          .from('gabinetes')
           .select('id')
           .eq('slug', newSlug)
           .single();
@@ -140,14 +158,14 @@ export class TenantProvisioningService {
   }
 
   /**
-   * Provisiona um novo tenant com usuário admin
+   * Provisiona um novo gabinete com usuário admin
    * Este é o método principal do provisionamento
    */
-  static async provisionTenant(request: CreateTenantRequest): Promise<CreateTenantResponse> {
+  static async provisionGabinete(request: CreateGabineteRequest): Promise<CreateGabineteResponse> {
     try {
       // Validações básicas
       if (!request.name) {
-        return { success: false, error: 'Nome do tenant é obrigatório' };
+        return { success: false, error: 'Nome do gabinete é obrigatório' };
       }
       
       if (!request.admin_email) {
@@ -171,9 +189,9 @@ export class TenantProvisioningService {
       // Gerar slug único
       const slug = await this.generateSlug(request.name, request.slug);
       
-      // 1. Criar tenant na tabela tenants
-      const { data: tenant, error: tenantError } = await supabaseAdmin
-        .from('tenants')
+      // 1. Criar gabinete na tabela gabinetes (nome da tabela no DB permanece "gabinetes")
+      const { data: gabinete, error: gabineteError } = await supabaseAdmin
+        .from('gabinetes')
         .insert({
           name: request.name,
           slug: slug,
@@ -203,9 +221,9 @@ export class TenantProvisioningService {
         .select()
         .single();
       
-      if (tenantError || !tenant) {
-        console.error('Erro ao criar tenant:', tenantError);
-        return { success: false, error: 'Erro ao criar tenant' };
+      if (gabineteError || !gabinete) {
+        console.error('Erro ao criar gabinete:', gabineteError);
+        return { success: false, error: 'Erro ao criar gabinete' };
       }
       
       // 2. Gerar senha temporária
@@ -219,24 +237,24 @@ export class TenantProvisioningService {
         user_metadata: {
           full_name: request.admin_full_name || '',
           role: 'admin',
-          gabinete_id: tenant.id,
+          tenant_id: gabinete.id,
         },
         app_metadata: {
           role: 'admin',
-          gabinete_id: tenant.id,
+          tenant_id: gabinete.id,
         },
       });
       
       if (authError || !authUser.user) {
         console.error('Erro ao criar usuário auth:', authError);
         
-        // Rollback: Deletar tenant criado
-        await supabaseAdmin.from('tenants').delete().eq('id', tenant.id);
+        // Rollback: Deletar gabinete criado
+        await supabaseAdmin.from('gabinetes').delete().eq('id', gabinete.id);
         
         return { success: false, error: 'Erro ao criar usuário de autenticação' };
       }
       
-      // 4. Criar perfil do usuário vinculado ao tenant
+      // 4. Criar perfil do usuário vinculado ao gabinete
       const { error: profileError } = await supabaseAdmin
         .from('profiles')
         .insert({
@@ -244,7 +262,7 @@ export class TenantProvisioningService {
           email: request.admin_email,
           full_name: request.admin_full_name || null,
           role: 'admin',
-          gabinete_id: tenant.id,
+          tenant_id: gabinete.id,
           onboarding_completed: false,
           onboarding_step: 0,
           metadata: {
@@ -256,9 +274,9 @@ export class TenantProvisioningService {
       if (profileError) {
         console.error('Erro ao criar perfil:', profileError);
         
-        // Rollback: Deletar usuário e tenant
+        // Rollback: Deletar usuário e gabinete
         await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
-        await supabaseAdmin.from('tenants').delete().eq('id', tenant.id);
+        await supabaseAdmin.from('gabinetes').delete().eq('id', gabinete.id);
         
         return { success: false, error: 'Erro ao criar perfil do usuário' };
       }
@@ -266,7 +284,7 @@ export class TenantProvisioningService {
       // 5. Retornar sucesso com credenciais
       return {
         success: true,
-        tenant: tenant as Tenant,
+        gabinete: gabinete as Gabinete,
         admin_user: {
           id: authUser.user.id,
           email: request.admin_email,
@@ -274,22 +292,22 @@ export class TenantProvisioningService {
         },
       };
     } catch (error) {
-      console.error('Erro no provisionTenant:', error);
-      return { success: false, error: 'Erro interno ao provisionar tenant' };
+      console.error('Erro no provisionGabinete:', error);
+      return { success: false, error: 'Erro interno ao provisionar gabinete' };
     }
   }
 
   /**
-   * Lista todos os tenants (para super admin)
+   * Lista todos os gabinetes (para super admin)
    */
-  static async listTenants(filters?: {
+  static async listGabinetes(filters?: {
     type?: string;
     uf?: string;
     ativo?: boolean;
     search?: string;
-  }): Promise<{ data: Tenant[] | null; error: string | null }> {
+  }): Promise<{ data: Gabinete[] | null; error: string | null }> {
     try {
-      let query = supabaseAdmin.from('tenants').select('*');
+      let query = supabaseAdmin.from('gabinetes').select('*');
       
       // Aplicar filtros
       if (filters?.type) {
@@ -314,50 +332,50 @@ export class TenantProvisioningService {
       const { data, error } = await query;
       
       if (error) {
-        console.error('Erro ao listar tenants:', error);
-        return { data: null, error: 'Erro ao listar tenants' };
+        console.error('Erro ao listar gabinetes:', error);
+        return { data: null, error: 'Erro ao listar gabinetes' };
       }
       
-      return { data: data as Tenant[], error: null };
+      return { data: data as Gabinete[], error: null };
     } catch (error) {
-      console.error('Erro no listTenants:', error);
-      return { data: null, error: 'Erro interno ao listar tenants' };
+      console.error('Erro no listGabinetes:', error);
+      return { data: null, error: 'Erro interno ao listar gabinetes' };
     }
   }
 
   /**
-   * Busca um tenant por ID
+   * Busca um gabinete por ID
    */
-  static async getTenant(tenantId: string): Promise<{ data: Tenant | null; error: string | null }> {
+  static async getGabinete(gabineteId: string): Promise<{ data: Gabinete | null; error: string | null }> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('tenants')
+        .from('gabinetes')
         .select('*')
-        .eq('id', tenantId)
+        .eq('id', gabineteId)
         .single();
       
       if (error) {
-        console.error('Erro ao buscar tenant:', error);
-        return { data: null, error: 'Erro ao buscar tenant' };
+        console.error('Erro ao buscar gabinete:', error);
+        return { data: null, error: 'Erro ao buscar gabinete' };
       }
       
-      return { data: data as Tenant, error: null };
+      return { data: data as Gabinete, error: null };
     } catch (error) {
-      console.error('Erro no getTenant:', error);
-      return { data: null, error: 'Erro interno ao buscar tenant' };
+      console.error('Erro no getGabinete:', error);
+      return { data: null, error: 'Erro interno ao buscar gabinete' };
     }
   }
 
   /**
-   * Atualiza um tenant
+   * Atualiza um gabinete
    */
-  static async updateTenant(
-    tenantId: string,
-    updates: Partial<CreateTenantRequest>
-  ): Promise<{ success: boolean; error?: string; tenant?: Tenant }> {
+  static async updateGabinete(
+    gabineteId: string,
+    updates: Partial<CreateGabineteRequest>
+  ): Promise<{ success: boolean; error?: string; gabinete?: Gabinete }> {
     try {
       const { data, error } = await supabaseAdmin
-        .from('tenants')
+        .from('gabinetes')
         .update({
           name: updates.name,
           parlamentar_name: updates.parlamentar_name,
@@ -381,56 +399,56 @@ export class TenantProvisioningService {
           metadata: updates.metadata,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', tenantId)
+        .eq('id', gabineteId)
         .select()
         .single();
       
       if (error) {
-        console.error('Erro ao atualizar tenant:', error);
-        return { success: false, error: 'Erro ao atualizar tenant' };
+        console.error('Erro ao atualizar gabinete:', error);
+        return { success: false, error: 'Erro ao atualizar gabinete' };
       }
       
-      return { success: true, tenant: data as Tenant };
+      return { success: true, gabinete: data as Gabinete };
     } catch (error) {
-      console.error('Erro no updateTenant:', error);
-      return { success: false, error: 'Erro interno ao atualizar tenant' };
+      console.error('Erro no updateGabinete:', error);
+      return { success: false, error: 'Erro interno ao atualizar gabinete' };
     }
   }
 
   /**
-   * Ativa ou desativa um tenant
+   * Ativa ou desativa um gabinete
    */
-  static async toggleTenantStatus(
-    tenantId: string
-  ): Promise<{ success: boolean; error?: string; tenant?: Tenant }> {
+  static async toggleGabineteStatus(
+    gabineteId: string
+  ): Promise<{ success: boolean; error?: string; gabinete?: Gabinete }> {
     try {
       // Buscar status atual
-      const { data: currentTenant } = await supabaseAdmin
-        .from('tenants')
+      const { data: currentGabinete } = await supabaseAdmin
+        .from('gabinetes')
         .select('ativo')
-        .eq('id', tenantId)
+        .eq('id', gabineteId)
         .single();
       
-      if (!currentTenant) {
-        return { success: false, error: 'Tenant não encontrado' };
+      if (!currentGabinete) {
+        return { success: false, error: 'Gabinete não encontrado' };
       }
       
       // Inverter status
       const { data, error } = await supabaseAdmin
-        .from('tenants')
-        .update({ ativo: !currentTenant.ativo, updated_at: new Date().toISOString() })
-        .eq('id', tenantId)
+        .from('gabinetes')
+        .update({ ativo: !currentGabinete.ativo, updated_at: new Date().toISOString() })
+        .eq('id', gabineteId)
         .select()
         .single();
       
       if (error) {
-        console.error('Erro ao alterar status do tenant:', error);
+        console.error('Erro ao alterar status do gabinete:', error);
         return { success: false, error: 'Erro ao alterar status' };
       }
       
-      return { success: true, tenant: data as Tenant };
+      return { success: true, gabinete: data as Gabinete };
     } catch (error) {
-      console.error('Erro no toggleTenantStatus:', error);
+      console.error('Erro no toggleGabineteStatus:', error);
       return { success: false, error: 'Erro interno ao alterar status' };
     }
   }

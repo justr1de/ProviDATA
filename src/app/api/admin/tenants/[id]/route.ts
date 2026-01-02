@@ -1,12 +1,13 @@
 // API Route: /api/admin/tenants/[id]
-// Gerenciamento de tenant individual (somente super-admin)
+// Gerenciamento de gabinete individual (somente super-admin)
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { TenantProvisioningService } from '@/lib/services/tenant-provisioning.service';
+import { GabineteProvisioningService } from '@/lib/services/gabinete-provisioning.service';
+import { getSuperAdminEmails } from '@/lib/env-validation';
 
-// Email do super admin geral do sistema
-const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
+// Lista de emails de super admins (configurável via variável de ambiente)
+const SUPER_ADMIN_EMAILS = getSuperAdminEmails();
 
 /**
  * Verifica se o usuário é super admin
@@ -20,7 +21,7 @@ async function isSuperAdmin(): Promise<{ isSuper: boolean; error?: string }> {
     return { isSuper: false, error: 'Não autenticado' };
   }
   
-  if (user.email !== SUPER_ADMIN_EMAIL) {
+  if (!user.email || !SUPER_ADMIN_EMAILS.includes(user.email)) {
     return { isSuper: false, error: 'Acesso negado: apenas super admin' };
   }
   
@@ -29,14 +30,13 @@ async function isSuperAdmin(): Promise<{ isSuper: boolean; error?: string }> {
 
 /**
  * GET /api/admin/tenants/[id]
- * Busca um tenant específico (somente super-admin)
+ * Busca um gabinete específico (somente super-admin)
  */
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Verificar se é super admin
     const { isSuper, error: authError } = await isSuperAdmin();
     
     if (!isSuper) {
@@ -48,19 +48,18 @@ export async function GET(
     
     const { id } = params;
     
-    // Buscar tenant
-    const { data: tenant, error } = await TenantProvisioningService.getTenant(id);
+    const { data: gabinete, error } = await GabineteProvisioningService.getGabinete(id);
     
-    if (error || !tenant) {
+    if (error || !gabinete) {
       return NextResponse.json(
-        { error: error || 'Tenant não encontrado' },
+        { error: error || 'Gabinete não encontrado' },
         { status: 404 }
       );
     }
     
-    return NextResponse.json({ tenant });
+    return NextResponse.json({ gabinete });
   } catch (error) {
-    console.error('Erro ao buscar tenant:', error);
+    console.error('Erro ao buscar gabinete:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -70,14 +69,13 @@ export async function GET(
 
 /**
  * PATCH /api/admin/tenants/[id]
- * Atualiza um tenant (somente super-admin)
+ * Atualiza um gabinete (somente super-admin)
  */
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Verificar se é super admin
     const { isSuper, error: authError } = await isSuperAdmin();
     
     if (!isSuper) {
@@ -88,10 +86,9 @@ export async function PATCH(
     }
     
     const { id } = params;
-    const body = await request.json();
+    const updates = await request.json();
     
-    // Atualizar tenant
-    const result = await TenantProvisioningService.updateTenant(id, body);
+    const result = await GabineteProvisioningService.updateGabinete(id, updates);
     
     if (!result.success) {
       return NextResponse.json(
@@ -100,13 +97,9 @@ export async function PATCH(
       );
     }
     
-    return NextResponse.json({
-      success: true,
-      tenant: result.tenant,
-      message: 'Tenant atualizado com sucesso',
-    });
+    return NextResponse.json({ gabinete: result.gabinete });
   } catch (error) {
-    console.error('Erro ao atualizar tenant:', error);
+    console.error('Erro ao atualizar gabinete:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -115,15 +108,14 @@ export async function PATCH(
 }
 
 /**
- * PUT /api/admin/tenants/[id]/toggle-status
- * Ativa ou desativa um tenant (somente super-admin)
+ * DELETE /api/admin/tenants/[id]
+ * Remove um gabinete (somente super-admin)
  */
-export async function PUT(
+export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Verificar se é super admin
     const { isSuper, error: authError } = await isSuperAdmin();
     
     if (!isSuper) {
@@ -135,17 +127,8 @@ export async function PUT(
     
     const { id } = params;
     
-    // Verificar se é uma requisição de toggle-status
-    const url = new URL(request.url);
-    if (!url.pathname.endsWith('/toggle-status')) {
-      return NextResponse.json(
-        { error: 'Endpoint não encontrado' },
-        { status: 404 }
-      );
-    }
-    
-    // Alterar status
-    const result = await TenantProvisioningService.toggleTenantStatus(id);
+    // Note: Instead of deleting, we should deactivate
+    const result = await GabineteProvisioningService.toggleGabineteStatus(id);
     
     if (!result.success) {
       return NextResponse.json(
@@ -154,13 +137,9 @@ export async function PUT(
       );
     }
     
-    return NextResponse.json({
-      success: true,
-      tenant: result.tenant,
-      message: `Tenant ${result.tenant?.ativo ? 'ativado' : 'desativado'} com sucesso`,
-    });
+    return NextResponse.json({ success: true, message: 'Gabinete desativado com sucesso' });
   } catch (error) {
-    console.error('Erro ao alterar status do tenant:', error);
+    console.error('Erro ao remover gabinete:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

@@ -102,7 +102,7 @@ export default function ProvidenciaDetailPage() {
             orgao_destino:orgaos(nome, sigla, email, telefone)
           `)
           .eq('id', id)
-          .eq('tenant_id', tenant.id)
+          .eq('tenant_id', gabinete.id)
           .single()
 
         if (provError) throw provError

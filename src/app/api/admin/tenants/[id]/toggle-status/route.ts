@@ -1,12 +1,13 @@
 // API Route: /api/admin/tenants/[id]/toggle-status
-// Ativa ou desativa um tenant (somente super-admin)
+// Ativa/desativa um gabinete (somente super-admin)
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { TenantProvisioningService } from '@/lib/services/tenant-provisioning.service';
+import { GabineteProvisioningService } from '@/lib/services/gabinete-provisioning.service';
+import { getSuperAdminEmails } from '@/lib/env-validation';
 
-// Email do super admin geral do sistema
-const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
+// Lista de emails de super admins (configurável via variável de ambiente)
+const SUPER_ADMIN_EMAILS = getSuperAdminEmails();
 
 /**
  * Verifica se o usuário é super admin
@@ -20,7 +21,7 @@ async function isSuperAdmin(): Promise<{ isSuper: boolean; error?: string }> {
     return { isSuper: false, error: 'Não autenticado' };
   }
   
-  if (user.email !== SUPER_ADMIN_EMAIL) {
+  if (!user.email || !SUPER_ADMIN_EMAILS.includes(user.email)) {
     return { isSuper: false, error: 'Acesso negado: apenas super admin' };
   }
   
@@ -28,15 +29,14 @@ async function isSuperAdmin(): Promise<{ isSuper: boolean; error?: string }> {
 }
 
 /**
- * PUT /api/admin/tenants/[id]/toggle-status
- * Ativa ou desativa um tenant (somente super-admin)
+ * POST /api/admin/tenants/[id]/toggle-status
+ * Alterna o status ativo/inativo de um gabinete
  */
-export async function PUT(
+export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Verificar se é super admin
     const { isSuper, error: authError } = await isSuperAdmin();
     
     if (!isSuper) {
@@ -48,8 +48,7 @@ export async function PUT(
     
     const { id } = params;
     
-    // Alterar status
-    const result = await TenantProvisioningService.toggleTenantStatus(id);
+    const result = await GabineteProvisioningService.toggleGabineteStatus(id);
     
     if (!result.success) {
       return NextResponse.json(
@@ -58,13 +57,13 @@ export async function PUT(
       );
     }
     
-    return NextResponse.json({
-      success: true,
-      tenant: result.tenant,
-      message: `Tenant ${result.tenant?.ativo ? 'ativado' : 'desativado'} com sucesso`,
+    return NextResponse.json({ 
+      success: true, 
+      gabinete: result.gabinete,
+      message: `Gabinete ${result.gabinete?.ativo ? 'ativado' : 'desativado'} com sucesso` 
     });
   } catch (error) {
-    console.error('Erro ao alterar status do tenant:', error);
+    console.error('Erro ao alterar status do gabinete:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

@@ -37,7 +37,7 @@ export default function CidadaosPage() {
         let query = supabase
           .from('cidadaos')
           .select('*', { count: 'exact' })
-          .eq('tenant_id', tenant.id)
+          .eq('tenant_id', gabinete.id)
           .order('nome')
 
         if (search) {

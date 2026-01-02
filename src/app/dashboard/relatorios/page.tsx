@@ -82,7 +82,7 @@ export default function RelatoriosPage() {
   const [dateRange, setDateRange] = useState({ start: '', end: '' })
   const [isGenerating, setIsGenerating] = useState(false)
   const [activeShortcut, setActiveShortcut] = useState<string | null>(null)
-  const { user, tenant } = useAuthStore()
+  const { user, gabinete } = useAuthStore()
   const supabase = createClient()
 
   // Função para formatar data no formato YYYY-MM-DD

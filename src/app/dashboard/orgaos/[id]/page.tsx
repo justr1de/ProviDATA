@@ -50,7 +50,7 @@ export default function EditarOrgaoPage() {
           .from('orgaos')
           .select('*')
           .eq('id', orgaoId)
-          .eq('tenant_id', tenant.id)
+          .eq('tenant_id', gabinete.id)
           .single()
 
         if (error) throw error
@@ -110,7 +110,7 @@ export default function EditarOrgaoPage() {
           responsavel: formData.responsavel || null,
         })
         .eq('id', orgaoId)
-        .eq('tenant_id', tenant.id)
+        .eq('tenant_id', gabinete.id)
 
       if (error) throw error
 
