@@ -1,9 +1,9 @@
-// API Route: /api/admin/tenants/[id]
-// Gerenciamento de tenant individual (somente super-admin)
+// API Route: /api/admin/gabinetes/[id]
+// Gerenciamento de gabinete individual (somente super-admin)
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { TenantProvisioningService } from '@/lib/services/tenant-provisioning.service';
+import { GabineteProvisioningService } from '@/lib/services/gabinete-provisioning.service';
 
 // Email do super admin geral do sistema
 const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
@@ -28,8 +28,8 @@ async function isSuperAdmin(): Promise<{ isSuper: boolean; error?: string }> {
 }
 
 /**
- * GET /api/admin/tenants/[id]
- * Busca um tenant específico (somente super-admin)
+ * GET /api/admin/gabinetes/[id]
+ * Busca um gabinete específico (somente super-admin)
  */
 export async function GET(
   request: NextRequest,
@@ -48,19 +48,19 @@ export async function GET(
     
     const { id } = params;
     
-    // Buscar tenant
-    const { data: tenant, error } = await TenantProvisioningService.getTenant(id);
+    // Buscar gabinete
+    const { data: gabinete, error } = await GabineteProvisioningService.getGabinete(id);
     
-    if (error || !tenant) {
+    if (error || !gabinete) {
       return NextResponse.json(
-        { error: error || 'Tenant não encontrado' },
+        { error: error || 'Gabinete não encontrado' },
         { status: 404 }
       );
     }
     
-    return NextResponse.json({ tenant });
+    return NextResponse.json({ gabinete });
   } catch (error) {
-    console.error('Erro ao buscar tenant:', error);
+    console.error('Erro ao buscar gabinete:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -69,8 +69,8 @@ export async function GET(
 }
 
 /**
- * PATCH /api/admin/tenants/[id]
- * Atualiza um tenant (somente super-admin)
+ * PATCH /api/admin/gabinetes/[id]
+ * Atualiza um gabinete (somente super-admin)
  */
 export async function PATCH(
   request: NextRequest,
@@ -90,8 +90,8 @@ export async function PATCH(
     const { id } = params;
     const body = await request.json();
     
-    // Atualizar tenant
-    const result = await TenantProvisioningService.updateTenant(id, body);
+    // Atualizar gabinete
+    const result = await GabineteProvisioningService.updateGabinete(id, body);
     
     if (!result.success) {
       return NextResponse.json(
@@ -102,11 +102,11 @@ export async function PATCH(
     
     return NextResponse.json({
       success: true,
-      tenant: result.tenant,
-      message: 'Tenant atualizado com sucesso',
+      gabinete: result.gabinete,
+      message: 'Gabinete atualizado com sucesso',
     });
   } catch (error) {
-    console.error('Erro ao atualizar tenant:', error);
+    console.error('Erro ao atualizar gabinete:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -115,8 +115,8 @@ export async function PATCH(
 }
 
 /**
- * PUT /api/admin/tenants/[id]/toggle-status
- * Ativa ou desativa um tenant (somente super-admin)
+ * PUT /api/admin/gabinetes/[id]/toggle-status
+ * Ativa ou desativa um gabinete (somente super-admin)
  */
 export async function PUT(
   request: NextRequest,
@@ -145,7 +145,7 @@ export async function PUT(
     }
     
     // Alterar status
-    const result = await TenantProvisioningService.toggleTenantStatus(id);
+    const result = await GabineteProvisioningService.toggleGabineteStatus(id);
     
     if (!result.success) {
       return NextResponse.json(
@@ -156,11 +156,11 @@ export async function PUT(
     
     return NextResponse.json({
       success: true,
-      tenant: result.tenant,
-      message: `Tenant ${result.tenant?.ativo ? 'ativado' : 'desativado'} com sucesso`,
+      gabinete: result.gabinete,
+      message: `Gabinete ${result.gabinete?.ativo ? 'ativado' : 'desativado'} com sucesso`,
     });
   } catch (error) {
-    console.error('Erro ao alterar status do tenant:', error);
+    console.error('Erro ao alterar status do gabinete:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

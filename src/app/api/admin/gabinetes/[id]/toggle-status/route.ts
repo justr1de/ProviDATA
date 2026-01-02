@@ -1,9 +1,9 @@
-// API Route: /api/admin/tenants/[id]/toggle-status
-// Ativa ou desativa um tenant (somente super-admin)
+// API Route: /api/admin/gabinetes/[id]/toggle-status
+// Ativa ou desativa um gabinete (somente super-admin)
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { TenantProvisioningService } from '@/lib/services/tenant-provisioning.service';
+import { GabineteProvisioningService } from '@/lib/services/gabinete-provisioning.service';
 
 // Email do super admin geral do sistema
 const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
@@ -28,8 +28,8 @@ async function isSuperAdmin(): Promise<{ isSuper: boolean; error?: string }> {
 }
 
 /**
- * PUT /api/admin/tenants/[id]/toggle-status
- * Ativa ou desativa um tenant (somente super-admin)
+ * PUT /api/admin/gabinetes/[id]/toggle-status
+ * Ativa ou desativa um gabinete (somente super-admin)
  */
 export async function PUT(
   request: NextRequest,
@@ -49,7 +49,7 @@ export async function PUT(
     const { id } = params;
     
     // Alterar status
-    const result = await TenantProvisioningService.toggleTenantStatus(id);
+    const result = await GabineteProvisioningService.toggleGabineteStatus(id);
     
     if (!result.success) {
       return NextResponse.json(
@@ -60,11 +60,11 @@ export async function PUT(
     
     return NextResponse.json({
       success: true,
-      tenant: result.tenant,
-      message: `Tenant ${result.tenant?.ativo ? 'ativado' : 'desativado'} com sucesso`,
+      gabinete: result.gabinete,
+      message: `Gabinete ${result.gabinete?.ativo ? 'ativado' : 'desativado'} com sucesso`,
     });
   } catch (error) {
-    console.error('Erro ao alterar status do tenant:', error);
+    console.error('Erro ao alterar status do gabinete:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
