@@ -1,9 +1,9 @@
 // API Route: /api/admin/tenants
-// Gerenciamento de tenants (somente super-admin)
+// Gerenciamento de gabinetes (somente super-admin)
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { TenantProvisioningService, CreateTenantRequest } from '@/lib/services/tenant-provisioning.service';
+import { GabineteProvisioningService, CreateGabineteRequest } from '@/lib/services/gabinete-provisioning.service';
 import { getSuperAdminEmails } from '@/lib/env-validation';
 
 // Lista de emails de super admins (configurável via variável de ambiente)
@@ -30,7 +30,7 @@ async function isSuperAdmin(request: NextRequest): Promise<{ isSuper: boolean; e
 
 /**
  * GET /api/admin/tenants
- * Lista todos os tenants (somente super-admin)
+ * Lista todos os gabinetes (somente super-admin)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -53,8 +53,8 @@ export async function GET(request: NextRequest) {
       search: searchParams.get('search') || undefined,
     };
     
-    // Listar tenants
-    const { data: tenants, error } = await TenantProvisioningService.listTenants(filters);
+    // Listar gabinetes
+    const { data: gabinetes, error } = await GabineteProvisioningService.listGabinetes(filters);
     
     if (error) {
       return NextResponse.json(
@@ -63,9 +63,9 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    return NextResponse.json({ tenants });
+    return NextResponse.json({ gabinetes });
   } catch (error) {
-    console.error('Erro ao listar tenants:', error);
+    console.error('Erro ao listar gabinetes:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/admin/tenants
- * Provisiona um novo tenant com usuário admin (somente super-admin)
+ * Provisiona um novo gabinete com usuário admin (somente super-admin)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -90,25 +90,25 @@ export async function POST(request: NextRequest) {
     }
     
     // Ler o body
-    const body: CreateTenantRequest = await request.json();
+    const body: CreateGabineteRequest = await request.json();
     
     // Validações básicas
     if (!body.name || !body.admin_email) {
       return NextResponse.json(
-        { error: 'Nome do tenant e email do admin são obrigatórios' },
+        { error: 'Nome do gabinete e email do admin são obrigatórios' },
         { status: 400 }
       );
     }
     
     if (!body.type) {
       return NextResponse.json(
-        { error: 'Tipo do tenant é obrigatório' },
+        { error: 'Tipo do gabinete é obrigatório' },
         { status: 400 }
       );
     }
     
-    // Provisionar tenant
-    const result = await TenantProvisioningService.provisionTenant(body);
+    // Provisionar gabinete
+    const result = await GabineteProvisioningService.provisionGabinete(body);
     
     if (!result.success) {
       return NextResponse.json(
@@ -121,14 +121,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        tenant: result.tenant,
+        gabinete: result.gabinete,
         admin_user: result.admin_user,
-        message: 'Tenant provisionado com sucesso. Envie as credenciais ao admin de forma segura.',
+        message: 'Gabinete provisionado com sucesso. Envie as credenciais ao admin de forma segura.',
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error('Erro ao provisionar tenant:', error);
+    console.error('Erro ao provisionar gabinete:', error);
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

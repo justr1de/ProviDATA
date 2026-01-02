@@ -388,13 +388,13 @@ export default function AdministracaoPage() {
         )}
 // --- GabinetesAdmin Component ---
 import { useCallback } from 'react'
-import { Tenant } from '@/types/database'
+import { Gabinete } from '@/types/database'
 
 function GabinetesAdmin() {
-  const [gabinetes, setGabinetes] = useState<Tenant[]>([])
+  const [gabinetes, setGabinetes] = useState<Gabinete[]>([])
   const [loading, setLoading] = useState(true)
   const [showNewModal, setShowNewModal] = useState(false)
-  const [newGabinete, setNewGabinete] = useState<Partial<Tenant>>({})
+  const [newGabinete, setNewGabinete] = useState<Partial<Gabinete>>({})
   const [saving, setSaving] = useState(false)
   const supabase = createClient()
   const { user, tenant } = useAuthStore()

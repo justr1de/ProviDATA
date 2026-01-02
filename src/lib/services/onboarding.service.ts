@@ -1,11 +1,11 @@
-// Serviço de Onboarding - Backend (Refatorado para tenant_id)
+// Serviço de Onboarding - Backend (Refatorado para gabinete_id)
 import { createClient } from '@supabase/supabase-js';
 import type {
   Invite,
   CreateInviteRequest,
   AcceptInviteResponse,
   Profile,
-  Tenant,
+  Gabinete,
 } from '@/types/onboarding';
 import { validateEnv, validateServerEnv, getSuperAdminEmails } from '@/lib/env-validation';
 
@@ -38,7 +38,7 @@ export class OnboardingService {
   }
 
   /**
-   * Cria um novo convite usando tenant_id
+   * Cria um novo convite usando gabinete_id
    */
   static async createInvite(
     request: CreateInviteRequest,
@@ -59,13 +59,13 @@ export class OnboardingService {
         return { data: null, error: 'Usuário não encontrado' };
       }
 
-      // Super admin pode convidar para qualquer tenant
-      // Outros admins/gestores só podem convidar para seu próprio tenant
+      // Super admin pode convidar para qualquer gabinete
+      // Outros admins/gestores só podem convidar para seu próprio gabinete
       if (!isSuperAdmin && !['admin', 'gestor'].includes(inviterProfile.role)) {
         return { data: null, error: 'Apenas administradores e gestores podem criar convites' };
       }
 
-      // Determinar tenant_id: se fornecido no request, usar; senão, usar do perfil do convidador
+      // Determinar gabinete_id: se fornecido no request, usar; senão, usar do perfil do convidador
       const targetGabineteId = request.gabinete_id || request.organization_id || inviterProfile.gabinete_id;
 
       if (!targetGabineteId) {
@@ -77,7 +77,7 @@ export class OnboardingService {
         return { data: null, error: 'Você só pode criar convites para seu próprio gabinete' };
       }
 
-      // Verificar se já existe convite pendente para este email no mesmo tenant
+      // Verificar se já existe convite pendente para este email no mesmo gabinete
       const { data: existingInvite } = await supabaseAdmin
         .from('invites')
         .select('id, status')
@@ -87,7 +87,7 @@ export class OnboardingService {
         .single();
 
       if (existingInvite) {
-        return { data: null, error: 'Já existe um convite pendente para este email neste tenant' };
+        return { data: null, error: 'Já existe um convite pendente para este email neste gabinete' };
       }
 
       // Calcular data de expiração
@@ -106,7 +106,7 @@ export class OnboardingService {
           expires_at: expiresAt.toISOString(),
           metadata: request.metadata || {},
         })
-        .select('*, gabinete:tenants(*), inviter:profiles!invited_by(*)')
+        .select('*, gabinete:gabinetes(*), inviter:profiles!invited_by(*)')
         .single();
 
       if (createError) {
@@ -122,17 +122,17 @@ export class OnboardingService {
   }
 
   /**
-   * Lista convites de um tenant
+   * Lista convites de um gabinete
    */
   static async listInvites(
-    tenantId: string,
+    gabineteId: string,
     userId: string
   ): Promise<{ data: Invite[] | null; error: string | null }> {
     try {
       // Verificar se é super admin
       const isSuperAdmin = await this.isSuperAdmin(userId);
 
-      // Verificar se o usuário é admin/gestor do tenant
+      // Verificar se o usuário é admin/gestor do gabinete
       const { data: profile, error: profileError } = await supabaseAdmin
         .from('profiles')
         .select('role, gabinete_id')
@@ -143,16 +143,16 @@ export class OnboardingService {
         return { data: null, error: 'Usuário não encontrado' };
       }
 
-      // Super admin pode listar convites de qualquer tenant
-      if (!isSuperAdmin && (!['admin', 'gestor'].includes(profile.role) || profile.gabinete_id !== tenantId)) {
+      // Super admin pode listar convites de qualquer gabinete
+      if (!isSuperAdmin && (!['admin', 'gestor'].includes(profile.role) || profile.gabinete_id !== gabineteId)) {
         return { data: null, error: 'Sem permissão para listar convites deste gabinete' };
       }
 
       // Buscar convites
       const { data: invites, error: invitesError } = await supabaseAdmin
         .from('invites')
-        .select('*, gabinete:tenants(*), inviter:profiles!invited_by(*)')
-        .eq('gabinete_id', tenantId)
+        .select('*, gabinete:gabinetes(*), inviter:profiles!invited_by(*)')
+        .eq('gabinete_id', gabineteId)
         .order('created_at', { ascending: false });
 
       if (invitesError) {
@@ -176,7 +176,7 @@ export class OnboardingService {
     try {
       const { data: invite, error: inviteError } = await supabaseAdmin
         .from('invites')
-        .select('*, tenant:tenants(*)')
+        .select('*, gabinete:gabinetes(*)')
         .eq('token', token)
         .eq('status', 'pending')
         .single();
@@ -222,12 +222,12 @@ export class OnboardingService {
         return { success: false, error: 'Erro ao aceitar convite' };
       }
 
-      // Converter tenant_id para organization_id para compatibilidade
+      // Converter gabinete_id para organization_id para compatibilidade
       const response = data as AcceptInviteResponse;
-      if (response.success && response.tenant_id) {
+      if (response.success && response.gabinete_id) {
         return {
           ...response,
-          organization_id: response.tenant_id, // Compatibilidade
+          organization_id: response.gabinete_id, // Compatibilidade
         };
       }
 
@@ -252,7 +252,7 @@ export class OnboardingService {
       // Verificar se o usuário é admin/gestor
       const { data: profile, error: profileError } = await supabaseAdmin
         .from('profiles')
-        .select('role, tenant_id')
+        .select('role, gabinete_id')
         .eq('id', userId)
         .single();
 
@@ -263,7 +263,7 @@ export class OnboardingService {
       // Buscar convite
       const { data: invite, error: inviteError } = await supabaseAdmin
         .from('invites')
-        .select('tenant_id')
+        .select('gabinete_id')
         .eq('id', inviteId)
         .single();
 
@@ -272,8 +272,8 @@ export class OnboardingService {
       }
 
       // Super admin pode revogar qualquer convite
-      // Outros admins/gestores só podem revogar convites do seu tenant
-      if (!isSuperAdmin && invite.tenant_id !== profile.tenant_id) {
+      // Outros admins/gestores só podem revogar convites do seu gabinete
+      if (!isSuperAdmin && invite.gabinete_id !== profile.gabinete_id) {
         return { success: false, error: 'Sem permissão para revogar este convite' };
       }
 
@@ -309,7 +309,7 @@ export class OnboardingService {
       // Verificar permissões
       const { data: profile, error: profileError } = await supabaseAdmin
         .from('profiles')
-        .select('role, tenant_id')
+        .select('role, gabinete_id')
         .eq('id', userId)
         .single();
 
@@ -329,8 +329,8 @@ export class OnboardingService {
       }
 
       // Super admin pode reenviar qualquer convite
-      // Outros admins/gestores só podem reenviar convites do seu tenant
-      if (!isSuperAdmin && invite.tenant_id !== profile.tenant_id) {
+      // Outros admins/gestores só podem reenviar convites do seu gabinete
+      if (!isSuperAdmin && invite.gabinete_id !== profile.gabinete_id) {
         return { data: null, error: 'Sem permissão para reenviar este convite' };
       }
 
@@ -346,7 +346,7 @@ export class OnboardingService {
           // O token será regenerado automaticamente pelo banco
         })
         .eq('id', inviteId)
-        .select('*, tenant:tenants(*)')
+        .select('*, gabinete:gabinetes(*)')
         .single();
 
       if (updateError) {
@@ -391,7 +391,7 @@ export class OnboardingService {
   }
 
   /**
-   * Busca perfil do usuário com tenant
+   * Busca perfil do usuário com gabinete
    */
   static async getProfile(
     userId: string
@@ -399,7 +399,7 @@ export class OnboardingService {
     try {
       const { data: profile, error } = await supabaseAdmin
         .from('profiles')
-        .select('*, tenant:tenants(*)')
+        .select('*, gabinete:gabinetes(*)')
         .eq('id', userId)
         .single();
 
@@ -435,27 +435,27 @@ export class OnboardingService {
   }
 
   /**
-   * Busca tenant por ID
+   * Busca gabinete por ID
    */
-  static async getTenant(
-    tenantId: string
-  ): Promise<{ data: Tenant | null; error: string | null }> {
+  static async getGabinete(
+    gabineteId: string
+  ): Promise<{ data: Gabinete | null; error: string | null }> {
     try {
-      const { data: tenant, error } = await supabaseAdmin
-        .from('tenants')
+      const { data: gabinete, error } = await supabaseAdmin
+        .from('gabinetes')
         .select('*')
-        .eq('id', tenantId)
+        .eq('id', gabineteId)
         .single();
 
       if (error) {
-        console.error('Erro ao buscar tenant:', error);
-        return { data: null, error: 'Erro ao buscar tenant' };
+        console.error('Erro ao buscar gabinete:', error);
+        return { data: null, error: 'Erro ao buscar gabinete' };
       }
 
-      return { data: tenant as Tenant, error: null };
+      return { data: gabinete as Gabinete, error: null };
     } catch (error) {
-      console.error('Erro no getTenant:', error);
-      return { data: null, error: 'Erro interno ao buscar tenant' };
+      console.error('Erro no getGabinete:', error);
+      return { data: null, error: 'Erro interno ao buscar gabinete' };
     }
   }
 }
