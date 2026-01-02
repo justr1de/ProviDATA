@@ -50,7 +50,8 @@ const adminNavigation = [
 ]
 
 // Helper function to get user display role/position
-function getUserDisplayRole(user: any, gabinete: any): string {
+// TODO: Consider extracting cargo mapping to shared utility if reused elsewhere
+function getUserDisplayRole(user: { role?: string; email?: string } | null, gabinete: { parlamentar_cargo?: string } | null): string {
   // Super Admin
   if (user?.role === 'super_admin' || user?.email === 'contato@dataro-it.com.br') {
     return 'Administrador'
@@ -77,7 +78,7 @@ function getUserDisplayRole(user: any, gabinete: any): string {
     'operador': 'Operador',
     'visualizador': 'Visualizador'
   }
-  return roleMap[user?.role] || 'Usuário'
+  return roleMap[user?.role || ''] || 'Usuário'
 }
 
 export default function DashboardLayout({
