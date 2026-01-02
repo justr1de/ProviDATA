@@ -39,7 +39,7 @@ interface FormData {
   telefone_adicional: string
   email_parlamentar: string
   email_gabinete: string
-  assessor_1: string
+  chefe_de_gabinete: string
   assessor_2: string
 }
 
@@ -56,7 +56,7 @@ const INITIAL_FORM_DATA: FormData = {
   telefone_adicional: '',
   email_parlamentar: '',
   email_gabinete: '',
-  assessor_1: '',
+  chefe_de_gabinete: '',
   assessor_2: ''
 }
 
@@ -201,7 +201,7 @@ export default function GabinetesPage() {
         telefone_adicional: formData.telefone_adicional?.trim() || null,
         email_parlamentar: formData.email_parlamentar?.trim() || null,
         email_gabinete: formData.email_gabinete?.trim() || null,
-        assessor_1: formData.assessor_1?.trim() || null,
+        chefe_de_gabinete: formData.chefe_de_gabinete?.trim() || null,
         assessor_2: formData.assessor_2?.trim() || null,
         ativo: true
       }
@@ -791,12 +791,12 @@ export default function GabinetesPage() {
                 <h4 className="text-sm font-semibold text-gray-900 dark:text-white border-b pb-2">Assessores (Opcional)</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="assessor-1" className={labelClassName}>Assessor 1</label>
+                    <label htmlFor="chefe-de-gabinete" className={labelClassName}>Chefe de Gabinete</label>
                     <input 
-                      id="assessor-1"
+                      id="chefe-de-gabinete"
                       type="text" 
-                      value={formData.assessor_1} 
-                      onChange={(e) => setFormData({ ...formData, assessor_1: e.target.value })} 
+                      value={formData.chefe_de_gabinete} 
+                      onChange={(e) => setFormData({ ...formData, chefe_de_gabinete: e.target.value })} 
                       className={inputClassName}
                       maxLength={255}
                     />
