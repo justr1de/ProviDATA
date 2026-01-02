@@ -1,13 +1,14 @@
 // Serviço de Provisionamento de Tenants
 // Responsável por criar tenants e seus usuários admin iniciais
 import { createClient } from '@supabase/supabase-js';
+import { getServerEnv, env } from '@/lib/env';
 import type { Tenant } from '@/types/onboarding';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Obter credenciais do servidor de forma segura
+const serverEnv = getServerEnv();
 
 // Cliente com service role para operações administrativas
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+const supabaseAdmin = createClient(env.supabaseUrl, serverEnv.supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
