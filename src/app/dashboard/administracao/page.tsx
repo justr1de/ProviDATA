@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
+import { Gabinete } from '@/types/database'
 import { 
   Shield, 
   Users, 
@@ -384,111 +385,9 @@ export default function AdministracaoPage() {
         )}
 
         {activeTab === 'gabinete' && (
-          <GabinetesAdmin />
-        )}
-// --- GabinetesAdmin Component ---
-import { useCallback } from 'react'
-import { Gabinete } from '@/types/database'
-
-function GabinetesAdmin() {
-  const [gabinetes, setGabinetes] = useState<Gabinete[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showNewModal, setShowNewModal] = useState(false)
-  const [newGabinete, setNewGabinete] = useState<Partial<Gabinete>>({})
-  const [saving, setSaving] = useState(false)
-  const supabase = createClient()
-  const { user, tenant } = useAuthStore()
-
-  const loadGabinetes = useCallback(async () => {
-    setLoading(true)
-    let query = supabase.from('tenants').select('*').eq('type', 'gabinete').order('created_at', { ascending: false })
-    if (!(user?.role === 'super_admin' || user?.email === 'contato@dataro-it.com.br')) {
-      query = query.eq('id', tenant?.id)
-    }
-    const { data, error } = await query
-    if (data) setGabinetes(data)
-    setLoading(false)
-  }, [supabase, user, tenant])
-
-  useEffect(() => { loadGabinetes() }, [loadGabinetes])
-
-  const handleAtivarDesativar = async (id: string, ativo: boolean) => {
-    await supabase.from('tenants').update({ ativo: !ativo }).eq('id', id)
-    loadGabinetes()
-  }
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    await supabase.from('tenants').insert({
-      ...newGabinete,
-      type: 'gabinete',
-      ativo: true,
-    })
-    setShowNewModal(false)
-    setNewGabinete({})
-    setSaving(false)
-    loadGabinetes()
-  }
-
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 600, color: 'var(--foreground)' }}>Gabinetes</h2>
-        <button onClick={() => setShowNewModal(true)} style={{ padding: '10px 20px', borderRadius: 8, background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Novo Gabinete</button>
-      </div>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid var(--border)' }}>
-              <th style={{ padding: '12px 10px', textAlign: 'left' }}>Nome</th>
-              <th style={{ padding: '12px 10px', textAlign: 'left' }}>Parlamentar</th>
-              <th style={{ padding: '12px 10px', textAlign: 'left' }}>Município</th>
-              <th style={{ padding: '12px 10px', textAlign: 'left' }}>UF</th>
-              <th style={{ padding: '12px 10px', textAlign: 'center' }}>Status</th>
-              <th style={{ padding: '12px 10px', textAlign: 'center' }}>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40 }}>Carregando...</td></tr>
-            ) : gabinetes.length === 0 ? (
-              <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40 }}>Nenhum gabinete encontrado</td></tr>
-            ) : (
-              gabinetes.map(g => (
-                <tr key={g.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '12px 10px' }}>{g.name}</td>
-                  <td style={{ padding: '12px 10px' }}>{g.parlamentar_name}</td>
-                  <td style={{ padding: '12px 10px' }}>{g.municipio}</td>
-                  <td style={{ padding: '12px 10px' }}>{g.uf}</td>
-                  <td style={{ padding: '12px 10px', textAlign: 'center' }}>
-                    {g.ativo ? <span style={{ color: '#22c55e', fontWeight: 600 }}>Ativo</span> : <span style={{ color: '#ef4444', fontWeight: 600 }}>Inativo</span>}
-                  </td>
-                  <td style={{ padding: '12px 10px', textAlign: 'center' }}>
-                    <button onClick={() => handleAtivarDesativar(g.id, g.ativo)} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: g.ativo ? '#fee2e2' : '#dcfce7', color: g.ativo ? '#ef4444' : '#22c55e', fontWeight: 600, cursor: 'pointer' }}>{g.ativo ? 'Desativar' : 'Ativar'}</button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-      {/* Modal Novo Gabinete */}
-      {showNewModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <form onSubmit={handleSave} style={{ background: 'white', borderRadius: 12, padding: 32, minWidth: 340, boxShadow: '0 8px 32px rgba(0,0,0,0.15)' }}>
-            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20 }}>Novo Gabinete</h3>
-            <input required placeholder="Nome" value={newGabinete.name||''} onChange={e=>setNewGabinete(v=>({...v,name:e.target.value}))} style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }} />
-            <input placeholder="Parlamentar" value={newGabinete.parlamentar_name||''} onChange={e=>setNewGabinete(v=>({...v,parlamentar_name:e.target.value}))} style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }} />
-            <input placeholder="Município" value={newGabinete.municipio||''} onChange={e=>setNewGabinete(v=>({...v,municipio:e.target.value}))} style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }} />
-            <input placeholder="UF" value={newGabinete.uf||''} onChange={e=>setNewGabinete(v=>({...v,uf:e.target.value}))} style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }} />
-            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-              <button type="button" onClick={()=>setShowNewModal(false)} style={{ flex: 1, padding: 10, borderRadius: 6, border: 'none', background: '#f3f4f6', color: '#374151', fontWeight: 600 }}>Cancelar</button>
-              <button type="submit" disabled={saving} style={{ flex: 1, padding: 10, borderRadius: 6, border: 'none', background: '#16a34a', color: 'white', fontWeight: 600 }}>{saving ? 'Salvando...' : 'Salvar'}</button>
-            </div>
-          </form>
-        </div>
-      )}
+          <div>
+            <h2>Gestão de Gabinetes</h2>
+            <p>Em desenvolvimento...</p>
     </div>
   )
 }
