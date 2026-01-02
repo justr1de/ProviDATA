@@ -2,12 +2,13 @@
 // Responsável por criar tenants e seus usuários admin iniciais
 import { createClient } from '@supabase/supabase-js';
 import type { Tenant } from '@/types/onboarding';
+import { validateEnv, validateServerEnv } from '@/lib/env-validation';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const env = validateEnv();
+const serverEnv = validateServerEnv();
 
 // Cliente com service role para operações administrativas
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+const supabaseAdmin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, serverEnv.SUPABASE_SERVICE_ROLE_KEY, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
@@ -69,26 +70,43 @@ export interface CreateTenantResponse {
 
 export class TenantProvisioningService {
   /**
-   * Gera uma senha temporária segura
+   * Gera uma senha temporária segura usando aleatoriedade criptográfica
    */
   private static generateTemporaryPassword(): string {
-    const length = 12;
+    const length = 16;
     const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*';
-    let password = '';
     
-    // Garantir pelo menos 1 maiúscula, 1 minúscula, 1 número e 1 especial
-    password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
-    password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
-    password += '0123456789'[Math.floor(Math.random() * 10)];
-    password += '!@#$%&*'[Math.floor(Math.random() * 7)];
-    
-    // Completar o resto
-    for (let i = password.length; i < length; i++) {
-      password += charset[Math.floor(Math.random() * charset.length)];
+    // Usar crypto.getRandomValues para aleatoriedade criptográfica
+    const randomValues = new Uint8Array(length * 2);
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      crypto.getRandomValues(randomValues);
+    } else {
+      // Fallback para Node.js
+      const nodeCrypto = require('crypto');
+      nodeCrypto.randomFillSync(randomValues);
     }
     
-    // Embaralhar
-    return password.split('').sort(() => Math.random() - 0.5).join('');
+    let password = '';
+    
+    // Garantir pelo menos 1 de cada tipo
+    password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[randomValues[0] % 26];
+    password += 'abcdefghijklmnopqrstuvwxyz'[randomValues[1] % 26];
+    password += '0123456789'[randomValues[2] % 10];
+    password += '!@#$%&*'[randomValues[3] % 7];
+    
+    // Completar o resto com caracteres aleatórios
+    for (let i = 4; i < length; i++) {
+      password += charset[randomValues[i] % charset.length];
+    }
+    
+    // Embaralhar usando Fisher-Yates
+    const chars = password.split('');
+    for (let i = chars.length - 1; i > 0; i--) {
+      const j = randomValues[i + length] % (i + 1);
+      [chars[i], chars[j]] = [chars[j], chars[i]];
+    }
+    
+    return chars.join('');
   }
 
   /**

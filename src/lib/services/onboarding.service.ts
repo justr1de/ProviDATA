@@ -7,15 +7,16 @@ import type {
   Profile,
   Tenant,
 } from '@/types/onboarding';
+import { validateEnv, validateServerEnv, getSuperAdminEmails } from '@/lib/env-validation';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const env = validateEnv();
+const serverEnv = validateServerEnv();
 
-// Email do super admin geral do sistema
-const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
+// Lista de emails de super admins (configurável via variável de ambiente)
+const SUPER_ADMIN_EMAILS = getSuperAdminEmails();
 
 // Cliente com service role para operações administrativas
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+const supabaseAdmin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, serverEnv.SUPABASE_SERVICE_ROLE_KEY, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
@@ -24,12 +25,12 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 
 export class OnboardingService {
   /**
-   * Verifica se o usuário é o super admin do sistema
+   * Verifica se o usuário é um super admin do sistema
    */
   private static async isSuperAdmin(userId: string): Promise<boolean> {
     try {
       const { data: user } = await supabaseAdmin.auth.admin.getUserById(userId);
-      return user?.user?.email === SUPER_ADMIN_EMAIL;
+      return user?.user?.email ? SUPER_ADMIN_EMAILS.includes(user.user.email) : false;
     } catch (error) {
       console.error('Erro ao verificar super admin:', error);
       return false;

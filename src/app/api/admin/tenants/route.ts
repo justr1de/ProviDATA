@@ -4,9 +4,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { TenantProvisioningService, CreateTenantRequest } from '@/lib/services/tenant-provisioning.service';
+import { getSuperAdminEmails } from '@/lib/env-validation';
 
-// Email do super admin geral do sistema
-const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
+// Lista de emails de super admins (configurável via variável de ambiente)
+const SUPER_ADMIN_EMAILS = getSuperAdminEmails();
 
 /**
  * Verifica se o usuário é super admin
@@ -20,7 +21,7 @@ async function isSuperAdmin(request: NextRequest): Promise<{ isSuper: boolean; e
     return { isSuper: false, error: 'Não autenticado' };
   }
   
-  if (user.email !== SUPER_ADMIN_EMAIL) {
+  if (!user.email || !SUPER_ADMIN_EMAILS.includes(user.email)) {
     return { isSuper: false, error: 'Acesso negado: apenas super admin' };
   }
   
