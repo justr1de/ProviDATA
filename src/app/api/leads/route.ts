@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerEnv } from '@/lib/env';
+import { getServerEnv, env } from '@/lib/env';
 import { validateLeadData } from '@/lib/validators';
 
 export async function POST(request: NextRequest) {
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     
     // Criar cliente Supabase com Service Role Key (server-only)
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      env.supabaseUrl,
       serverEnv.supabaseServiceKey,
       {
         auth: {

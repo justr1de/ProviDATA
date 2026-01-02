@@ -3,6 +3,8 @@
  * Gerencia verificações de super admin e outras permissões
  */
 
+import { getServerEnv } from './env';
+
 /**
  * Lista de emails de super admin - fallback para uso no cliente
  * Em produção, esta verificação deve ser feita no servidor via RLS/API
@@ -19,7 +21,6 @@ export function getSuperAdminEmails(): string[] {
   if (typeof window === 'undefined') {
     try {
       // Apenas no servidor podemos acessar getServerEnv
-      const { getServerEnv } = require('./env');
       const serverEnv = getServerEnv();
       const emails = serverEnv.superAdminEmails || '';
       return emails

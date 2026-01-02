@@ -11,7 +11,9 @@
  * @throws Error se a variável não estiver definida
  */
 export function getRequiredEnv(key: string, isServer: boolean = false): string {
-  // Em ambiente de cliente, apenas variáveis NEXT_PUBLIC_ são acessíveis
+  // Em ambiente de cliente (navegador), apenas variáveis NEXT_PUBLIC_ são acessíveis
+  // Nota: typeof window !== 'undefined' funciona bem no Next.js para detecção cliente/servidor
+  // Em ambientes edge/serverless, este código roda no servidor onde window não existe
   if (typeof window !== 'undefined' && !key.startsWith('NEXT_PUBLIC_')) {
     throw new Error(
       `Tentativa de acessar variável server-only "${key}" no cliente. ` +

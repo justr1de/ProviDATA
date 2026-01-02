@@ -80,6 +80,7 @@ export function sanitizePhone(phone: string): string {
 
 /**
  * Valida se uma string contém apenas caracteres alfanuméricos e espaços
+ * Suporta caracteres Unicode incluindo acentuação
  * @param input String para validar
  * @returns true se contém apenas caracteres seguros
  */
@@ -88,7 +89,10 @@ export function isAlphanumericWithSpaces(input: string): boolean {
     return false;
   }
   
-  return /^[a-zA-Z0-9\s\u00C0-\u017F]+$/.test(input);
+  // Permite letras Unicode (incluindo acentuadas), números e espaços
+  // \p{L} = todas as letras Unicode
+  // \p{N} = todos os números Unicode
+  return /^[\p{L}\p{N}\s]+$/u.test(input);
 }
 
 /**
