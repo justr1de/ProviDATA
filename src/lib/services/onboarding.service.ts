@@ -1,365 +1,370 @@
-import { supabase } from '$lib/supabase';
-import type { Database } from '$lib/database.types';
-import type { PostgrestError } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
+import type { Database } from '@/types/supabase';
+import { cache } from 'react';
+import {
+  Profile,
+  GabineteInvite,
+  InviteEmailResponseDto,
+  Gabinete,
+  ProfileWithGabinete,
+} from '@/types';
+import { formatReactEmailDate } from '@/lib/utils/date';
+import { GabineteRole } from '@/lib/enums';
+import { Resend } from 'resend';
+import InviteUserEmail from '@/emails/InviteUserEmail';
 
-type Profile = Database['public']['Tables']['profiles']['Row'];
-type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
-type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
-type Gabinete = Database['public']['Tables']['gabinetes']['Row'];
-type GabineteInsert = Database['public']['Tables']['gabinetes']['Insert'];
+type GabineteInviteCreateRequest = Database['public']['Tables']['gabinete_invites']['Insert'];
 
-type InviteRequest = {
-	email: string;
-	role: 'admin' | 'manager' | 'user';
-	gabinete_id?: string;
-	organization_id?: string;
-};
+async function getLatestInvite(email: string): Promise<GabineteInvite | null> {
+  const supabase = await createClient();
 
-type InviteResponse = {
-	data: {
-		profile: Profile;
-		inviteUrl?: string;
-	} | null;
-	error: PostgrestError | Error | null;
-};
+  const { data, error } = await supabase
+    .from('gabinete_invites')
+    .select('*')
+    .eq('email', email)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
 
-export class OnboardingService {
-	static async getProfile(userId: string): Promise<{
-		data: Profile | null;
-		error: PostgrestError | null;
-	}> {
-		const { data, error } = await supabase
-			.from('profiles')
-			.select('*')
-			.eq('id', userId)
-			.single();
+  if (error) {
+    console.error('Error fetching latest invite:', error);
+    return null;
+  }
 
-		return { data, error };
-	}
-
-	static async updateProfile(
-		userId: string,
-		updates: ProfileUpdate
-	): Promise<{
-		data: Profile | null;
-		error: PostgrestError | null;
-	}> {
-		const { data, error } = await supabase
-			.from('profiles')
-			.update(updates)
-			.eq('id', userId)
-			.select()
-			.single();
-
-		return { data, error };
-	}
-
-	static async inviteUser(
-		inviterId: string,
-		request: InviteRequest
-	): Promise<InviteResponse> {
-		try {
-			// Get inviter's profile
-			const { data: inviterProfile, error: inviterError } = await this.getProfile(inviterId);
-			if (inviterError || !inviterProfile) {
-				return { data: null, error: inviterError || new Error('Inviter not found') };
-			}
-
-			const gabineteId = request.gabinete_id || inviterProfile.gabinete_id;
-
-			if (!gabineteId) {
-				return { data: null, error: new Error('gabinete_id is required') };
-			}
-
-			// Check if user exists
-			const { data: existingProfile } = await supabase
-				.from('profiles')
-				.select('*')
-				.eq('email', request.email)
-				.single();
-
-			if (existingProfile) {
-				// User exists, update their role and gabinete
-				const { data: updatedProfile, error: updateError } = await this.updateProfile(
-					existingProfile.id,
-					{
-						role: request.role,
-						gabinete_id: gabineteId
-					}
-				);
-
-				if (updateError) {
-					return { data: null, error: updateError };
-				}
-
-				return { data: { profile: updatedProfile! }, error: null };
-			}
-
-			// Generate magic link for new user
-			const { data: authData, error: authError } = await supabase.auth.signInWithOtp({
-				email: request.email,
-				options: {
-					emailRedirectTo: `${window.location.origin}/auth/callback`
-				}
-			});
-
-			if (authError) {
-				return { data: null, error: authError };
-			}
-
-			// Create profile for new user
-			// Note: The profile will be created via trigger when they first sign in
-			// We'll return a temporary profile object for the response
-			const tempProfile: Profile = {
-				id: '', // Will be set by the database trigger
-				email: request.email,
-				full_name: null,
-				avatar_url: null,
-				role: request.role,
-				gabinete_id: gabineteId,
-				created_at: new Date().toISOString(),
-				updated_at: new Date().toISOString()
-			};
-
-			return {
-				data: {
-					profile: tempProfile,
-					inviteUrl: authData.properties?.action_link
-				},
-				error: null
-			};
-		} catch (error) {
-			return {
-				data: null,
-				error: error instanceof Error ? error : new Error('Unknown error occurred')
-			};
-		}
-	}
-
-	static async listProfiles(gabineteId: string): Promise<{
-		data: Profile[] | null;
-		error: PostgrestError | null;
-	}> {
-		const { data, error } = await supabase
-			.from('profiles')
-			.select('*')
-			.eq('gabinete_id', gabineteId)
-			.order('created_at', { ascending: false });
-
-		return { data, error };
-	}
-
-	static async removeUser(
-		adminId: string,
-		targetUserId: string
-	): Promise<{
-		data: boolean;
-		error: PostgrestError | Error | null;
-	}> {
-		try {
-			// Get admin's profile to verify they have permission
-			const { data: adminProfile, error: adminError } = await this.getProfile(adminId);
-			if (adminError || !adminProfile) {
-				return { data: false, error: adminError || new Error('Admin not found') };
-			}
-
-			if (adminProfile.role !== 'admin') {
-				return { data: false, error: new Error('Insufficient permissions') };
-			}
-
-			// Get target user's profile
-			const { data: targetProfile, error: targetError } = await this.getProfile(targetUserId);
-			if (targetError || !targetProfile) {
-				return { data: false, error: targetError || new Error('Target user not found') };
-			}
-
-			// Verify both users are in the same gabinete
-			if (adminProfile.gabinete_id !== targetProfile.gabinete_id) {
-				return { data: false, error: new Error('Cannot remove users from different gabinetes') };
-			}
-
-			// Don't allow removing yourself
-			if (adminId === targetUserId) {
-				return { data: false, error: new Error('Cannot remove yourself') };
-			}
-
-			// Delete the user's profile
-			const { error: deleteError } = await supabase
-				.from('profiles')
-				.delete()
-				.eq('id', targetUserId);
-
-			if (deleteError) {
-				return { data: false, error: deleteError };
-			}
-
-			return { data: true, error: null };
-		} catch (error) {
-			return {
-				data: false,
-				error: error instanceof Error ? error : new Error('Unknown error occurred')
-			};
-		}
-	}
-
-	static async updateUserRole(
-		adminId: string,
-		targetUserId: string,
-		newRole: 'admin' | 'manager' | 'user'
-	): Promise<{
-		data: Profile | null;
-		error: PostgrestError | Error | null;
-	}> {
-		try {
-			// Get admin's profile to verify they have permission
-			const { data: adminProfile, error: adminError } = await this.getProfile(adminId);
-			if (adminError || !adminProfile) {
-				return { data: null, error: adminError || new Error('Admin not found') };
-			}
-
-			if (adminProfile.role !== 'admin') {
-				return { data: null, error: new Error('Insufficient permissions') };
-			}
-
-			// Get target user's profile
-			const { data: targetProfile, error: targetError } = await this.getProfile(targetUserId);
-			if (targetError || !targetProfile) {
-				return { data: null, error: targetError || new Error('Target user not found') };
-			}
-
-			// Verify both users are in the same gabinete
-			if (adminProfile.gabinete_id !== targetProfile.gabinete_id) {
-				return { data: null, error: new Error('Cannot update users from different gabinetes') };
-			}
-
-			// Don't allow updating yourself
-			if (adminId === targetUserId) {
-				return { data: null, error: new Error('Cannot update your own role') };
-			}
-
-			// Update the role
-			const { data: updatedProfile, error: updateError } = await this.updateProfile(
-				targetUserId,
-				{ role: newRole }
-			);
-
-			if (updateError) {
-				return { data: null, error: updateError };
-			}
-
-			return { data: updatedProfile, error: null };
-		} catch (error) {
-			return {
-				data: null,
-				error: error instanceof Error ? error : new Error('Unknown error occurred')
-			};
-		}
-	}
-
-	static async createGabinete(
-		userId: string,
-		gabineteData: Omit<GabineteInsert, 'id' | 'created_at' | 'updated_at'>
-	): Promise<{
-		data: Gabinete | null;
-		error: PostgrestError | Error | null;
-	}> {
-		try {
-			// Create the gabinete
-			const { data: gabinete, error: gabineteError } = await supabase
-				.from('gabinetes')
-				.insert(gabineteData)
-				.select()
-				.single();
-
-			if (gabineteError) {
-				return { data: null, error: gabineteError };
-			}
-
-			// Update the user's profile with the new gabinete
-			const { error: profileError } = await this.updateProfile(userId, {
-				gabinete_id: gabinete.id,
-				role: 'admin' // Creator becomes admin
-			});
-
-			if (profileError) {
-				// Rollback: delete the gabinete if profile update fails
-				await supabase.from('gabinetes').delete().eq('id', gabinete.id);
-				return { data: null, error: profileError };
-			}
-
-			return { data: gabinete, error: null };
-		} catch (error) {
-			return {
-				data: null,
-				error: error instanceof Error ? error : new Error('Unknown error occurred')
-			};
-		}
-	}
-
-	static async updateGabinete(
-		adminId: string,
-		gabineteId: string,
-		updates: Partial<Omit<GabineteInsert, 'id' | 'created_at' | 'updated_at'>>
-	): Promise<{
-		data: Gabinete | null;
-		error: PostgrestError | Error | null;
-	}> {
-		try {
-			// Verify admin has permission
-			const { data: adminProfile, error: adminError } = await this.getProfile(adminId);
-			if (adminError || !adminProfile) {
-				return { data: null, error: adminError || new Error('Admin not found') };
-			}
-
-			if (adminProfile.role !== 'admin' || adminProfile.gabinete_id !== gabineteId) {
-				return { data: null, error: new Error('Insufficient permissions') };
-			}
-
-			// Update the gabinete
-			const { data: gabinete, error: updateError } = await supabase
-				.from('gabinetes')
-				.update(updates)
-				.eq('id', gabineteId)
-				.select()
-				.single();
-
-			if (updateError) {
-				return { data: null, error: updateError };
-			}
-
-			return { data: gabinete, error: null };
-		} catch (error) {
-			return {
-				data: null,
-				error: error instanceof Error ? error : new Error('Unknown error occurred')
-			};
-		}
-	}
-
-	static async getGabinete(
-		gabineteId: string
-	): Promise<{
-		data: Gabinete | null;
-		error: PostgrestError | Error | null;
-	}> {
-		try {
-			const { data: gabinete, error } = await supabase
-				.from('gabinetes')
-				.select('*')
-				.eq('id', gabineteId)
-				.single();
-
-			if (error) {
-				return { data: null, error };
-			}
-
-			return { data: gabinete as Gabinete, error: null };
-		} catch (error) {
-			console.error('Erro no getGabinete:', error);
-			return {
-				data: null,
-				error: error instanceof Error ? error : new Error('Unknown error occurred')
-			};
-		}
-	}
+  return data as GabineteInvite;
 }
+
+async function getProfile(userId: string): Promise<Profile | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching profile:', error);
+    return null;
+  }
+
+  return data as Profile;
+}
+
+async function createInvite(
+  request: GabineteInviteCreateRequest
+): Promise<GabineteInvite | null> {
+  const supabase = await createClient();
+
+  // Get the inviter's profile
+  const inviterProfile = await getProfile(request.inviter_id);
+  if (!inviterProfile) {
+    console.error('Inviter profile not found');
+    return null;
+  }
+
+  // Use gabinete_id from request or fall back to inviter's gabinete_id
+  const targetGabineteId = request.gabinete_id || inviterProfile.gabinete_id;
+
+  if (!targetGabineteId) {
+    console.error('No gabinete_id available');
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('gabinete_invites')
+    .insert([
+      {
+        email: request.email,
+        role: request.role,
+        inviter_id: request.inviter_id,
+        gabinete_id: targetGabineteId,
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating invite:', error);
+    return null;
+  }
+
+  return data as GabineteInvite;
+}
+
+async function deleteInvite(inviteId: string): Promise<boolean> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.from('gabinete_invites').delete().eq('id', inviteId);
+
+  if (error) {
+    console.error('Error deleting invite:', error);
+    return false;
+  }
+
+  return true;
+}
+
+async function updateProfile(
+  userId: string,
+  updates: Partial<Profile>
+): Promise<Profile | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', userId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating profile:', error);
+    return null;
+  }
+
+  return data as Profile;
+}
+
+const getProfileByIdCached = cache(async (id: string) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*, gabinetes(*)')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error in getProfileByIdCached:', error);
+    return null;
+  }
+
+  return data as ProfileWithGabinete;
+});
+
+async function handleSignup(
+  userId: string,
+  email: string,
+  fullName?: string
+): Promise<Profile | null> {
+  const supabase = await createClient();
+
+  // Check if there's a pending invite for this email
+  const invite = await getLatestInvite(email);
+
+  if (invite) {
+    // Create profile with the invite's gabinete_id and role
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert([
+        {
+          id: userId,
+          email: email,
+          full_name: fullName || '',
+          gabinete_id: invite.gabinete_id,
+          role: invite.role,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating profile with invite:', error);
+      return null;
+    }
+
+    // Delete the invite after successful signup
+    await deleteInvite(invite.id);
+
+    return data as Profile;
+  } else {
+    // No invite found - create a new gabinete and profile
+    const { data: gabineteData, error: gabineteError } = await supabase
+      .from('gabinetes')
+      .insert([{ name: `${fullName || email}'s Gabinete` }])
+      .select()
+      .single();
+
+    if (gabineteError) {
+      console.error('Error creating gabinete:', gabineteError);
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert([
+        {
+          id: userId,
+          email: email,
+          full_name: fullName || '',
+          gabinete_id: gabineteData.id,
+          role: GabineteRole.OWNER,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating profile:', error);
+      return null;
+    }
+
+    return data as Profile;
+  }
+}
+
+async function getInvitesByGabineteId(gabineteId: string): Promise<GabineteInvite[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('gabinete_invites')
+    .select('*')
+    .eq('gabinete_id', gabineteId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching invites:', error);
+    return [];
+  }
+
+  return data as GabineteInvite[];
+}
+
+async function getProfilesByGabineteId(gabineteId: string): Promise<Profile[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('gabinete_id', gabineteId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching profiles:', error);
+    return [];
+  }
+
+  return data as Profile[];
+}
+
+async function sendInviteEmail(
+  inviterName: string,
+  inviteeEmail: string,
+  gabineteId: string
+): Promise<InviteEmailResponseDto> {
+  try {
+    if (!process.env.RESEND_API_KEY) {
+      return {
+        success: false,
+        error: 'Resend API key not configured',
+      };
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    // Get the gabinete name
+    const supabase = await createClient();
+    const { data: gabineteData, error: gabineteError } = await supabase
+      .from('gabinetes')
+      .select('name')
+      .eq('id', gabineteId)
+      .single();
+
+    if (gabineteError) {
+      return {
+        success: false,
+        error: 'Failed to fetch gabinete information',
+      };
+    }
+
+    const gabineteName = gabineteData?.name || 'the gabinete';
+
+    // Send the email
+    const { data, error } = await resend.emails.send({
+      from: 'ProviDATA <noreply@providata.com.br>',
+      to: inviteeEmail,
+      subject: `${inviterName} invited you to join ${gabineteName} on ProviDATA`,
+      react: InviteUserEmail({
+        inviterName,
+        inviteeEmail,
+        gabineteName,
+        inviteDate: formatReactEmailDate(new Date()),
+        inviteLink: `${process.env.NEXT_PUBLIC_APP_URL}/signup?email=${encodeURIComponent(inviteeEmail)}`,
+      }),
+    });
+
+    if (error) {
+      console.error('Error sending invite email:', error);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        id: data?.id || '',
+      },
+    };
+  } catch (error) {
+    console.error('Error in sendInviteEmail:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+    };
+  }
+}
+
+async function updateGabinete(
+  gabineteId: string,
+  updates: { name?: string; cpf_cnpj?: string }
+): Promise<Gabinete | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('gabinetes')
+    .update(updates)
+    .eq('id', gabineteId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating gabinete:', error);
+    return null;
+  }
+
+  return data as Gabinete;
+}
+
+async function getGabinete(gabineteId: string): Promise<Gabinete | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('gabinetes')
+    .select('*')
+    .eq('id', gabineteId)
+    .single();
+
+  if (error) {
+    console.error('Error in getGabinete:', error);
+    return null;
+  }
+
+  return data as Gabinete;
+}
+
+export const OnboardingService = {
+  getLatestInvite,
+  getProfile,
+  createInvite,
+  deleteInvite,
+  updateProfile,
+  handleSignup,
+  getInvitesByGabineteId,
+  getProfilesByGabineteId,
+  sendInviteEmail,
+  updateGabinete,
+  getGabinete,
+  getProfileByIdCached,
+};
