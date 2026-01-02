@@ -168,27 +168,43 @@ export default function GabinetesPage() {
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Validação aprimorada
-    if (!formData.nome?.trim() || !formData.municipio?.trim() || !formData.uf) {
-      toast.error('Preencha todos os campos obrigatórios (Nome, Município e UF)')
+    // Validação aprimorada de campos obrigatórios
+    if (!formData.nome?.trim()) {
+      toast.error('Nome do gabinete é obrigatório')
+      return
+    }
+    
+    if (!formData.municipio?.trim()) {
+      toast.error('Município é obrigatório')
+      return
+    }
+    
+    if (!formData.uf) {
+      toast.error('UF é obrigatória')
       return
     }
 
-    // Validação de e-mail
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (formData.email_parlamentar && !emailRegex.test(formData.email_parlamentar)) {
-      toast.error('E-mail do parlamentar inválido')
-      return
+    // Validação de e-mail com regex robusto (RFC 5322 simplificado)
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+    
+    if (formData.email_parlamentar && formData.email_parlamentar.trim()) {
+      if (!emailRegex.test(formData.email_parlamentar.trim())) {
+        toast.error('E-mail do parlamentar inválido')
+        return
+      }
     }
-    if (formData.email_gabinete && !emailRegex.test(formData.email_gabinete)) {
-      toast.error('E-mail do gabinete inválido')
-      return
+    
+    if (formData.email_gabinete && formData.email_gabinete.trim()) {
+      if (!emailRegex.test(formData.email_gabinete.trim())) {
+        toast.error('E-mail do gabinete inválido')
+        return
+      }
     }
 
     try {
       setSubmitting(true)
       
-      // Prepara os dados, convertendo strings vazias para null
+      // Prepara os dados, convertendo strings vazias para null e sanitizando
       const dataToInsert = {
         nome: formData.nome.trim(),
         municipio: formData.municipio.trim(),
@@ -199,8 +215,8 @@ export default function GabinetesPage() {
         telefone_parlamentar: formData.telefone_parlamentar?.trim() || null,
         telefone_gabinete: formData.telefone_gabinete?.trim() || null,
         telefone_adicional: formData.telefone_adicional?.trim() || null,
-        email_parlamentar: formData.email_parlamentar?.trim() || null,
-        email_gabinete: formData.email_gabinete?.trim() || null,
+        email_parlamentar: formData.email_parlamentar?.trim().toLowerCase() || null,
+        email_gabinete: formData.email_gabinete?.trim().toLowerCase() || null,
         chefe_de_gabinete: formData.chefe_de_gabinete?.trim() || null,
         assessor_2: formData.assessor_2?.trim() || null,
         ativo: true
@@ -218,7 +234,21 @@ export default function GabinetesPage() {
       await carregarGabinetes()
     } catch (error: any) {
       console.error('Erro ao criar gabinete:', error)
-      const errorMessage = error?.message || 'Erro desconhecido ao criar gabinete'
+      
+      // Tratamento de erros mais robusto
+      let errorMessage = 'Erro desconhecido ao criar gabinete'
+      
+      if (error?.message) {
+        errorMessage = error.message
+        
+        // Mensagens de erro mais amigáveis para erros comuns
+        if (error.message.includes('duplicate key')) {
+          errorMessage = 'Já existe um gabinete com este nome'
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente'
+        }
+      }
+      
       toast.error(`Erro ao criar gabinete: ${errorMessage}`)
     } finally {
       setSubmitting(false)
