@@ -1,4 +1,4 @@
-// API Route: /api/invites/accept (Refatorado para tenant_id)
+// API Route: /api/invites/accept
 // Aceitar convite (público)
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Aceitar convite usando função unificada
+    // Aceitar convite
     const result = await OnboardingService.acceptInvite(token, user.id);
 
     if (!result.success) {
@@ -47,8 +47,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       role: result.role,
-      gabinete_id: result.tenant_id, // gabinete_id agora é a fonte de verdade
-      organization_id: result.organization_id || result.tenant_id, // Compatibilidade
+      gabinete_id: result.gabinete_id,
     });
   } catch (error) {
     console.error('Erro ao aceitar convite:', error);
