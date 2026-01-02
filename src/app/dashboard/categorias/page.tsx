@@ -36,7 +36,7 @@ export default function CategoriasPage() {
       const { data, error } = await supabase
         .from('categorias')
         .select('*')
-        .eq('tenant_id', tenant.id)
+        .eq('gabinete_id', tenant.id)
         .order('nome')
 
       if (error) throw error
@@ -78,7 +78,7 @@ export default function CategoriasPage() {
         const { error } = await supabase
           .from('categorias')
           .insert({
-            tenant_id: tenant.id,
+            gabinete_id: tenant.id,
             nome: formData.nome,
             descricao: formData.descricao || null,
             cor: formData.cor,

@@ -612,7 +612,14 @@ export default function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main style={{ flex: 1, padding: isDesktop ? '32px' : '20px', paddingBottom: '40px' }}>
+        {/* Page content */}
+      <main style={{ 
+        flex: 1, 
+        paddingTop: isDesktop ? '32px' : '20px',
+        paddingLeft: isDesktop ? '32px' : '20px',
+        paddingRight: isDesktop ? '32px' : '20px',
+        paddingBottom: '40px' 
+      }}>
           {/* Slogan */}
           <div style={{
             textAlign: 'center',

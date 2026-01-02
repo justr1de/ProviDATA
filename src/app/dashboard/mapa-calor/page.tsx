@@ -96,7 +96,7 @@ export default function MapaCalorPage() {
             categoria:categorias(*),
             orgao_destino:orgaos(*)
           `)
-          .eq('tenant_id', tenant.id)
+          .eq('gabinete_id', tenant.id)
           .order('created_at', { ascending: false })
 
         if (provError) throw provError
@@ -131,7 +131,7 @@ export default function MapaCalorPage() {
         const { data: categoriasData } = await supabase
           .from('categorias')
           .select('id, nome')
-          .eq('tenant_id', tenant.id)
+          .eq('gabinete_id', tenant.id)
           .eq('ativo', true)
 
         setCategorias(categoriasData || [])

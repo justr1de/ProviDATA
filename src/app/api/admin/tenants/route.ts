@@ -1,0 +1,136 @@
+// API Route: /api/admin/tenants
+// Gerenciamento de tenants (somente super-admin)
+
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+import { TenantProvisioningService, CreateTenantRequest } from '@/lib/services/tenant-provisioning.service';
+
+// Email do super admin geral do sistema
+const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
+
+/**
+ * Verifica se o usuário é super admin
+ */
+async function isSuperAdmin(request: NextRequest): Promise<{ isSuper: boolean; error?: string }> {
+  const supabase = await createClient();
+  
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  if (authError || !user) {
+    return { isSuper: false, error: 'Não autenticado' };
+  }
+  
+  if (user.email !== SUPER_ADMIN_EMAIL) {
+    return { isSuper: false, error: 'Acesso negado: apenas super admin' };
+  }
+  
+  return { isSuper: true };
+}
+
+/**
+ * GET /api/admin/tenants
+ * Lista todos os tenants (somente super-admin)
+ */
+export async function GET(request: NextRequest) {
+  try {
+    // Verificar se é super admin
+    const { isSuper, error: authError } = await isSuperAdmin(request);
+    
+    if (!isSuper) {
+      return NextResponse.json(
+        { error: authError || 'Acesso negado' },
+        { status: 403 }
+      );
+    }
+    
+    // Buscar filtros da query string
+    const searchParams = request.nextUrl.searchParams;
+    const filters = {
+      type: searchParams.get('type') || undefined,
+      uf: searchParams.get('uf') || undefined,
+      ativo: searchParams.get('ativo') === 'true' ? true : searchParams.get('ativo') === 'false' ? false : undefined,
+      search: searchParams.get('search') || undefined,
+    };
+    
+    // Listar tenants
+    const { data: tenants, error } = await TenantProvisioningService.listTenants(filters);
+    
+    if (error) {
+      return NextResponse.json(
+        { error },
+        { status: 400 }
+      );
+    }
+    
+    return NextResponse.json({ tenants });
+  } catch (error) {
+    console.error('Erro ao listar tenants:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * POST /api/admin/tenants
+ * Provisiona um novo tenant com usuário admin (somente super-admin)
+ */
+export async function POST(request: NextRequest) {
+  try {
+    // Verificar se é super admin
+    const { isSuper, error: authError } = await isSuperAdmin(request);
+    
+    if (!isSuper) {
+      return NextResponse.json(
+        { error: authError || 'Acesso negado' },
+        { status: 403 }
+      );
+    }
+    
+    // Ler o body
+    const body: CreateTenantRequest = await request.json();
+    
+    // Validações básicas
+    if (!body.name || !body.admin_email) {
+      return NextResponse.json(
+        { error: 'Nome do tenant e email do admin são obrigatórios' },
+        { status: 400 }
+      );
+    }
+    
+    if (!body.type) {
+      return NextResponse.json(
+        { error: 'Tipo do tenant é obrigatório' },
+        { status: 400 }
+      );
+    }
+    
+    // Provisionar tenant
+    const result = await TenantProvisioningService.provisionTenant(body);
+    
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: 400 }
+      );
+    }
+    
+    // Retornar sucesso com credenciais (IMPORTANTE: Esta senha deve ser enviada ao admin via email seguro)
+    return NextResponse.json(
+      {
+        success: true,
+        tenant: result.tenant,
+        admin_user: result.admin_user,
+        message: 'Tenant provisionado com sucesso. Envie as credenciais ao admin de forma segura.',
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error('Erro ao provisionar tenant:', error);
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    );
+  }
+}

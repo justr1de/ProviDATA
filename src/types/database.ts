@@ -1,27 +1,126 @@
+// =====================================================
+// TIPOS PARA MULTI-TENANCY - MODELO UNIFICADO
+// =====================================================
+
+// Tipo unificado para Tenant (fonte de verdade)
 export interface Tenant {
   id: string
   name: string
   slug: string
-  parlamentar_name: string
+  type: 'gabinete' | 'organization' | 'municipal' | 'estadual' | 'federal'
+  
+  // Informações parlamentares
+  parlamentar_name?: string
   parlamentar_nickname?: string
-  cargo: 'vereador' | 'deputado_estadual' | 'deputado_federal' | 'senador'
+  parlamentar_cargo?: 'vereador' | 'prefeito' | 'deputado_estadual' | 'deputado_federal' | 'senador' | 'governador'
   partido?: string
+  
+  // Localização
   uf?: string
   municipio?: string
-  logo_url?: string
-  email_contato?: string
-  telefone?: string
-  telefone_contato?: string
   endereco?: string
-  plano: 'basico' | 'profissional' | 'enterprise'
+  
+  // Contatos
+  telefone?: string
+  telefone_parlamentar?: string
+  telefone_gabinete?: string
+  telefone_adicional?: string
+  email?: string
+  email_parlamentar?: string
+  email_gabinete?: string
+  
+  // Assessores
+  assessor_1?: string
+  assessor_2?: string
+  
+  // Configurações
+  logo_url?: string
+  settings?: Record<string, unknown>
+  plano?: 'basico' | 'profissional' | 'enterprise'
+  
+  // Status
+  ativo: boolean
+  
+  // Timestamps
+  created_at: string
+  updated_at: string
+  
+  // Metadados
+  metadata?: Record<string, unknown>
+}
+
+// Tipo legado - manter compatibilidade
+export interface Gabinete {
+  id: string
+  nome: string
+  municipio: string
+  uf: string
+  parlamentar_nome?: string
+  parlamentar_cargo?: 'vereador' | 'prefeito' | 'deputado_estadual' | 'deputado_federal' | 'senador' | 'governador'
+  partido?: string
+  telefone?: string // Campo legado - manter compatibilidade
+  email?: string // Campo legado - manter compatibilidade
+  telefone_parlamentar?: string
+  telefone_gabinete?: string
+  telefone_adicional?: string
+  email_parlamentar?: string
+  email_gabinete?: string
+  assessor_1?: string
+  assessor_2?: string
+  endereco?: string
+  logo_url?: string
+  settings?: Record<string, unknown>
   ativo: boolean
   created_at: string
   updated_at: string
 }
 
+export interface Convite {
+  id: string
+  email: string
+  tenant_id?: string // Novo campo - fonte de verdade
+  gabinete_id: string // Legado - manter compatibilidade
+  cargo: 'admin' | 'gestor' | 'assessor' | 'operador' | 'visualizador'
+  token: string
+  status: 'pendente' | 'aceito' | 'expirado' | 'revogado'
+  validade: string
+  aceito_em?: string
+  created_at: string
+  updated_at: string
+  convidado_por?: string
+  aceito_por?: string
+  metadata?: Record<string, unknown>
+  // Relations
+  tenant?: Tenant // Novo campo usando Tenant
+  gabinete?: Gabinete // Legado - compatibilidade
+}
+
+export interface Profile {
+  id: string
+  email: string
+  full_name?: string
+  role: 'super_admin' | 'admin' | 'gestor' | 'assessor' | 'operador' | 'visualizador'
+  tenant_id?: string // Novo campo - fonte de verdade
+  organization_id?: string // Legado - compatibilidade
+  gabinete_id?: string // Legado - compatibilidade
+  avatar_url?: string
+  onboarding_completed: boolean
+  onboarding_step: number
+  created_at: string
+  updated_at: string
+  metadata?: Record<string, unknown>
+  // Relations
+  tenant?: Tenant // Novo campo usando Tenant
+  gabinete?: Gabinete // Legado - compatibilidade
+}
+
+// =====================================================
+// TIPOS LEGADOS (MANTER COMPATIBILIDADE)
+// =====================================================
+
 export interface User {
   id: string
-  tenant_id: string
+  gabinete_id: string
   nome: string
   email: string
   telefone?: string
@@ -35,7 +134,7 @@ export interface User {
 
 export interface Cidadao {
   id: string
-  tenant_id: string
+  gabinete_id: string
   nome: string
   cpf?: string
   rg?: string
@@ -58,7 +157,7 @@ export interface Cidadao {
 
 export interface Orgao {
   id: string
-  tenant_id: string
+  gabinete_id: string
   nome: string
   tipo: 'secretaria_municipal' | 'secretaria_estadual' | 'mp_estadual' | 'mp_federal' | 'defensoria' | 'tribunal_contas' | 'outros'
   sigla?: string
@@ -73,7 +172,7 @@ export interface Orgao {
 
 export interface Categoria {
   id: string
-  tenant_id: string
+  gabinete_id: string
   nome: string
   descricao?: string
   cor: string
@@ -84,7 +183,7 @@ export interface Categoria {
 
 export interface Providencia {
   id: string
-  tenant_id: string
+  gabinete_id: string
   numero_protocolo: string
   cidadao_id?: string
   categoria_id?: string
@@ -149,7 +248,7 @@ export interface Historico {
 
 export interface Notificacao {
   id: string
-  tenant_id: string
+  gabinete_id: string
   usuario_id?: string
   providencia_id?: string
   tipo: 'nova_providencia' | 'atualizacao' | 'prazo_proximo' | 'prazo_vencido' | 'resposta' | 'info' | 'alerta' | 'prazo' | 'sucesso'
@@ -162,7 +261,7 @@ export interface Notificacao {
 }
 
 export interface DashboardStats {
-  tenant_id: string
+  gabinete_id: string
   total_providencias: number
   pendentes: number
   em_analise: number
@@ -173,4 +272,78 @@ export interface DashboardStats {
   urgentes: number
   atrasadas: number
   este_mes: number
+}
+
+// =====================================================
+// TIPOS PARA FUNÇÕES E RESPOSTAS - GABINETES
+// =====================================================
+
+export interface AceitarConviteResponse {
+  success: boolean
+  error?: string
+  cargo?: string
+  gabinete_id?: string
+}
+
+export interface RevogarConviteResponse {
+  success: boolean
+  error?: string
+  message?: string
+}
+
+export interface EstatisticasGabinete {
+  total_usuarios: number
+  total_admins: number
+  total_gestores: number
+  total_assessores: number
+  total_operadores: number
+  total_visualizadores: number
+  convites_pendentes: number
+  convites_aceitos: number
+}
+
+export interface ConviteFormData {
+  email: string
+  gabinete_id: string
+  cargo: 'admin' | 'gestor' | 'assessor' | 'operador' | 'visualizador'
+  metadata?: Record<string, unknown>
+}
+
+export interface GabineteFormData {
+  nome: string
+  municipio: string
+  uf: string
+  parlamentar_nome?: string
+  parlamentar_cargo?: 'vereador' | 'prefeito' | 'deputado_estadual' | 'deputado_federal' | 'senador' | 'governador'
+  partido?: string
+  telefone?: string // Campo legado
+  email?: string // Campo legado
+  telefone_parlamentar?: string
+  telefone_gabinete?: string
+  telefone_adicional?: string
+  email_parlamentar?: string
+  email_gabinete?: string
+  assessor_1?: string
+  assessor_2?: string
+  endereco?: string
+  logo_url?: string
+  settings?: Record<string, unknown>
+}
+
+// =====================================================
+// TIPOS PARA FILTROS E QUERIES
+// =====================================================
+
+export interface ConviteFilters {
+  status?: 'pendente' | 'aceito' | 'expirado' | 'revogado'
+  gabinete_id?: string
+  email?: string
+  cargo?: string
+}
+
+export interface GabineteFilters {
+  uf?: string
+  municipio?: string
+  ativo?: boolean
+  parlamentar_cargo?: string
 }

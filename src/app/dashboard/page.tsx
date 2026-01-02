@@ -275,7 +275,7 @@ export default function DashboardPage() {
       const { data: providencias } = await supabase
         .from('providencias')
         .select('status, prioridade')
-        .eq('tenant_id', tenant.id)
+        .eq('gabinete_id', tenant.id)
         .gte('created_at', startOfYear)
         .lte('created_at', endOfYear)
 
@@ -304,7 +304,7 @@ export default function DashboardPage() {
           cidadao:cidadaos(nome),
           orgao_destino:orgaos(nome, sigla)
         `)
-        .eq('tenant_id', tenant.id)
+        .eq('gabinete_id', tenant.id)
         .order('created_at', { ascending: false })
         .limit(5)
 
@@ -465,30 +465,30 @@ export default function DashboardPage() {
 
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
-                onClick={handleTourComplete}
-                style={{
-                  flex: 1,
-                  padding: '12px 20px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  borderRadius: '10px',
-                  
-                  backgroundColor: 'var(--card)',
-                  color: 'var(--text-muted)',
-                  cursor: 'pointer'
-                }}
-              >
-                Pular Tour
-              </button>
+                    onClick={handleTourComplete}
+                    style={{
+                      flex: 1,
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      borderRadius: '10px',
+                      padding: '12px 20px',
+                      border: 'none',
+                      backgroundColor: 'var(--card)',
+                      color: 'var(--text-muted)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Pular Tour
+                  </button>
               {currentTourStep > 0 && (
                 <button
                   onClick={handleTourPrev}
                   style={{
-                    padding: '12px 20px',
                     fontSize: '14px',
                     fontWeight: '600',
                     borderRadius: '10px',
-                    
+                    padding: '12px 20px',
+                    border: 'none',
                     backgroundColor: 'var(--card)',
                     color: 'var(--text-muted)',
                     cursor: 'pointer'
@@ -522,10 +522,10 @@ export default function DashboardPage() {
         {/* Área Principal */}
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Header */}
-          <div style={{ 
-            
+          <div style={{
+            backgroundColor: 'var(--card)',
             borderRadius: '16px',
-            
+            border: '1px solid var(--border)',
             padding: '24px',
             marginBottom: '24px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
@@ -1079,10 +1079,10 @@ export default function DashboardPage() {
           </div>
 
           {/* Providências Recentes */}
-          <div id="providencias-recentes" style={{ 
-            
+          <div id="providencias-recentes" style={{
+            backgroundColor: 'var(--card)',
             borderRadius: '16px',
-            
+            border: '1px solid var(--border)',
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
             overflow: 'hidden'
           }}>
@@ -1247,10 +1247,10 @@ export default function DashboardPage() {
         <div style={{ width: '340px', flexShrink: 0 }}>
           <div style={{ position: 'sticky', top: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {/* Criar Gráfico */}
-            <div id="criar-grafico" style={{ 
+            <div id="criar-grafico" style={{
               backgroundColor: 'var(--card)',
               borderRadius: '16px',
-              
+              border: '1px solid var(--border)',
               boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
               overflow: 'hidden'
             }}>
@@ -1495,10 +1495,10 @@ export default function DashboardPage() {
             </div>
 
             {/* Assistente de IA */}
-            <div id="ia-assistant" style={{ 
+            <div id="ia-assistant" style={{
               backgroundColor: 'var(--card)',
               borderRadius: '16px',
-              
+              border: '1px solid var(--border)',
               boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
               overflow: 'hidden'
             }}>

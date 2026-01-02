@@ -17,6 +17,10 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!email || !email.trim() || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      toast.error('Informe um e-mail válido')
+      return
+    }
     setIsLoading(true)
 
     try {
