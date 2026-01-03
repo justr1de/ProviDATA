@@ -36,11 +36,11 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Providências', href: '/dashboard/providencias', icon: FileText },
   { name: 'Cidadãos', href: '/dashboard/cidadaos', icon: Users },
-  { name: 'Órgãos', href: '/dashboard/orgaos', icon: Building2 },
-  { name: 'Categorias', href: '/dashboard/categorias', icon: FolderOpen },
-  { name: 'Relatórios', href: '/dashboard/relatorios', icon: FileBarChart },
   { name: 'Documentos', href: '/dashboard/documentos', icon: Files },
+  { name: 'Relatórios', href: '/dashboard/relatorios', icon: FileBarChart },
   { name: 'Mapa de Calor', href: '/dashboard/mapa-calor', icon: MapPin },
+  { name: 'Categorias', href: '/dashboard/categorias', icon: FolderOpen },
+  { name: 'Órgãos', href: '/dashboard/orgaos', icon: Building2 },
 ]
 
 const adminNavigation = [
@@ -514,9 +514,44 @@ export default function DashboardLayout({
                     <User style={{ width: '18px', height: '18px', color: 'white' }} />
                   </div>
                   {isDesktop && (
-                    <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--foreground)' }}>
-                      {user?.nome?.split(' ')[0] || 'Usuário'}
-                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--foreground)', lineHeight: '1.2' }}>
+                        {user?.nome?.split(' ')[0] || 'Usuário'}
+                      </span>
+                      <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--foreground-muted)', lineHeight: '1.2' }}>
+                        {(() => {
+                          // Se for super_admin
+                          if (user?.role === 'super_admin') {
+                            return 'Administrador';
+                          }
+                          
+                          // Se tiver cargo parlamentar no tenant
+                          const cargo = tenant?.parlamentar_cargo || tenant?.cargo;
+                          if (cargo) {
+                            const cargoMap: Record<string, string> = {
+                              'vereador': 'Vereador',
+                              'prefeito': 'Prefeito',
+                              'deputado_estadual': 'Deputado',
+                              'deputado_federal': 'Deputado',
+                              'senador': 'Senador',
+                              'governador': 'Governador'
+                            };
+                            return cargoMap[cargo] || 'Parlamentar';
+                          }
+                          
+                          // Mapear role para texto amigável
+                          const roleMap: Record<string, string> = {
+                            'admin': 'Administrador',
+                            'gestor': 'Gestor',
+                            'assessor': 'Assessor',
+                            'operador': 'Operador',
+                            'colaborador': 'Colaborador',
+                            'visualizador': 'Visualizador'
+                          };
+                          return roleMap[user?.role || ''] || 'Usuário';
+                        })()}
+                      </span>
+                    </div>
                   )}
                   <ChevronDown style={{ width: '18px', height: '18px', color: 'var(--foreground-muted)' }} />
                 </button>

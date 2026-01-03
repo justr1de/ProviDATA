@@ -98,7 +98,7 @@ export default async function AdminLayout({
               </span>
             </h1>
             <p className="text-sm sm:text-base text-gray-600 mt-2">
-              Painel Administrativo - {user.email}
+              Painel Administrativo - {user.email} | {userRole === 'super_admin' ? 'Administrador' : userRole === 'admin' ? 'Administrador' : 'Usuário'}
             </p>
           </div>
         </div>
