@@ -1,29 +1,29 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Users, 
-  Building2, 
-  UserPlus, 
+import { createClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/store/auth-store'
+import { Tenant } from '@/types/database'
+import {
+  Shield,
+  Users,
+  Building2,
   Settings,
-  Trash2,
+  UserPlus,
   Edit,
-  Mail,
-  Phone,
-  MapPin,
-  CheckCircle2,
   XCircle,
-  AlertCircle
+  CheckCircle,
+  Key,
+  Mail,
+  AlertTriangle,
+  X,
+  Loader2,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Tenant } from '@/types/database'
+
+// --- Interfaces e Constantes ---
 
 interface Usuario {
   id: string
@@ -38,473 +38,959 @@ interface Usuario {
   }
 }
 
-interface GabineteForm {
-  nome: string
-  cnpj: string
-  endereco: string
-  telefone: string
-  email: string
-  status: 'ativo' | 'inativo'
-}
+const tabs = [
+  { id: 'usuarios', name: 'Usuários', icon: Users },
+  { id: 'gabinete', name: 'Gabinete', icon: Building2 },
+  { id: 'seguranca', name: 'Segurança', icon: Key }
+]
+
+const roleOptions = [
+  { value: 'user', label: 'Usuário' },
+  { value: 'admin', label: 'Administrador' },
+  { value: 'super_admin', label: 'Super Admin' }
+]
+
+// --- Componente Principal ---
 
 export default function AdministracaoPage() {
+  const [activeTab, setActiveTab] = useState('usuarios')
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
-  const [gabinetes, setGabinetes] = useState<Tenant[]>([])
   const [loading, setLoading] = useState(true)
-  const [novoGabineteForm, setNovoGabineteForm] = useState<GabineteForm>({
-    nome: '',
-    cnpj: '',
-    endereco: '',
-    telefone: '',
-    email: '',
-    status: 'ativo'
-  })
-  const [editingGabinete, setEditingGabinete] = useState<Tenant | null>(null)
-  const supabase = createClientComponentClient()
+  const [showNewUserModal, setShowNewUserModal] = useState(false)
+  const [savingUser, setSavingUser] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+
+  // Form state
+  const [newUserName, setNewUserName] = useState('')
+  const [newUserEmail, setNewUserEmail] = useState('')
+  const [newUserPassword, setNewUserPassword] = useState('')
+  const [newUserRole, setNewUserRole] = useState('user')
+
+  const supabase = createClient()
+  const { tenant, user } = useAuthStore()
+
+  const loadUsers = useCallback(async () => {
+    setLoading(true)
+    let query = supabase.from('users').select('*').order('created_at', { ascending: false })
+    
+    // Filtro de segurança: se não for super_admin ou email mestre, vê apenas do próprio gabinete
+    if (!(user?.role === 'super_admin' || user?.email === 'contato@dataro-it.com.br')) {
+      query = query.eq('gabinete_id', tenant?.id)
+    }
+    
+    const { data } = await query
+    if (data) {
+      // Mapeando para interface Usuario se necessário ou usando any no map
+      setUsuarios(data as any)
+    }
+    setLoading(false)
+  }, [supabase, tenant?.id, user?.email, user?.role])
 
   useEffect(() => {
-    carregarDados()
-  }, [])
+    loadUsers()
+  }, [loadUsers])
 
-  const carregarDados = async () => {
-    try {
-      setLoading(true)
-      
-      // Carregar usuários
-      const { data: usuariosData, error: usuariosError } = await supabase
-        .from('usuarios')
-        .select(`
-          *,
-          tenant:tenants(nome)
-        `)
-        .order('created_at', { ascending: false })
+  const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
+    const { error } = await supabase.from('users').update({ ativo: !currentStatus }).eq('id', userId)
 
-      if (usuariosError) throw usuariosError
-
-      // Carregar gabinetes
-      const { data: gabinetesData, error: gabinetesError } = await supabase
-        .from('tenants')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (gabinetesError) throw gabinetesError
-
-      setUsuarios(usuariosData || [])
-      setGabinetes(gabinetesData || [])
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error)
-      toast.error('Erro ao carregar dados')
-    } finally {
-      setLoading(false)
+    if (!error) {
+      toast.success(`Usuário ${!currentStatus ? 'ativado' : 'desativado'} com sucesso`)
+      loadUsers()
+    } else {
+      toast.error('Erro ao atualizar status do usuário')
     }
   }
 
-  const handleCriarGabinete = async (e: React.FormEvent) => {
+  const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
+    if (!newUserName || !newUserEmail || !newUserPassword) {
+      toast.error('Preencha todos os campos obrigatórios')
+      return
+    }
+
+    setSavingUser(true)
+
     try {
-      const { data, error } = await supabase
-        .from('tenants')
-        .insert([novoGabineteForm])
-        .select()
-        .single()
-
-      if (error) throw error
-
-      toast.success('Gabinete criado com sucesso!')
-      setNovoGabineteForm({
-        nome: '',
-        cnpj: '',
-        endereco: '',
-        telefone: '',
-        email: '',
-        status: 'ativo'
+      // Criar usuário no Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: newUserEmail,
+        password: newUserPassword,
+        options: {
+          data: {
+            nome: newUserName
+          }
+        }
       })
-      carregarDados()
-    } catch (error) {
-      console.error('Erro ao criar gabinete:', error)
-      toast.error('Erro ao criar gabinete')
-    }
-  }
 
-  const handleAtualizarGabinete = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!editingGabinete) return
+      if (authError) {
+        console.error('Auth error:', authError)
+        if (authError.message.includes('already registered')) {
+          toast.error('Este e-mail já está cadastrado')
+        } else {
+          toast.error(`Erro ao criar usuário: ${authError.message}`)
+        }
+        setSavingUser(false)
+        return
+      }
 
-    try {
-      const { error } = await supabase
-        .from('tenants')
-        .update({
-          nome: editingGabinete.nome,
-          cnpj: editingGabinete.cnpj,
-          endereco: editingGabinete.endereco,
-          telefone: editingGabinete.telefone,
-          email: editingGabinete.email,
-          status: editingGabinete.status
+      if (authData.user) {
+        // Criar registro na tabela users
+        const { error: userError } = await supabase.from('users').insert({
+          id: authData.user.id,
+          gabinete_id: tenant?.id,
+          nome: newUserName,
+          email: newUserEmail,
+          role: newUserRole,
+          ativo: true
         })
-        .eq('id', editingGabinete.id)
+        
+        if (userError) throw userError
 
-      if (error) throw error
-
-      toast.success('Gabinete atualizado com sucesso!')
-      setEditingGabinete(null)
-      carregarDados()
-    } catch (error) {
-      console.error('Erro ao atualizar gabinete:', error)
-      toast.error('Erro ao atualizar gabinete')
+        toast.success('Usuário criado com sucesso!')
+        setShowNewUserModal(false)
+        resetForm()
+        loadUsers()
+      }
+    } catch (error: any) {
+        console.error('Error creating user:', error)
+        toast.error('Erro ao criar usuário')
+    } finally {
+        setSavingUser(false)
     }
   }
 
-  const handleDesativarGabinete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja desativar este gabinete?')) return
-
-    try {
-      const { error } = await supabase
-        .from('tenants')
-        .update({ status: 'inativo' })
-        .eq('id', id)
-
-      if (error) throw error
-
-      toast.success('Gabinete desativado com sucesso!')
-      carregarDados()
-    } catch (error) {
-      console.error('Erro ao desativar gabinete:', error)
-      toast.error('Erro ao desativar gabinete')
-    }
+  const resetForm = () => {
+    setNewUserName('')
+    setNewUserEmail('')
+    setNewUserPassword('')
+    setNewUserRole('user')
+    setShowPassword(false)
   }
 
-  const handleAlterarStatusUsuario = async (id: string, novoStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from('usuarios')
-        .update({ status: novoStatus })
-        .eq('id', id)
-
-      if (error) throw error
-
-      toast.success('Status do usuário atualizado!')
-      carregarDados()
-    } catch (error) {
-      console.error('Erro ao alterar status:', error)
-      toast.error('Erro ao alterar status do usuário')
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    )
+  const closeModal = () => {
+    setShowNewUserModal(false)
+    resetForm()
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Administração</h1>
-        <p className="text-muted-foreground">
-          Gerencie usuários, gabinetes e configurações do sistema
+    <div className="max-w-[1400px] mx-auto px-1 md:px-2">
+      {/* Header */}
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+          <Shield style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
+          <h1 className="text-xl md:text-2xl lg:text-[28px] font-bold" style={{ color: 'var(--foreground)' }}>
+            Administração
+          </h1>
+        </div>
+        <p style={{ fontSize: '16px', color: 'var(--foreground-muted)' }}>
+          Gerencie usuários, configurações do gabinete e segurança do sistema
         </p>
       </div>
 
-      <Tabs defaultValue="usuarios" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="usuarios" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Usuários
-          </TabsTrigger>
-          <TabsTrigger value="gabinetes" className="flex items-center gap-2">
-            <Building2 className="h-4 w-4" />
-            Gabinetes
-          </TabsTrigger>
-          <TabsTrigger value="configuracoes" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Configurações
-          </TabsTrigger>
-        </TabsList>
+      {/* Tabs */}
+      <div className="flex flex-wrap gap-2 mb-6 md:mb-8 border-b border-[var(--border)] pb-0 overflow-x-auto">
+        {tabs.map((tab) => {
+          const Icon = tab.icon
+          const isActive = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '14px 24px',
+                borderRadius: '12px 12px 0 0',
+                backgroundColor: isActive ? 'var(--card)' : 'transparent',
+                border: isActive ? '1px solid var(--border)' : '1px solid transparent',
+                borderBottom: isActive ? '1px solid var(--card)' : '1px solid transparent',
+                marginBottom: '-1px',
+                fontSize: '15px',
+                fontWeight: isActive ? '600' : '500',
+                color: isActive ? 'var(--primary)' : 'var(--foreground-muted)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Icon style={{ width: '20px', height: '20px' }} />
+              {tab.name}
+            </button>
+          )
+        })}
+      </div>
 
-        {/* Usuários Tab */}
-        <TabsContent value="usuarios" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Gerenciar Usuários</CardTitle>
-              <CardDescription>
-                Visualize e gerencie todos os usuários do sistema
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {usuarios.map((usuario) => (
-                  <div
-                    key={usuario.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium">{usuario.nome_completo || 'Nome não informado'}</h3>
-                        <Badge variant={usuario.status === 'ativo' ? 'default' : 'secondary'}>
-                          {usuario.status}
-                        </Badge>
-                        <Badge variant="outline">{usuario.papel}</Badge>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Mail className="h-3 w-3" />
-                          {usuario.email}
-                        </span>
-                        {usuario.tenant && (
-                          <span className="flex items-center gap-1">
-                            <Building2 className="h-3 w-3" />
-                            {usuario.tenant.nome}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleAlterarStatusUsuario(
-                          usuario.id,
-                          usuario.status === 'ativo' ? 'inativo' : 'ativo'
-                        )}
-                      >
-                        {usuario.status === 'ativo' ? (
-                          <>
-                            <XCircle className="h-4 w-4 mr-1" />
-                            Desativar
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle2 className="h-4 w-4 mr-1" />
-                            Ativar
-                          </>
-                        )}
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+      {/* Content */}
+      <div className="p-4 md:p-6 lg:p-7 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
+        {activeTab === 'usuarios' && (
+          <div>
+            {/* Users Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <div>
+                <h2 style={{ fontSize: '20px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>Gerenciar Usuários</h2>
+                <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>{usuarios.length} usuário(s) cadastrado(s)</p>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <button
+                onClick={() => setShowNewUserModal(true)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '12px 20px',
+                  borderRadius: '10px',
+                  backgroundColor: 'var(--primary)',
+                  color: 'white',
+                  border: 'none',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                <UserPlus style={{ width: '18px', height: '18px' }} />
+                Novo Usuário
+              </button>
+            </div>
 
-        {/* Gabinetes Tab */}
-        <TabsContent value="gabinetes" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Novo Gabinete</CardTitle>
-              <CardDescription>
-                Cadastre um novo gabinete no sistema
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleCriarGabinete} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="nome">Nome do Gabinete</Label>
-                    <Input
-                      id="nome"
-                      value={novoGabineteForm.nome}
-                      onChange={(e) => setNovoGabineteForm({ ...novoGabineteForm, nome: e.target.value })}
-                      required
-                    />
+            {/* Users Table */}
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--border)' }}>
+                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: 'var(--foreground-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Usuário</th>
+                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: 'var(--foreground-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Função</th>
+                    <th style={{ padding: '14px 16px', textAlign: 'center', fontSize: '13px', fontWeight: '600', color: 'var(--foreground-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Status</th>
+                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: 'var(--foreground-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Cadastro</th>
+                    <th style={{ padding: '14px 16px', textAlign: 'center', fontSize: '13px', fontWeight: '600', color: 'var(--foreground-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={5} style={{ padding: '40px', textAlign: 'center', color: 'var(--foreground-muted)' }}>
+                        <Loader2 style={{ width: '24px', height: '24px', animation: 'spin 1s linear infinite', margin: '0 auto 8px' }} />
+                        Carregando usuários...
+                      </td>
+                    </tr>
+                  ) : usuarios.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} style={{ padding: '40px', textAlign: 'center', color: 'var(--foreground-muted)' }}>
+                        Nenhum usuário encontrado
+                      </td>
+                    </tr>
+                  ) : (
+                    usuarios.map((u: any) => (
+                      <tr key={u.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                        <td style={{ padding: '16px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div
+                              style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                backgroundColor: 'var(--primary)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontWeight: '600',
+                                fontSize: '16px'
+                              }}
+                            >
+                              {u.nome?.charAt(0).toUpperCase() || 'U'}
+                            </div>
+                            <div>
+                              <p style={{ fontSize: '15px', fontWeight: '600', color: 'var(--foreground)' }}>{u.nome || 'Sem nome'}</p>
+                              <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Mail style={{ width: '12px', height: '12px' }} />
+                                {u.email}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '16px' }}>
+                          <span
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              backgroundColor:
+                                u.role === 'super_admin'
+                                  ? 'rgba(139, 92, 246, 0.1)'
+                                  : u.role === 'admin'
+                                  ? 'rgba(59, 130, 246, 0.1)'
+                                  : 'var(--muted)',
+                              color: u.role === 'super_admin' ? '#8b5cf6' : u.role === 'admin' ? '#3b82f6' : 'var(--foreground)',
+                              fontSize: '13px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            {u.role === 'super_admin' ? 'Super Admin' : u.role === 'admin' ? 'Administrador' : 'Usuário'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '16px', textAlign: 'center' }}>
+                          {u.ativo !== false ? (
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#22c55e', fontSize: '14px' }}>
+                              <CheckCircle style={{ width: '16px', height: '16px' }} />
+                              Ativo
+                            </span>
+                          ) : (
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#ef4444', fontSize: '14px' }}>
+                              <XCircle style={{ width: '16px', height: '16px' }} />
+                              Inativo
+                            </span>
+                          )}
+                        </td>
+                        <td style={{ padding: '16px', fontSize: '14px', color: 'var(--foreground-muted)' }}>
+                          {new Date(u.created_at).toLocaleDateString('pt-BR')}
+                        </td>
+                        <td style={{ padding: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                            <button
+                              style={{
+                                padding: '8px',
+                                borderRadius: '8px',
+                                backgroundColor: 'var(--muted)',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: 'var(--foreground-muted)'
+                              }}
+                              title="Editar"
+                            >
+                              <Edit style={{ width: '16px', height: '16px' }} />
+                            </button>
+                            <button
+                              onClick={() => toggleUserStatus(u.id, u.ativo !== false)}
+                              style={{
+                                padding: '8px',
+                                borderRadius: '8px',
+                                backgroundColor: u.ativo !== false ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: u.ativo !== false ? '#ef4444' : '#22c55e'
+                              }}
+                              title={u.ativo !== false ? 'Desativar' : 'Ativar'}
+                            >
+                              {u.ativo !== false ? <XCircle style={{ width: '16px', height: '16px' }} /> : <CheckCircle style={{ width: '16px', height: '16px' }} />}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'gabinete' && <GabinetesAdmin />}
+
+        {activeTab === 'seguranca' && (
+          <div>
+            <h2 style={{ fontSize: '20px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '24px' }}>Configurações de Segurança</h2>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div
+                style={{
+                  padding: '20px',
+                  borderRadius: '12px',
+                  backgroundColor: 'var(--muted)',
+                  border: '1px solid var(--border)'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>Autenticação em Dois Fatores</h3>
+                    <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>Adicione uma camada extra de segurança à sua conta</p>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cnpj">CNPJ</Label>
-                    <Input
-                      id="cnpj"
-                      value={novoGabineteForm.cnpj}
-                      onChange={(e) => setNovoGabineteForm({ ...novoGabineteForm, cnpj: e.target.value })}
-                      required
-                    />
+                  <button
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--primary)',
+                      color: 'white',
+                      border: 'none',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Configurar
+                  </button>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  padding: '20px',
+                  borderRadius: '12px',
+                  backgroundColor: 'var(--muted)',
+                  border: '1px solid var(--border)'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>Logs de Acesso</h3>
+                    <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>Visualize o histórico de acessos ao sistema</p>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">E-mail</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={novoGabineteForm.email}
-                      onChange={(e) => setNovoGabineteForm({ ...novoGabineteForm, email: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="telefone">Telefone</Label>
-                    <Input
-                      id="telefone"
-                      value={novoGabineteForm.telefone}
-                      onChange={(e) => setNovoGabineteForm({ ...novoGabineteForm, telefone: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2 col-span-2">
-                    <Label htmlFor="endereco">Endereço</Label>
-                    <Input
-                      id="endereco"
-                      value={novoGabineteForm.endereco}
-                      onChange={(e) => setNovoGabineteForm({ ...novoGabineteForm, endereco: e.target.value })}
-                      required
-                    />
+                  <button
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--secondary)',
+                      color: 'var(--foreground)',
+                      border: '1px solid var(--border)',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Ver Logs
+                  </button>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  padding: '20px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                  border: '1px solid rgba(245, 158, 11, 0.3)'
+                }}
+              >
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                  <AlertTriangle style={{ width: '24px', height: '24px', color: '#f59e0b', flexShrink: 0 }} />
+                  <div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>Sessões Ativas</h3>
+                    <p style={{ fontSize: '14px', color: 'var(--foreground-muted)', marginBottom: '12px' }}>
+                      Você tem 1 sessão ativa. Encerre sessões que você não reconhece.
+                    </p>
+                    <button
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        backgroundColor: 'transparent',
+                        color: '#f59e0b',
+                        border: '1px solid #f59e0b',
+                        fontSize: '13px',
+                        fontWeight: '500',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Gerenciar Sessões
+                    </button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Criar Gabinete
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Gabinetes Cadastrados</CardTitle>
-              <CardDescription>
-                Lista de todos os gabinetes no sistema
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {gabinetes.map((gabinete) => (
-                  <div
-                    key={gabinete.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+      {/* Modal Novo Usuário */}
+      {showNewUserModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            padding: '20px'
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'var(--card)',
+              borderRadius: '20px',
+              width: '100%',
+              maxWidth: '480px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              border: '1px solid var(--border)'
+            }}
+          >
+            {/* Modal Header */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '24px',
+                borderBottom: '1px solid var(--border)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '12px',
+                    backgroundColor: 'var(--primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <UserPlus style={{ width: '22px', height: '22px', color: 'white' }} />
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>Novo Usuário</h2>
+                  <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', margin: 0 }}>Adicione um novo membro ao gabinete</p>
+                </div>
+              </div>
+              <button
+                onClick={closeModal}
+                style={{
+                  padding: '8px',
+                  borderRadius: '8px',
+                  backgroundColor: 'var(--muted)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--foreground-muted)'
+                }}
+              >
+                <X style={{ width: '20px', height: '20px' }} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleCreateUser}>
+              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* Nome */}
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                      marginBottom: '8px'
+                    }}
                   >
-                    {editingGabinete?.id === gabinete.id ? (
-                      <form onSubmit={handleAtualizarGabinete} className="flex-1 space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="edit-nome">Nome</Label>
-                            <Input
-                              id="edit-nome"
-                              value={editingGabinete.nome}
-                              onChange={(e) => setEditingGabinete({ ...editingGabinete, nome: e.target.value })}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="edit-cnpj">CNPJ</Label>
-                            <Input
-                              id="edit-cnpj"
-                              value={editingGabinete.cnpj}
-                              onChange={(e) => setEditingGabinete({ ...editingGabinete, cnpj: e.target.value })}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="edit-email">E-mail</Label>
-                            <Input
-                              id="edit-email"
-                              type="email"
-                              value={editingGabinete.email}
-                              onChange={(e) => setEditingGabinete({ ...editingGabinete, email: e.target.value })}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="edit-telefone">Telefone</Label>
-                            <Input
-                              id="edit-telefone"
-                              value={editingGabinete.telefone}
-                              onChange={(e) => setEditingGabinete({ ...editingGabinete, telefone: e.target.value })}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2 col-span-2">
-                            <Label htmlFor="edit-endereco">Endereço</Label>
-                            <Input
-                              id="edit-endereco"
-                              value={editingGabinete.endereco}
-                              onChange={(e) => setEditingGabinete({ ...editingGabinete, endereco: e.target.value })}
-                              required
-                            />
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button type="submit" size="sm">Salvar</Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setEditingGabinete(null)}
-                          >
-                            Cancelar
-                          </Button>
-                        </div>
-                      </form>
-                    ) : (
-                      <>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-medium">{gabinete.nome}</h3>
-                            <Badge variant={gabinete.status === 'ativo' ? 'default' : 'secondary'}>
-                              {gabinete.status}
-                            </Badge>
-                          </div>
-                          <div className="grid grid-cols-2 gap-x-4 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Mail className="h-3 w-3" />
-                              {gabinete.email}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              {gabinete.telefone}
-                            </span>
-                            <span className="flex items-center gap-1 col-span-2">
-                              <MapPin className="h-3 w-3" />
-                              {gabinete.endereco}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setEditingGabinete(gabinete)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDesativarGabinete(gabinete.id)}
-                            disabled={gabinete.status === 'inativo'}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                    Nome Completo *
+                  </label>
+                  <input
+                    type="text"
+                    value={newUserName}
+                    onChange={(e) => setNewUserName(e.target.value)}
+                    placeholder="Digite o nome completo"
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      fontSize: '15px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
 
-        {/* Configurações Tab */}
-        <TabsContent value="configuracoes" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Configurações do Sistema</CardTitle>
-              <CardDescription>
-                Gerencie as configurações gerais do sistema
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center h-32 text-muted-foreground">
-                <AlertCircle className="h-8 w-8 mr-2" />
-                Em desenvolvimento
+                {/* Email */}
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    E-mail *
+                  </label>
+                  <input
+                    type="email"
+                    value={newUserEmail}
+                    onChange={(e) => setNewUserEmail(e.target.value)}
+                    placeholder="usuario@email.com"
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      fontSize: '15px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                {/* Senha */}
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    Senha *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={newUserPassword}
+                      onChange={(e) => setNewUserPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      required
+                      minLength={6}
+                      style={{
+                        width: '100%',
+                        padding: '12px 48px 12px 16px',
+                        fontSize: '15px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--border)',
+                        backgroundColor: 'var(--background)',
+                        color: 'var(--foreground)',
+                        outline: 'none'
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        padding: '4px',
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: 'var(--foreground-muted)'
+                      }}
+                    >
+                      {showPassword ? <EyeOff style={{ width: '18px', height: '18px' }} /> : <Eye style={{ width: '18px', height: '18px' }} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Role */}
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    Função
+                  </label>
+                  <select
+                    value={newUserRole}
+                    onChange={(e) => setNewUserRole(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      fontSize: '15px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {roleOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+
+              {/* Modal Footer */}
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '12px',
+                  padding: '20px 24px',
+                  borderTop: '1px solid var(--border)',
+                  backgroundColor: 'var(--muted)'
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  disabled={savingUser}
+                  style={{
+                    flex: 1,
+                    padding: '12px 20px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    borderRadius: '10px',
+                    border: '1px solid var(--border)',
+                    backgroundColor: 'var(--background)',
+                    color: 'var(--foreground)',
+                    cursor: savingUser ? 'not-allowed' : 'pointer',
+                    opacity: savingUser ? 0.5 : 1
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingUser}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '12px 20px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    borderRadius: '10px',
+                    border: 'none',
+                    backgroundColor: 'var(--primary)',
+                    color: 'white',
+                    cursor: savingUser ? 'not-allowed' : 'pointer',
+                    opacity: savingUser ? 0.7 : 1
+                  }}
+                >
+                  {savingUser ? (
+                    <>
+                      <Loader2 style={{ width: '18px', height: '18px', animation: 'spin 1s linear infinite' }} />
+                      Criando...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus style={{ width: '18px', height: '18px' }} />
+                      Criar Usuário
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// --- Componente Secundário (Externo) ---
+
+function GabinetesAdmin() {
+  const [gabinetes, setGabinetes] = useState<Tenant[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showNewModal, setShowNewModal] = useState(false)
+  const [newGabinete, setNewGabinete] = useState<Partial<Tenant>>({})
+  const [saving, setSaving] = useState(false)
+  const supabase = createClient()
+  const { user, tenant } = useAuthStore()
+
+  const loadGabinetes = useCallback(async () => {
+    setLoading(true)
+    let query = supabase.from('tenants').select('*').eq('type', 'gabinete').order('created_at', { ascending: false })
+    if (!(user?.role === 'super_admin' || user?.email === 'contato@dataro-it.com.br')) {
+      query = query.eq('id', tenant?.id)
+    }
+    const { data } = await query
+    if (data) setGabinetes(data)
+    setLoading(false)
+  }, [supabase, tenant?.id, user?.email, user?.role])
+
+  useEffect(() => {
+    loadGabinetes()
+  }, [loadGabinetes])
+
+  const handleAtivarDesativar = async (id: string, ativo: boolean) => {
+    await supabase.from('tenants').update({ ativo: !ativo }).eq('id', id)
+    loadGabinetes()
+  }
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
+    await supabase
+      .from('tenants')
+      .insert({
+        ...newGabinete,
+        type: 'gabinete',
+        ativo: true
+      })
+    setShowNewModal(false)
+    setNewGabinete({})
+    setSaving(false)
+    loadGabinetes()
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 600, color: 'var(--foreground)' }}>Gabinetes</h2>
+        <button
+          onClick={() => setShowNewModal(true)}
+          style={{
+            padding: '10px 20px',
+            borderRadius: 8,
+            background: 'var(--primary)',
+            color: 'white',
+            border: 'none',
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: 'pointer'
+          }}
+        >
+          Novo Gabinete
+        </button>
+      </div>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid var(--border)' }}>
+              <th style={{ padding: '12px 10px', textAlign: 'left' }}>Nome</th>
+              <th style={{ padding: '12px 10px', textAlign: 'left' }}>Parlamentar</th>
+              <th style={{ padding: '12px 10px', textAlign: 'left' }}>Município</th>
+              <th style={{ padding: '12px 10px', textAlign: 'left' }}>UF</th>
+              <th style={{ padding: '12px 10px', textAlign: 'center' }}>Status</th>
+              <th style={{ padding: '12px 10px', textAlign: 'center' }}>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: 40 }}>
+                  Carregando...
+                </td>
+              </tr>
+            ) : gabinetes.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: 40 }}>
+                  Nenhum gabinete encontrado
+                </td>
+              </tr>
+            ) : (
+              gabinetes.map((g) => (
+                <tr key={g.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                  <td style={{ padding: '12px 10px' }}>{g.name}</td>
+                  <td style={{ padding: '12px 10px' }}>{g.parlamentar_name}</td>
+                  <td style={{ padding: '12px 10px' }}>{g.municipio}</td>
+                  <td style={{ padding: '12px 10px' }}>{g.uf}</td>
+                  <td style={{ padding: '12px 10px', textAlign: 'center' }}>
+                    {g.ativo ? <span style={{ color: '#22c55e', fontWeight: 600 }}>Ativo</span> : <span style={{ color: '#ef4444', fontWeight: 600 }}>Inativo</span>}
+                  </td>
+                  <td style={{ padding: '12px 10px', textAlign: 'center' }}>
+                    <button
+                      onClick={() => handleAtivarDesativar(g.id, g.ativo)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: 6,
+                        border: 'none',
+                        background: g.ativo ? '#fee2e2' : '#dcfce7',
+                        color: g.ativo ? '#ef4444' : '#22c55e',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {g.ativo ? 'Desativar' : 'Ativar'}
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+      {/* Modal Novo Gabinete */}
+      {showNewModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.3)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <form
+            onSubmit={handleSave}
+            style={{
+              background: 'white',
+              borderRadius: 12,
+              padding: 32,
+              minWidth: 340,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.15)'
+            }}
+          >
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20 }}>Novo Gabinete</h3>
+            <input
+              required
+              placeholder="Nome"
+              value={newGabinete.name || ''}
+              onChange={(e) => setNewGabinete((v) => ({ ...v, name: e.target.value }))}
+              style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }}
+            />
+            <input
+              placeholder="Parlamentar"
+              value={newGabinete.parlamentar_name || ''}
+              onChange={(e) => setNewGabinete((v) => ({ ...v, parlamentar_name: e.target.value }))}
+              style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }}
+            />
+            <input
+              placeholder="Município"
+              value={newGabinete.municipio || ''}
+              onChange={(e) => setNewGabinete((v) => ({ ...v, municipio: e.target.value }))}
+              style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }}
+            />
+            <input
+              placeholder="UF"
+              value={newGabinete.uf || ''}
+              onChange={(e) => setNewGabinete((v) => ({ ...v, uf: e.target.value }))}
+              style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }}
+            />
+            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+              <button
+                type="button"
+                onClick={() => setShowNewModal(false)}
+                style={{
+                  flex: 1,
+                  padding: 10,
+                  borderRadius: 6,
+                  border: 'none',
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  fontWeight: 600
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                style={{
+                  flex: 1,
+                  padding: 10,
+                  borderRadius: 6,
+                  border: 'none',
+                  background: '#16a34a',
+                  color: 'white',
+                  fontWeight: 600,
+                  cursor: saving ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {saving ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   )
 }
