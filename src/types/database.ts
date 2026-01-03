@@ -2,8 +2,8 @@
 // TIPOS PARA MULTI-TENANCY - MODELO UNIFICADO
 // =====================================================
 
-// Tipo unificado para Tenant (fonte de verdade)
-export interface Tenant {
+// Tipo unificado para Gabinete (fonte de verdade)
+export interface Gabinete {
   id: string
   name: string
   slug: string
@@ -49,37 +49,14 @@ export interface Tenant {
   metadata?: Record<string, unknown>
 }
 
-// Tipo legado - manter compatibilidade
-export interface Gabinete {
-  id: string
-  nome: string
-  municipio: string
-  uf: string
-  parlamentar_nome?: string
-  parlamentar_cargo?: 'vereador' | 'prefeito' | 'deputado_estadual' | 'deputado_federal' | 'senador' | 'governador'
-  partido?: string
-  telefone?: string // Campo legado - manter compatibilidade
-  email?: string // Campo legado - manter compatibilidade
-  telefone_parlamentar?: string
-  telefone_gabinete?: string
-  telefone_adicional?: string
-  email_parlamentar?: string
-  email_gabinete?: string
-  chefe_de_gabinete?: string
-  assessor_2?: string
-  endereco?: string
-  logo_url?: string
-  settings?: Record<string, unknown>
-  ativo: boolean
-  created_at: string
-  updated_at: string
-}
+// Alias para compatibilidade legada (usar Gabinete ao invés deste)
+/** @deprecated Use Gabinete instead */
+export type Tenant = Gabinete
 
 export interface Convite {
   id: string
   email: string
-  tenant_id?: string // Novo campo - fonte de verdade
-  gabinete_id: string // Legado - manter compatibilidade
+  gabinete_id: string
   cargo: 'admin' | 'gestor' | 'assessor' | 'operador' | 'visualizador'
   token: string
   status: 'pendente' | 'aceito' | 'expirado' | 'revogado'
@@ -91,8 +68,7 @@ export interface Convite {
   aceito_por?: string
   metadata?: Record<string, unknown>
   // Relations
-  tenant?: Tenant // Novo campo usando Tenant
-  gabinete?: Gabinete // Legado - compatibilidade
+  gabinete?: Gabinete
 }
 
 export interface Profile {
@@ -100,9 +76,7 @@ export interface Profile {
   email: string
   full_name?: string
   role: 'super_admin' | 'admin' | 'gestor' | 'assessor' | 'operador' | 'visualizador'
-  tenant_id?: string // Novo campo - fonte de verdade
-  organization_id?: string // Legado - compatibilidade
-  gabinete_id?: string // Legado - compatibilidade
+  gabinete_id?: string
   avatar_url?: string
   onboarding_completed: boolean
   onboarding_step: number
@@ -110,8 +84,7 @@ export interface Profile {
   updated_at: string
   metadata?: Record<string, unknown>
   // Relations
-  tenant?: Tenant // Novo campo usando Tenant
-  gabinete?: Gabinete // Legado - compatibilidade
+  gabinete?: Gabinete
 }
 
 // =====================================================

@@ -1,22 +1,22 @@
 import { create } from 'zustand'
-import type { User, Tenant } from '@/types/database'
+import type { User, Gabinete } from '@/types/database'
 
 interface AuthState {
   user: User | null
-  tenant: Tenant | null
+  gabinete: Gabinete | null
   isLoading: boolean
   setUser: (user: User | null) => void
-  setTenant: (tenant: Tenant | null) => void
+  setGabinete: (gabinete: Gabinete | null) => void
   setLoading: (loading: boolean) => void
   reset: () => void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  tenant: null,
+  gabinete: null,
   isLoading: true,
   setUser: (user) => set({ user }),
-  setTenant: (tenant) => set({ tenant }),
+  setGabinete: (gabinete) => set({ gabinete }),
   setLoading: (isLoading) => set({ isLoading }),
-  reset: () => set({ user: null, tenant: null, isLoading: false }),
+  reset: () => set({ user: null, gabinete: null, isLoading: false }),
 }))

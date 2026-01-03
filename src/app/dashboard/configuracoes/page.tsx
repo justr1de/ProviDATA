@@ -21,7 +21,7 @@ import { toast } from 'sonner'
 export default function ConfiguracoesPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
-  const [tenantData, setTenantData] = useState({
+  const [gabineteData, setGabineteData] = useState({
     name: '',
     parlamentar_name: '',
     parlamentar_nickname: '',
@@ -31,49 +31,49 @@ export default function ConfiguracoesPage() {
     telefone_contato: '',
     logo_url: '',
   })
-  const { tenant, setTenant } = useAuthStore()
+  const { gabinete, setGabinete } = useAuthStore()
   const { colors, setColors } = useTheme()
   const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (tenant) {
-      setTenantData({
-        name: tenant.name || '',
-        parlamentar_name: tenant.parlamentar_name || '',
-        parlamentar_nickname: tenant.parlamentar_nickname || '',
-        cargo: tenant.cargo || '',
-        partido: tenant.partido || '',
-        email_contato: tenant.email_contato || '',
-        telefone_contato: tenant.telefone_contato || '',
-        logo_url: (tenant as any).logo_url || '',
+    if (gabinete) {
+      setGabineteData({
+        name: gabinete.name || '',
+        parlamentar_name: gabinete.parlamentar_name || '',
+        parlamentar_nickname: gabinete.parlamentar_nickname || '',
+        cargo: gabinete.cargo || '',
+        partido: gabinete.partido || '',
+        email_contato: gabinete.email_contato || '',
+        telefone_contato: gabinete.telefone_contato || '',
+        logo_url: (gabinete as any).logo_url || '',
       })
     }
-  }, [tenant])
+  }, [gabinete])
 
   const handleSave = async () => {
-    if (!tenant) return
+    if (!gabinete) return
 
     setIsLoading(true)
     try {
       const { data, error } = await supabase
         .from('tenants')
         .update({
-          name: tenantData.name,
-          parlamentar_name: tenantData.parlamentar_name,
-          parlamentar_nickname: tenantData.parlamentar_nickname || null,
-          cargo: tenantData.cargo || null,
-          partido: tenantData.partido || null,
-          email_contato: tenantData.email_contato || null,
-          telefone_contato: tenantData.telefone_contato || null,
+          name: gabineteData.name,
+          parlamentar_name: gabineteData.parlamentar_name,
+          parlamentar_nickname: gabineteData.parlamentar_nickname || null,
+          cargo: gabineteData.cargo || null,
+          partido: gabineteData.partido || null,
+          email_contato: gabineteData.email_contato || null,
+          telefone_contato: gabineteData.telefone_contato || null,
         })
-        .eq('id', tenant.id)
+        .eq('id', gabinete.id)
         .select()
         .single()
 
       if (error) throw error
 
-      setTenant(data)
+      setGabinete(data)
       toast.success('Configurações salvas com sucesso!')
     } catch (error) {
       console.error('Error saving settings:', error)
@@ -85,7 +85,7 @@ export default function ConfiguracoesPage() {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file || !tenant) return
+    if (!file || !gabinete) return
 
     if (!file.type.startsWith('image/')) {
       toast.error('Por favor, selecione uma imagem')
@@ -112,7 +112,7 @@ export default function ConfiguracoesPage() {
         .from('tenant-assets')
         .getPublicUrl(fileName)
 
-      setTenantData({ ...tenantData, logo_url: publicUrl })
+      setGabineteData({ ...gabineteData, logo_url: publicUrl })
       toast.success('Imagem carregada com sucesso!')
     } catch (error) {
       console.error('Error uploading image:', error)
@@ -238,9 +238,9 @@ export default function ConfiguracoesPage() {
                   overflow: 'hidden',
                   border: '3px solid var(--border)'
                 }}>
-                  {tenantData.logo_url ? (
+                  {gabineteData.logo_url ? (
                     <img 
-                      src={tenantData.logo_url} 
+                      src={gabineteData.logo_url} 
                       alt="Foto do parlamentar" 
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
@@ -383,8 +383,8 @@ export default function ConfiguracoesPage() {
               <div>
                 <label style={labelStyle}>Nome do Gabinete</label>
                 <input
-                  value={tenantData.name}
-                  onChange={(e) => setTenantData({ ...tenantData, name: e.target.value })}
+                  value={gabineteData.name}
+                  onChange={(e) => setGabineteData({ ...gabineteData, name: e.target.value })}
                   style={inputStyle}
                   placeholder="Digite o nome do gabinete"
                 />
@@ -394,8 +394,8 @@ export default function ConfiguracoesPage() {
                 <div>
                   <label style={labelStyle}>Nome do Parlamentar</label>
                   <input
-                    value={tenantData.parlamentar_name}
-                    onChange={(e) => setTenantData({ ...tenantData, parlamentar_name: e.target.value })}
+                    value={gabineteData.parlamentar_name}
+                    onChange={(e) => setGabineteData({ ...gabineteData, parlamentar_name: e.target.value })}
                     style={inputStyle}
                     placeholder="Digite o nome do parlamentar"
                   />
@@ -404,8 +404,8 @@ export default function ConfiguracoesPage() {
                 <div>
                   <label style={labelStyle}>Apelido do Parlamentar</label>
                   <input
-                    value={tenantData.parlamentar_nickname}
-                    onChange={(e) => setTenantData({ ...tenantData, parlamentar_nickname: e.target.value })}
+                    value={gabineteData.parlamentar_nickname}
+                    onChange={(e) => setGabineteData({ ...gabineteData, parlamentar_nickname: e.target.value })}
                     style={inputStyle}
                     placeholder="Ex: O médico do povo"
                   />
@@ -416,8 +416,8 @@ export default function ConfiguracoesPage() {
                 <div>
                   <label style={labelStyle}>Cargo</label>
                   <select
-                    value={tenantData.cargo}
-                    onChange={(e) => setTenantData({ ...tenantData, cargo: e.target.value })}
+                    value={gabineteData.cargo}
+                    onChange={(e) => setGabineteData({ ...gabineteData, cargo: e.target.value })}
                     style={{ ...inputStyle, cursor: 'pointer' }}
                   >
                     <option value="">Selecione o cargo</option>
@@ -431,8 +431,8 @@ export default function ConfiguracoesPage() {
                 <div>
                   <label style={labelStyle}>Partido</label>
                   <input
-                    value={tenantData.partido}
-                    onChange={(e) => setTenantData({ ...tenantData, partido: e.target.value })}
+                    value={gabineteData.partido}
+                    onChange={(e) => setGabineteData({ ...gabineteData, partido: e.target.value })}
                     style={inputStyle}
                     placeholder="Ex: DEMO"
                   />
@@ -444,8 +444,8 @@ export default function ConfiguracoesPage() {
                   <label style={labelStyle}>E-mail de Contato</label>
                   <input
                     type="email"
-                    value={tenantData.email_contato}
-                    onChange={(e) => setTenantData({ ...tenantData, email_contato: e.target.value })}
+                    value={gabineteData.email_contato}
+                    onChange={(e) => setGabineteData({ ...gabineteData, email_contato: e.target.value })}
                     style={inputStyle}
                     placeholder="contato@exemplo.com"
                   />
@@ -454,8 +454,8 @@ export default function ConfiguracoesPage() {
                 <div>
                   <label style={labelStyle}>Telefone de Contato</label>
                   <input
-                    value={tenantData.telefone_contato}
-                    onChange={(e) => setTenantData({ ...tenantData, telefone_contato: e.target.value })}
+                    value={gabineteData.telefone_contato}
+                    onChange={(e) => setGabineteData({ ...gabineteData, telefone_contato: e.target.value })}
                     style={inputStyle}
                     placeholder="(00) 00000-0000"
                   />
