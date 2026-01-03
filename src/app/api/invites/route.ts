@@ -1,4 +1,4 @@
-// API Route: /api/invites (Refatorado para tenant_id)
+// API Route: /api/invites
 // Gerenciamento de convites (CRUD)
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -11,7 +11,7 @@ const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
 
 /**
  * GET /api/invites
- * Lista convites do tenant do usuário
+ * Lista convites do gabinete do usuário
  */
 export async function GET(request: NextRequest) {
   try {
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     // Buscar perfil do usuário com gabinete_id
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('gabinete_id, organization_id, role')
+      .select('gabinete_id, role')
       .eq('id', user.id)
       .single();
 
@@ -51,8 +51,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Determinar gabinete_id (usar gabinete_id ou fallback para organization_id)
-    const gabineteId = profile.gabinete_id || profile.organization_id;
+    // Determinar gabinete_id
+    const gabineteId = profile.gabinete_id;
 
     if (!isSuperAdmin && !gabineteId) {
       return NextResponse.json(
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     // Buscar perfil do usuário
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('tenant_id, organization_id, gabinete_id, role')
+      .select('gabinete_id, role')
       .eq('id', user.id)
       .single();
 
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
     const body: CreateInviteRequest = await request.json();
 
     // Determinar gabinete_id
-    const targetGabineteId = body.gabinete_id || body.organization_id || profile.gabinete_id || profile.organization_id;
+    const targetGabineteId = body.gabinete_id || profile.gabinete_id;
 
     // Super admin deve especificar o gabinete
     if (isSuperAdmin && !targetGabineteId) {

@@ -23,13 +23,19 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 
-interface User {
+// --- Interfaces e Constantes ---
+
+interface Usuario {
   id: string
-  nome: string
   email: string
-  role: string
-  ativo: boolean
+  nome_completo: string | null
+  papel: string
+  status: string
   created_at: string
+  tenant_id: string
+  tenant?: {
+    nome: string
+  }
 }
 
 const tabs = [
@@ -44,9 +50,11 @@ const roleOptions = [
   { value: 'super_admin', label: 'Super Admin' }
 ]
 
+// --- Componente Principal ---
+
 export default function AdministracaoPage() {
   const [activeTab, setActiveTab] = useState('usuarios')
-  const [users, setUsers] = useState<User[]>([])
+  const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [loading, setLoading] = useState(true)
   const [showNewUserModal, setShowNewUserModal] = useState(false)
   const [savingUser, setSavingUser] = useState(false)
@@ -64,12 +72,16 @@ export default function AdministracaoPage() {
   const loadUsers = useCallback(async () => {
     setLoading(true)
     let query = supabase.from('users').select('*').order('created_at', { ascending: false })
+    
+    // Filtro de segurança: se não for super_admin ou email mestre, vê apenas do próprio gabinete
     if (!(user?.role === 'super_admin' || user?.email === 'contato@dataro-it.com.br')) {
       query = query.eq('gabinete_id', tenant?.id)
     }
+    
     const { data } = await query
     if (data) {
-      setUsers(data)
+      // Mapeando para interface Usuario se necessário ou usando any no map
+      setUsuarios(data as any)
     }
     setLoading(false)
   }, [supabase, tenant?.id, user?.email, user?.role])
@@ -94,11 +106,6 @@ export default function AdministracaoPage() {
 
     if (!newUserName || !newUserEmail || !newUserPassword) {
       toast.error('Preencha todos os campos obrigatórios')
-      return
-    }
-
-    if (newUserPassword.length < 6) {
-      toast.error('A senha deve ter no mínimo 6 caracteres')
       return
     }
 
@@ -137,22 +144,19 @@ export default function AdministracaoPage() {
           role: newUserRole,
           ativo: true
         })
+        
+        if (userError) throw userError
 
-        if (userError) {
-          console.error('User table error:', userError)
-          toast.error('Usuário criado no auth, mas houve erro ao salvar dados adicionais')
-        } else {
-          toast.success('Usuário criado com sucesso!')
-          setShowNewUserModal(false)
-          resetForm()
-          loadUsers()
-        }
+        toast.success('Usuário criado com sucesso!')
+        setShowNewUserModal(false)
+        resetForm()
+        loadUsers()
       }
-    } catch (error) {
-      console.error('Create user error:', error)
-      toast.error('Erro ao criar usuário')
+    } catch (error: any) {
+        console.error('Error creating user:', error)
+        toast.error('Erro ao criar usuário')
     } finally {
-      setSavingUser(false)
+        setSavingUser(false)
     }
   }
 
@@ -225,7 +229,7 @@ export default function AdministracaoPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div>
                 <h2 style={{ fontSize: '20px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>Gerenciar Usuários</h2>
-                <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>{users.length} usuário(s) cadastrado(s)</p>
+                <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>{usuarios.length} usuário(s) cadastrado(s)</p>
               </div>
               <button
                 onClick={() => setShowNewUserModal(true)}
@@ -268,14 +272,14 @@ export default function AdministracaoPage() {
                         Carregando usuários...
                       </td>
                     </tr>
-                  ) : users.length === 0 ? (
+                  ) : usuarios.length === 0 ? (
                     <tr>
                       <td colSpan={5} style={{ padding: '40px', textAlign: 'center', color: 'var(--foreground-muted)' }}>
                         Nenhum usuário encontrado
                       </td>
                     </tr>
                   ) : (
-                    users.map((u) => (
+                    usuarios.map((u: any) => (
                       <tr key={u.id} style={{ borderBottom: '1px solid var(--border)' }}>
                         <td style={{ padding: '16px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -777,6 +781,8 @@ export default function AdministracaoPage() {
     </div>
   )
 }
+
+// --- Componente Secundário (Externo) ---
 
 function GabinetesAdmin() {
   const [gabinetes, setGabinetes] = useState<Tenant[]>([])

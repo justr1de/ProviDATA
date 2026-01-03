@@ -1,19 +1,19 @@
-// Tipos para o sistema de onboarding híbrido (Refatorado para tenant_id)
+// Tipos para o sistema de onboarding híbrido
 
 export type UserRole = 'super_admin' | 'admin' | 'gestor' | 'assessor' | 'operador' | 'visualizador';
 
 export type InviteStatus = 'pending' | 'accepted' | 'expired' | 'revoked';
 
-export type TenantType = 'gabinete' | 'organization' | 'municipal' | 'estadual' | 'federal';
+export type GabineteType = 'gabinete' | 'organization' | 'municipal' | 'estadual' | 'federal';
 
 export type ParlamentarCargo = 'vereador' | 'prefeito' | 'deputado_estadual' | 'deputado_federal' | 'senador' | 'governador';
 
-// Tipo unificado para Tenant (fonte de verdade)
-export interface Tenant {
+// Tipo unificado para Gabinete (fonte de verdade)
+export interface Gabinete {
   id: string;
   name: string;
   slug: string;
-  type: TenantType;
+  type: GabineteType;
   
   // Informações parlamentares
   parlamentar_name?: string;
@@ -55,43 +55,32 @@ export interface Tenant {
   metadata?: Record<string, any>;
 }
 
-// Tipo legado mantido para compatibilidade
-export type OrganizationType = 'municipal' | 'estadual' | 'federal';
-
-export interface Organization {
-  id: string;
-  name: string;
-  slug: string;
-  type: OrganizationType;
-  settings: Record<string, any>;
-  created_at: string;
-  updated_at: string;
-}
+// Alias para compatibilidade legada (usar Gabinete ao invés deste)
+/** @deprecated Use Gabinete instead */
+export type Tenant = Gabinete;
+/** @deprecated Use GabineteType instead */
+export type TenantType = GabineteType;
 
 export interface Profile {
   id: string;
   email: string;
   full_name: string | null;
   role: UserRole;
-  tenant_id: string | null;
-  organization_id?: string | null; // Legado - manter compatibilidade
-  gabinete_id?: string | null; // Legado - manter compatibilidade
+  gabinete_id: string | null;
   avatar_url: string | null;
   onboarding_completed: boolean;
   onboarding_step: number;
   created_at: string;
   updated_at: string;
   metadata: Record<string, unknown>;
-  tenant?: Tenant; // Novo campo usando Tenant
-  organization?: Organization; // Legado - manter compatibilidade
+  gabinete?: Gabinete;
 }
 
 export interface Invite {
   id: string;
   email: string;
   role: UserRole;
-  tenant_id: string | null;
-  organization_id?: string | null; // Legado - manter compatibilidade
+  gabinete_id: string | null;
   invited_by: string | null;
   token: string;
   status: InviteStatus;
@@ -100,17 +89,14 @@ export interface Invite {
   created_at: string;
   updated_at: string;
   metadata: Record<string, unknown>;
-  tenant?: Tenant; // Novo campo usando Tenant
-  organization?: Organization; // Legado - manter compatibilidade
+  gabinete?: Gabinete;
   inviter?: Profile;
 }
 
 export interface CreateInviteRequest {
   email: string;
   role: UserRole;
-  gabinete_id?: string;
-  tenant_id?: string;
-  organization_id?: string; // Legado - manter compatibilidade
+  gabinete_id: string;
   expires_in_days?: number;
   metadata?: Record<string, unknown>;
 }
@@ -124,8 +110,7 @@ export interface AcceptInviteResponse {
   success: boolean;
   error?: string;
   role?: UserRole;
-  tenant_id?: string;
-  organization_id?: string; // Legado - manter compatibilidade
+  gabinete_id?: string;
 }
 
 export interface OnboardingStep {
@@ -191,9 +176,9 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
-  super_admin: 'Acesso total ao sistema incluindo gestão de múltiplos tenants',
-  admin: 'Acesso completo ao tenant, incluindo gerenciamento de usuários e configurações',
-  gestor: 'Pode gerenciar providências e visualizar relatórios do tenant',
+  super_admin: 'Acesso total ao sistema incluindo gestão de múltiplos gabinetes',
+  admin: 'Acesso completo ao gabinete, incluindo gerenciamento de usuários e configurações',
+  gestor: 'Pode gerenciar providências e visualizar relatórios do gabinete',
   assessor: 'Pode gerenciar providências e apoiar na gestão do gabinete',
   operador: 'Pode criar e editar providências',
   visualizador: 'Apenas visualização de dados',
@@ -201,10 +186,10 @@ export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
 
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   super_admin: [
-    'manage_all_tenants',
+    'manage_all_gabinetes',
     'manage_users',
     'manage_invites',
-    'manage_tenant',
+    'manage_gabinete',
     'manage_providencias',
     'view_reports',
     'manage_settings',
@@ -213,7 +198,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   admin: [
     'manage_users',
     'manage_invites',
-    'manage_tenant',
+    'manage_gabinete',
     'manage_providencias',
     'view_reports',
     'manage_settings',
