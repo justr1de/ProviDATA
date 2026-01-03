@@ -1,20 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
-import { 
-  Shield, 
-  Users, 
-  Building2, 
+import { Tenant } from '@/types/database'
+import {
+  Shield,
+  Users,
+  Building2,
   Settings,
   UserPlus,
   Edit,
-  Trash2,
+  XCircle,
+  CheckCircle,
   Key,
   Mail,
-  CheckCircle,
-  XCircle,
   AlertTriangle,
   X,
   Loader2,
@@ -35,13 +35,13 @@ interface User {
 const tabs = [
   { id: 'usuarios', name: 'Usuários', icon: Users },
   { id: 'gabinete', name: 'Gabinete', icon: Building2 },
-  { id: 'seguranca', name: 'Segurança', icon: Key },
+  { id: 'seguranca', name: 'Segurança', icon: Key }
 ]
 
 const roleOptions = [
   { value: 'user', label: 'Usuário' },
   { value: 'admin', label: 'Administrador' },
-  { value: 'super_admin', label: 'Super Admin' },
+  { value: 'super_admin', label: 'Super Admin' }
 ]
 
 export default function AdministracaoPage() {
@@ -51,38 +51,35 @@ export default function AdministracaoPage() {
   const [showNewUserModal, setShowNewUserModal] = useState(false)
   const [savingUser, setSavingUser] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  
+
   // Form state
   const [newUserName, setNewUserName] = useState('')
   const [newUserEmail, setNewUserEmail] = useState('')
   const [newUserPassword, setNewUserPassword] = useState('')
   const [newUserRole, setNewUserRole] = useState('user')
-  
+
   const supabase = createClient()
   const { tenant, user } = useAuthStore()
 
-  useEffect(() => {
-    loadUsers()
-  }, [])
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     setLoading(true)
     let query = supabase.from('users').select('*').order('created_at', { ascending: false })
     if (!(user?.role === 'super_admin' || user?.email === 'contato@dataro-it.com.br')) {
       query = query.eq('gabinete_id', tenant?.id)
     }
-    const { data, error } = await query
+    const { data } = await query
     if (data) {
       setUsers(data)
     }
     setLoading(false)
-  }
+  }, [supabase, tenant?.id, user?.email, user?.role])
+
+  useEffect(() => {
+    loadUsers()
+  }, [loadUsers])
 
   const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
-    const { error } = await supabase
-      .from('users')
-      .update({ ativo: !currentStatus })
-      .eq('id', userId)
+    const { error } = await supabase.from('users').update({ ativo: !currentStatus }).eq('id', userId)
 
     if (!error) {
       toast.success(`Usuário ${!currentStatus ? 'ativado' : 'desativado'} com sucesso`)
@@ -94,7 +91,7 @@ export default function AdministracaoPage() {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!newUserName || !newUserEmail || !newUserPassword) {
       toast.error('Preencha todos os campos obrigatórios')
       return
@@ -114,7 +111,7 @@ export default function AdministracaoPage() {
         password: newUserPassword,
         options: {
           data: {
-            nome: newUserName,
+            nome: newUserName
           }
         }
       })
@@ -132,16 +129,14 @@ export default function AdministracaoPage() {
 
       if (authData.user) {
         // Criar registro na tabela users
-        const { error: userError } = await supabase
-          .from('users')
-          .insert({
-            id: authData.user.id,
-            gabinete_id: tenant?.id,
-            nome: newUserName,
-            email: newUserEmail,
-            role: newUserRole,
-            ativo: true
-          })
+        const { error: userError } = await supabase.from('users').insert({
+          id: authData.user.id,
+          gabinete_id: tenant?.id,
+          nome: newUserName,
+          email: newUserEmail,
+          role: newUserRole,
+          ativo: true
+        })
 
         if (userError) {
           console.error('User table error:', userError)
@@ -229,12 +224,8 @@ export default function AdministracaoPage() {
             {/* Users Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div>
-                <h2 style={{ fontSize: '20px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>
-                  Gerenciar Usuários
-                </h2>
-                <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>
-                  {users.length} usuário(s) cadastrado(s)
-                </p>
+                <h2 style={{ fontSize: '20px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>Gerenciar Usuários</h2>
+                <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>{users.length} usuário(s) cadastrado(s)</p>
               </div>
               <button
                 onClick={() => setShowNewUserModal(true)}
@@ -284,51 +275,56 @@ export default function AdministracaoPage() {
                       </td>
                     </tr>
                   ) : (
-                    users.map((user) => (
-                      <tr key={user.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                    users.map((u) => (
+                      <tr key={u.id} style={{ borderBottom: '1px solid var(--border)' }}>
                         <td style={{ padding: '16px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{
-                              width: '40px',
-                              height: '40px',
-                              borderRadius: '50%',
-                              backgroundColor: 'var(--primary)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'white',
-                              fontWeight: '600',
-                              fontSize: '16px'
-                            }}>
-                              {user.nome?.charAt(0).toUpperCase() || 'U'}
+                            <div
+                              style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                backgroundColor: 'var(--primary)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontWeight: '600',
+                                fontSize: '16px'
+                              }}
+                            >
+                              {u.nome?.charAt(0).toUpperCase() || 'U'}
                             </div>
                             <div>
-                              <p style={{ fontSize: '15px', fontWeight: '600', color: 'var(--foreground)' }}>
-                                {user.nome || 'Sem nome'}
-                              </p>
+                              <p style={{ fontSize: '15px', fontWeight: '600', color: 'var(--foreground)' }}>{u.nome || 'Sem nome'}</p>
                               <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <Mail style={{ width: '12px', height: '12px' }} />
-                                {user.email}
+                                {u.email}
                               </p>
                             </div>
                           </div>
                         </td>
                         <td style={{ padding: '16px' }}>
-                          <span style={{
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            backgroundColor: user.role === 'super_admin' ? 'rgba(139, 92, 246, 0.1)' : 
-                                           user.role === 'admin' ? 'rgba(59, 130, 246, 0.1)' : 'var(--muted)',
-                            color: user.role === 'super_admin' ? '#8b5cf6' : 
-                                   user.role === 'admin' ? '#3b82f6' : 'var(--foreground)',
-                            fontSize: '13px',
-                            fontWeight: '500'
-                          }}>
-                            {user.role === 'super_admin' ? 'Super Admin' : user.role === 'admin' ? 'Administrador' : 'Usuário'}
+                          <span
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              backgroundColor:
+                                u.role === 'super_admin'
+                                  ? 'rgba(139, 92, 246, 0.1)'
+                                  : u.role === 'admin'
+                                  ? 'rgba(59, 130, 246, 0.1)'
+                                  : 'var(--muted)',
+                              color: u.role === 'super_admin' ? '#8b5cf6' : u.role === 'admin' ? '#3b82f6' : 'var(--foreground)',
+                              fontSize: '13px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            {u.role === 'super_admin' ? 'Super Admin' : u.role === 'admin' ? 'Administrador' : 'Usuário'}
                           </span>
                         </td>
                         <td style={{ padding: '16px', textAlign: 'center' }}>
-                          {user.ativo !== false ? (
+                          {u.ativo !== false ? (
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#22c55e', fontSize: '14px' }}>
                               <CheckCircle style={{ width: '16px', height: '16px' }} />
                               Ativo
@@ -341,7 +337,7 @@ export default function AdministracaoPage() {
                           )}
                         </td>
                         <td style={{ padding: '16px', fontSize: '14px', color: 'var(--foreground-muted)' }}>
-                          {new Date(user.created_at).toLocaleDateString('pt-BR')}
+                          {new Date(u.created_at).toLocaleDateString('pt-BR')}
                         </td>
                         <td style={{ padding: '16px' }}>
                           <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
@@ -359,18 +355,18 @@ export default function AdministracaoPage() {
                               <Edit style={{ width: '16px', height: '16px' }} />
                             </button>
                             <button
-                              onClick={() => toggleUserStatus(user.id, user.ativo !== false)}
+                              onClick={() => toggleUserStatus(u.id, u.ativo !== false)}
                               style={{
                                 padding: '8px',
                                 borderRadius: '8px',
-                                backgroundColor: user.ativo !== false ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+                                backgroundColor: u.ativo !== false ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
                                 border: 'none',
                                 cursor: 'pointer',
-                                color: user.ativo !== false ? '#ef4444' : '#22c55e'
+                                color: u.ativo !== false ? '#ef4444' : '#22c55e'
                               }}
-                              title={user.ativo !== false ? 'Desativar' : 'Ativar'}
+                              title={u.ativo !== false ? 'Desativar' : 'Ativar'}
                             >
-                              {user.ativo !== false ? <XCircle style={{ width: '16px', height: '16px' }} /> : <CheckCircle style={{ width: '16px', height: '16px' }} />}
+                              {u.ativo !== false ? <XCircle style={{ width: '16px', height: '16px' }} /> : <CheckCircle style={{ width: '16px', height: '16px' }} />}
                             </button>
                           </div>
                         </td>
@@ -383,208 +379,100 @@ export default function AdministracaoPage() {
           </div>
         )}
 
-        {activeTab === 'gabinete' && (
-          <GabinetesAdmin />
-        )}
-// --- GabinetesAdmin Component ---
-import { useCallback } from 'react'
-import { Tenant } from '@/types/database'
-
-function GabinetesAdmin() {
-  const [gabinetes, setGabinetes] = useState<Tenant[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showNewModal, setShowNewModal] = useState(false)
-  const [newGabinete, setNewGabinete] = useState<Partial<Tenant>>({})
-  const [saving, setSaving] = useState(false)
-  const supabase = createClient()
-  const { user, tenant } = useAuthStore()
-
-  const loadGabinetes = useCallback(async () => {
-    setLoading(true)
-    let query = supabase.from('tenants').select('*').eq('type', 'gabinete').order('created_at', { ascending: false })
-    if (!(user?.role === 'super_admin' || user?.email === 'contato@dataro-it.com.br')) {
-      query = query.eq('id', tenant?.id)
-    }
-    const { data, error } = await query
-    if (data) setGabinetes(data)
-    setLoading(false)
-  }, [supabase, user, tenant])
-
-  useEffect(() => { loadGabinetes() }, [loadGabinetes])
-
-  const handleAtivarDesativar = async (id: string, ativo: boolean) => {
-    await supabase.from('tenants').update({ ativo: !ativo }).eq('id', id)
-    loadGabinetes()
-  }
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    await supabase.from('tenants').insert({
-      ...newGabinete,
-      type: 'gabinete',
-      ativo: true,
-    })
-    setShowNewModal(false)
-    setNewGabinete({})
-    setSaving(false)
-    loadGabinetes()
-  }
-
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 600, color: 'var(--foreground)' }}>Gabinetes</h2>
-        <button onClick={() => setShowNewModal(true)} style={{ padding: '10px 20px', borderRadius: 8, background: 'var(--primary)', color: 'white', border: 'none', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Novo Gabinete</button>
-      </div>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid var(--border)' }}>
-              <th style={{ padding: '12px 10px', textAlign: 'left' }}>Nome</th>
-              <th style={{ padding: '12px 10px', textAlign: 'left' }}>Parlamentar</th>
-              <th style={{ padding: '12px 10px', textAlign: 'left' }}>Município</th>
-              <th style={{ padding: '12px 10px', textAlign: 'left' }}>UF</th>
-              <th style={{ padding: '12px 10px', textAlign: 'center' }}>Status</th>
-              <th style={{ padding: '12px 10px', textAlign: 'center' }}>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40 }}>Carregando...</td></tr>
-            ) : gabinetes.length === 0 ? (
-              <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40 }}>Nenhum gabinete encontrado</td></tr>
-            ) : (
-              gabinetes.map(g => (
-                <tr key={g.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '12px 10px' }}>{g.name}</td>
-                  <td style={{ padding: '12px 10px' }}>{g.parlamentar_name}</td>
-                  <td style={{ padding: '12px 10px' }}>{g.municipio}</td>
-                  <td style={{ padding: '12px 10px' }}>{g.uf}</td>
-                  <td style={{ padding: '12px 10px', textAlign: 'center' }}>
-                    {g.ativo ? <span style={{ color: '#22c55e', fontWeight: 600 }}>Ativo</span> : <span style={{ color: '#ef4444', fontWeight: 600 }}>Inativo</span>}
-                  </td>
-                  <td style={{ padding: '12px 10px', textAlign: 'center' }}>
-                    <button onClick={() => handleAtivarDesativar(g.id, g.ativo)} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: g.ativo ? '#fee2e2' : '#dcfce7', color: g.ativo ? '#ef4444' : '#22c55e', fontWeight: 600, cursor: 'pointer' }}>{g.ativo ? 'Desativar' : 'Ativar'}</button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-      {/* Modal Novo Gabinete */}
-      {showNewModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <form onSubmit={handleSave} style={{ background: 'white', borderRadius: 12, padding: 32, minWidth: 340, boxShadow: '0 8px 32px rgba(0,0,0,0.15)' }}>
-            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20 }}>Novo Gabinete</h3>
-            <input required placeholder="Nome" value={newGabinete.name||''} onChange={e=>setNewGabinete(v=>({...v,name:e.target.value}))} style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }} />
-            <input placeholder="Parlamentar" value={newGabinete.parlamentar_name||''} onChange={e=>setNewGabinete(v=>({...v,parlamentar_name:e.target.value}))} style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }} />
-            <input placeholder="Município" value={newGabinete.municipio||''} onChange={e=>setNewGabinete(v=>({...v,municipio:e.target.value}))} style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }} />
-            <input placeholder="UF" value={newGabinete.uf||''} onChange={e=>setNewGabinete(v=>({...v,uf:e.target.value}))} style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }} />
-            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-              <button type="button" onClick={()=>setShowNewModal(false)} style={{ flex: 1, padding: 10, borderRadius: 6, border: 'none', background: '#f3f4f6', color: '#374151', fontWeight: 600 }}>Cancelar</button>
-              <button type="submit" disabled={saving} style={{ flex: 1, padding: 10, borderRadius: 6, border: 'none', background: '#16a34a', color: 'white', fontWeight: 600 }}>{saving ? 'Salvando...' : 'Salvar'}</button>
-            </div>
-          </form>
-        </div>
-      )}
-    </div>
-  )
-}
+        {activeTab === 'gabinete' && <GabinetesAdmin />}
 
         {activeTab === 'seguranca' && (
           <div>
-            <h2 style={{ fontSize: '20px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '24px' }}>
-              Configurações de Segurança
-            </h2>
-            
+            <h2 style={{ fontSize: '20px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '24px' }}>Configurações de Segurança</h2>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{
-                padding: '20px',
-                borderRadius: '12px',
-                backgroundColor: 'var(--muted)',
-                border: '1px solid var(--border)'
-              }}>
+              <div
+                style={{
+                  padding: '20px',
+                  borderRadius: '12px',
+                  backgroundColor: 'var(--muted)',
+                  border: '1px solid var(--border)'
+                }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>
-                      Autenticação em Dois Fatores
-                    </h3>
-                    <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>
-                      Adicione uma camada extra de segurança à sua conta
-                    </p>
+                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>Autenticação em Dois Fatores</h3>
+                    <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>Adicione uma camada extra de segurança à sua conta</p>
                   </div>
-                  <button style={{
-                    padding: '10px 20px',
-                    borderRadius: '8px',
-                    backgroundColor: 'var(--primary)',
-                    color: 'white',
-                    border: 'none',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}>
+                  <button
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--primary)',
+                      color: 'white',
+                      border: 'none',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                  >
                     Configurar
                   </button>
                 </div>
               </div>
 
-              <div style={{
-                padding: '20px',
-                borderRadius: '12px',
-                backgroundColor: 'var(--muted)',
-                border: '1px solid var(--border)'
-              }}>
+              <div
+                style={{
+                  padding: '20px',
+                  borderRadius: '12px',
+                  backgroundColor: 'var(--muted)',
+                  border: '1px solid var(--border)'
+                }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>
-                      Logs de Acesso
-                    </h3>
-                    <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>
-                      Visualize o histórico de acessos ao sistema
-                    </p>
+                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>Logs de Acesso</h3>
+                    <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>Visualize o histórico de acessos ao sistema</p>
                   </div>
-                  <button style={{
-                    padding: '10px 20px',
-                    borderRadius: '8px',
-                    backgroundColor: 'var(--secondary)',
-                    color: 'var(--foreground)',
-                    border: '1px solid var(--border)',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}>
+                  <button
+                    style={{
+                      padding: '10px 20px',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--secondary)',
+                      color: 'var(--foreground)',
+                      border: '1px solid var(--border)',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                  >
                     Ver Logs
                   </button>
                 </div>
               </div>
 
-              <div style={{
-                padding: '20px',
-                borderRadius: '12px',
-                backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                border: '1px solid rgba(245, 158, 11, 0.3)'
-              }}>
+              <div
+                style={{
+                  padding: '20px',
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                  border: '1px solid rgba(245, 158, 11, 0.3)'
+                }}
+              >
                 <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
                   <AlertTriangle style={{ width: '24px', height: '24px', color: '#f59e0b', flexShrink: 0 }} />
                   <div>
-                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>
-                      Sessões Ativas
-                    </h3>
+                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>Sessões Ativas</h3>
                     <p style={{ fontSize: '14px', color: 'var(--foreground-muted)', marginBottom: '12px' }}>
                       Você tem 1 sessão ativa. Encerre sessões que você não reconhece.
                     </p>
-                    <button style={{
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      backgroundColor: 'transparent',
-                      color: '#f59e0b',
-                      border: '1px solid #f59e0b',
-                      fontSize: '13px',
-                      fontWeight: '500',
-                      cursor: 'pointer'
-                    }}>
+                    <button
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        backgroundColor: 'transparent',
+                        color: '#f59e0b',
+                        border: '1px solid #f59e0b',
+                        fontSize: '13px',
+                        fontWeight: '500',
+                        cursor: 'pointer'
+                      }}
+                    >
                       Gerenciar Sessões
                     </button>
                   </div>
@@ -597,52 +485,56 @@ function GabinetesAdmin() {
 
       {/* Modal Novo Usuário */}
       {showNewUserModal && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: '20px'
-        }}>
-          <div style={{
-            backgroundColor: 'var(--card)',
-            borderRadius: '20px',
-            width: '100%',
-            maxWidth: '480px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            border: '1px solid var(--border)'
-          }}>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            padding: '20px'
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'var(--card)',
+              borderRadius: '20px',
+              width: '100%',
+              maxWidth: '480px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              border: '1px solid var(--border)'
+            }}
+          >
             {/* Modal Header */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '24px',
-              borderBottom: '1px solid var(--border)'
-            }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '24px',
+                borderBottom: '1px solid var(--border)'
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '12px',
-                  backgroundColor: 'var(--primary)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
+                <div
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '12px',
+                    backgroundColor: 'var(--primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
                   <UserPlus style={{ width: '22px', height: '22px', color: 'white' }} />
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>
-                    Novo Usuário
-                  </h2>
-                  <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', margin: 0 }}>
-                    Adicione um novo membro ao gabinete
-                  </p>
+                  <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>Novo Usuário</h2>
+                  <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', margin: 0 }}>Adicione um novo membro ao gabinete</p>
                 </div>
               </div>
               <button
@@ -665,13 +557,15 @@ function GabinetesAdmin() {
               <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {/* Nome */}
                 <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: 'var(--foreground)',
-                    marginBottom: '8px'
-                  }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                      marginBottom: '8px'
+                    }}
+                  >
                     Nome Completo *
                   </label>
                   <input
@@ -695,13 +589,15 @@ function GabinetesAdmin() {
 
                 {/* Email */}
                 <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: 'var(--foreground)',
-                    marginBottom: '8px'
-                  }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                      marginBottom: '8px'
+                    }}
+                  >
                     E-mail *
                   </label>
                   <input
@@ -725,13 +621,15 @@ function GabinetesAdmin() {
 
                 {/* Senha */}
                 <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: 'var(--foreground)',
-                    marginBottom: '8px'
-                  }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                      marginBottom: '8px'
+                    }}
+                  >
                     Senha *
                   </label>
                   <div style={{ position: 'relative' }}>
@@ -775,13 +673,15 @@ function GabinetesAdmin() {
 
                 {/* Role */}
                 <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: 'var(--foreground)',
-                    marginBottom: '8px'
-                  }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                      marginBottom: '8px'
+                    }}
+                  >
                     Função
                   </label>
                   <select
@@ -809,13 +709,15 @@ function GabinetesAdmin() {
               </div>
 
               {/* Modal Footer */}
-              <div style={{
-                display: 'flex',
-                gap: '12px',
-                padding: '20px 24px',
-                borderTop: '1px solid var(--border)',
-                backgroundColor: 'var(--muted)'
-              }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '12px',
+                  padding: '20px 24px',
+                  borderTop: '1px solid var(--border)',
+                  backgroundColor: 'var(--muted)'
+                }}
+              >
                 <button
                   type="button"
                   onClick={closeModal}
@@ -870,6 +772,217 @@ function GabinetesAdmin() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function GabinetesAdmin() {
+  const [gabinetes, setGabinetes] = useState<Tenant[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showNewModal, setShowNewModal] = useState(false)
+  const [newGabinete, setNewGabinete] = useState<Partial<Tenant>>({})
+  const [saving, setSaving] = useState(false)
+  const supabase = createClient()
+  const { user, tenant } = useAuthStore()
+
+  const loadGabinetes = useCallback(async () => {
+    setLoading(true)
+    let query = supabase.from('tenants').select('*').eq('type', 'gabinete').order('created_at', { ascending: false })
+    if (!(user?.role === 'super_admin' || user?.email === 'contato@dataro-it.com.br')) {
+      query = query.eq('id', tenant?.id)
+    }
+    const { data } = await query
+    if (data) setGabinetes(data)
+    setLoading(false)
+  }, [supabase, tenant?.id, user?.email, user?.role])
+
+  useEffect(() => {
+    loadGabinetes()
+  }, [loadGabinetes])
+
+  const handleAtivarDesativar = async (id: string, ativo: boolean) => {
+    await supabase.from('tenants').update({ ativo: !ativo }).eq('id', id)
+    loadGabinetes()
+  }
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
+    await supabase
+      .from('tenants')
+      .insert({
+        ...newGabinete,
+        type: 'gabinete',
+        ativo: true
+      })
+    setShowNewModal(false)
+    setNewGabinete({})
+    setSaving(false)
+    loadGabinetes()
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 600, color: 'var(--foreground)' }}>Gabinetes</h2>
+        <button
+          onClick={() => setShowNewModal(true)}
+          style={{
+            padding: '10px 20px',
+            borderRadius: 8,
+            background: 'var(--primary)',
+            color: 'white',
+            border: 'none',
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: 'pointer'
+          }}
+        >
+          Novo Gabinete
+        </button>
+      </div>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid var(--border)' }}>
+              <th style={{ padding: '12px 10px', textAlign: 'left' }}>Nome</th>
+              <th style={{ padding: '12px 10px', textAlign: 'left' }}>Parlamentar</th>
+              <th style={{ padding: '12px 10px', textAlign: 'left' }}>Município</th>
+              <th style={{ padding: '12px 10px', textAlign: 'left' }}>UF</th>
+              <th style={{ padding: '12px 10px', textAlign: 'center' }}>Status</th>
+              <th style={{ padding: '12px 10px', textAlign: 'center' }}>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: 40 }}>
+                  Carregando...
+                </td>
+              </tr>
+            ) : gabinetes.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: 40 }}>
+                  Nenhum gabinete encontrado
+                </td>
+              </tr>
+            ) : (
+              gabinetes.map((g) => (
+                <tr key={g.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                  <td style={{ padding: '12px 10px' }}>{g.name}</td>
+                  <td style={{ padding: '12px 10px' }}>{g.parlamentar_name}</td>
+                  <td style={{ padding: '12px 10px' }}>{g.municipio}</td>
+                  <td style={{ padding: '12px 10px' }}>{g.uf}</td>
+                  <td style={{ padding: '12px 10px', textAlign: 'center' }}>
+                    {g.ativo ? <span style={{ color: '#22c55e', fontWeight: 600 }}>Ativo</span> : <span style={{ color: '#ef4444', fontWeight: 600 }}>Inativo</span>}
+                  </td>
+                  <td style={{ padding: '12px 10px', textAlign: 'center' }}>
+                    <button
+                      onClick={() => handleAtivarDesativar(g.id, g.ativo)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: 6,
+                        border: 'none',
+                        background: g.ativo ? '#fee2e2' : '#dcfce7',
+                        color: g.ativo ? '#ef4444' : '#22c55e',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {g.ativo ? 'Desativar' : 'Ativar'}
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+      {/* Modal Novo Gabinete */}
+      {showNewModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.3)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <form
+            onSubmit={handleSave}
+            style={{
+              background: 'white',
+              borderRadius: 12,
+              padding: 32,
+              minWidth: 340,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.15)'
+            }}
+          >
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20 }}>Novo Gabinete</h3>
+            <input
+              required
+              placeholder="Nome"
+              value={newGabinete.name || ''}
+              onChange={(e) => setNewGabinete((v) => ({ ...v, name: e.target.value }))}
+              style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }}
+            />
+            <input
+              placeholder="Parlamentar"
+              value={newGabinete.parlamentar_name || ''}
+              onChange={(e) => setNewGabinete((v) => ({ ...v, parlamentar_name: e.target.value }))}
+              style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }}
+            />
+            <input
+              placeholder="Município"
+              value={newGabinete.municipio || ''}
+              onChange={(e) => setNewGabinete((v) => ({ ...v, municipio: e.target.value }))}
+              style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }}
+            />
+            <input
+              placeholder="UF"
+              value={newGabinete.uf || ''}
+              onChange={(e) => setNewGabinete((v) => ({ ...v, uf: e.target.value }))}
+              style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }}
+            />
+            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+              <button
+                type="button"
+                onClick={() => setShowNewModal(false)}
+                style={{
+                  flex: 1,
+                  padding: 10,
+                  borderRadius: 6,
+                  border: 'none',
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  fontWeight: 600
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                style={{
+                  flex: 1,
+                  padding: 10,
+                  borderRadius: 6,
+                  border: 'none',
+                  background: '#16a34a',
+                  color: 'white',
+                  fontWeight: 600,
+                  cursor: saving ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {saving ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>
