@@ -1,6 +1,4 @@
-// API Route: /api/admin/gabinetes/[id]
-// Gerenciamento de gabinete individual (somente super-admin)
-
+// API Route: /api/admin/gabinetes/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { GabineteProvisioningService } from '@/lib/services/gabinete-provisioning.service';
@@ -13,7 +11,6 @@ const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
  */
 async function isSuperAdmin(): Promise<{ isSuper: boolean; error?: string }> {
   const supabase = await createClient();
-  
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   
   if (authError || !user) {
@@ -29,40 +26,35 @@ async function isSuperAdmin(): Promise<{ isSuper: boolean; error?: string }> {
 
 /**
  * GET /api/admin/gabinetes/[id]
- * Busca um gabinete específico (somente super-admin)
  */
 export async function GET(
   request: NextRequest,
-  props: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> } // ✅ Correção Next.js 16: params é Promise
 ) {
-  const params = await props.params;
-  const { gabinete } = { gabinete: { id: params.id } }; // Exemplo, ajuste conforme sua lógica
-    // ... resto do código
-}) {
+  // ✅ Aguarda os parâmetros antes de usar
+  const { id } = await context.params;
+
   try {
-    // Verificar se é super admin
     const { isSuper, error: authError } = await isSuperAdmin();
-    
+
     if (!isSuper) {
       return NextResponse.json(
         { error: authError || 'Acesso negado' },
         { status: 403 }
       );
     }
-    
-    const { id } = params;
-    
-    // Buscar gabinete
+
     const { data: gabinete, error } = await GabineteProvisioningService.getGabinete(id);
-    
+
     if (error || !gabinete) {
       return NextResponse.json(
-        { error: error || 'Gabinete não encontrado' },
+        { error: error?.message || 'Gabinete não encontrado' },
         { status: 404 }
       );
     }
-    
+
     return NextResponse.json({ gabinete });
+
   } catch (error) {
     console.error('Erro ao buscar gabinete:', error);
     return NextResponse.json(
@@ -74,46 +66,33 @@ export async function GET(
 
 /**
  * PATCH /api/admin/gabinetes/[id]
- * Atualiza um gabinete (somente super-admin)
  */
-// ✅ CÓDIGO NOVO (Com await)
 export async function PATCH(
   request: NextRequest,
-  props: { params: Promise<{ id: string }> } // Mudou a tipagem
+  context: { params: Promise<{ id: string }> } // ✅ Correção Next.js 16: params é Promise
 ) {
-  const params = await props.params; // <--- Adicione esta linha obrigatória
-  const id = params.id; // Agora você pode usar o id
+  // ✅ Aguarda os parâmetros antes de usar
+  const { id } = await context.params;
 
-  // ... continue o resto da função (remova o destructuring do argumento se tiver)
-}  try {
-    // Verificar se é super admin
+  try {
     const { isSuper, error: authError } = await isSuperAdmin();
-    
+
     if (!isSuper) {
       return NextResponse.json(
         { error: authError || 'Acesso negado' },
         { status: 403 }
       );
     }
-    
-    const { id } = params;
+
     const body = await request.json();
-    
-    // Atualizar gabinete
-    const result = await GabineteProvisioningService.updateGabinete(id, body);
-    
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 400 }
-      );
+    const { data, error } = await GabineteProvisioningService.updateGabinete(id, body);
+
+    if (error) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
     }
-    
-    return NextResponse.json({
-      success: true,
-      gabinete: result.gabinete,
-      message: 'Gabinete atualizado com sucesso',
-    });
+
+    return NextResponse.json({ gabinete: data });
+
   } catch (error) {
     console.error('Erro ao atualizar gabinete:', error);
     return NextResponse.json(
