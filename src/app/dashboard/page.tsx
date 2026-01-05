@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
 import { useTheme } from '@/providers/theme-provider'
+import { isSuperAdmin } from '@/lib/auth-utils'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { 
@@ -248,7 +249,7 @@ export default function DashboardPage() {
   const [showAiPanel, setShowAiPanel] = useState(false)
   
   const supabase = createClient()
-  const { gabinete } = useAuthStore()
+  const { user, gabinete: tenant } = useAuthStore()
 
   useEffect(() => {
     // Verificar se é o primeiro acesso
@@ -272,10 +273,16 @@ export default function DashboardPage() {
       const startOfYear = new Date(selectedYear, 0, 1).toISOString()
       const endOfYear = new Date(selectedYear, 11, 31, 23, 59, 59).toISOString()
 
-      const { data: providencias } = await supabase
+      let query = supabase
         .from('providencias')
         .select('status, prioridade')
-        .eq('gabinete_id', gabinete?.id)
+      
+      // Filtrar por gabinete apenas se não for super admin
+      if (!isSuperAdmin(user)) {
+        query = query.eq('gabinete_id', tenant?.id)
+      }
+      
+      const { data: providencias } = await query
         .gte('created_at', startOfYear)
         .lte('created_at', endOfYear)
 
@@ -292,7 +299,7 @@ export default function DashboardPage() {
         setStats(newStats)
       }
 
-      const { data: recent } = await supabase
+      let recentQuery = supabase
         .from('providencias')
         .select(`
           id,
@@ -304,7 +311,13 @@ export default function DashboardPage() {
           cidadao:cidadaos(nome),
           orgao_destino:orgaos(nome, sigla)
         `)
-        .eq('gabinete_id', gabinete?.id)
+      
+      // Filtrar por gabinete apenas se não for super admin
+      if (!isSuperAdmin(user)) {
+        recentQuery = recentQuery.eq('gabinete_id', tenant?.id)
+      }
+      
+      const { data: recent } = await recentQuery
         .order('created_at', { ascending: false })
         .limit(5)
 

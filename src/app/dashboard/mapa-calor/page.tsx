@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
+import { isSuperAdmin } from '@/lib/auth-utils'
 import { Providencia } from '@/types/database'
 import { 
   MapPin, 
@@ -77,7 +78,7 @@ export default function MapaCalorPage() {
   })
   const [providenciasFiltradas, setProvidenciasFiltradas] = useState<ProvidenciaComCoordenadas[]>([])
   
-  const { tenant } = useAuthStore()
+  const { user, gabinete: tenant } = useAuthStore()
   const supabase = createClient()
 
   // Carregar providências e categorias
@@ -88,7 +89,7 @@ export default function MapaCalorPage() {
       setLoading(true)
       try {
         // Buscar providências
-        const { data: providenciasData, error: provError } = await supabase
+        let query = supabase
           .from('providencias')
           .select(`
             *,
@@ -96,7 +97,13 @@ export default function MapaCalorPage() {
             categoria:categorias(*),
             orgao_destino:orgaos(*)
           `)
-          .eq('gabinete_id', tenant.id)
+        
+        // Filtrar por gabinete apenas se não for super admin
+        if (!isSuperAdmin(user)) {
+          query = query.eq('gabinete_id', tenant.id)
+        }
+        
+        const { data: providenciasData, error: provError } = await query
           .order('created_at', { ascending: false })
 
         if (provError) throw provError
@@ -128,10 +135,16 @@ export default function MapaCalorPage() {
         setEstatisticas(stats)
 
         // Buscar categorias
-        const { data: categoriasData } = await supabase
+        let catQuery = supabase
           .from('categorias')
           .select('id, nome')
-          .eq('gabinete_id', tenant.id)
+        
+        // Filtrar por gabinete apenas se não for super admin
+        if (!isSuperAdmin(user)) {
+          catQuery = catQuery.eq('gabinete_id', tenant.id)
+        }
+        
+        const { data: categoriasData } = await catQuery
           .eq('ativo', true)
 
         setCategorias(categoriasData || [])

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
+import { isSuperAdmin } from '@/lib/auth-utils'
 import { 
   Plus, 
   Search, 
@@ -34,7 +35,7 @@ export default function OrgaosPage() {
   const [orgaos, setOrgaos] = useState<Orgao[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const { tenant } = useAuthStore()
+  const { user, gabinete: tenant } = useAuthStore()
   const supabase = createClient()
 
   const loadOrgaos = async () => {
@@ -45,8 +46,13 @@ export default function OrgaosPage() {
       let query = supabase
         .from('orgaos')
         .select('*')
-        .eq('tenant_id', tenant.id)
-        .order('nome')
+      
+      // Filtrar por tenant apenas se não for super admin
+      if (!isSuperAdmin(user)) {
+        query = query.eq('tenant_id', tenant.id)
+      }
+      
+      query = query.order('nome')
 
       if (search) {
         query = query.or(`nome.ilike.%${search}%,sigla.ilike.%${search}%`)

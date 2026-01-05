@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
+import { isSuperAdmin } from '@/lib/auth-utils'
 import { 
   Plus, 
   Search, 
@@ -80,7 +81,7 @@ function ProvidenciasContent() {
   const [priorityFilter, setPriorityFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
-  const { tenant } = useAuthStore()
+  const { user, gabinete: tenant } = useAuthStore()
   const supabase = createClient()
   const searchParams = useSearchParams()
 
@@ -105,8 +106,13 @@ function ProvidenciasContent() {
             categoria:categorias(nome, cor),
             orgao_destino:orgaos(nome, sigla)
           `, { count: 'exact' })
-          .eq('gabinete_id', tenant.id)
-          .order('created_at', { ascending: false })
+        
+        // Filtrar por gabinete apenas se não for super admin
+        if (!isSuperAdmin(user)) {
+          query = query.eq('gabinete_id', tenant.id)
+        }
+        
+        query = query.order('created_at', { ascending: false })
 
         if (statusFilter) {
           query = query.eq('status', statusFilter)
