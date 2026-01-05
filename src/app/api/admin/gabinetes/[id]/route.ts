@@ -33,8 +33,12 @@ async function isSuperAdmin(): Promise<{ isSuper: boolean; error?: string }> {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params;
+  const { gabinete } = { gabinete: { id: params.id } }; // Exemplo, ajuste conforme sua lógica
+    // ... resto do código
+}) {
   try {
     // Verificar se é super admin
     const { isSuper, error: authError } = await isSuperAdmin();
@@ -72,11 +76,16 @@ export async function GET(
  * PATCH /api/admin/gabinetes/[id]
  * Atualiza um gabinete (somente super-admin)
  */
+// ✅ CÓDIGO NOVO (Com await)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> } // Mudou a tipagem
 ) {
-  try {
+  const params = await props.params; // <--- Adicione esta linha obrigatória
+  const id = params.id; // Agora você pode usar o id
+
+  // ... continue o resto da função (remova o destructuring do argumento se tiver)
+}  try {
     // Verificar se é super admin
     const { isSuper, error: authError } = await isSuperAdmin();
     
