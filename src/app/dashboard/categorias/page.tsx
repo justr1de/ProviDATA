@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
+import { isSuperAdmin } from '@/lib/auth-utils'
 import { 
   Plus, 
   FolderOpen,
@@ -25,7 +26,7 @@ export default function CategoriasPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({ nome: '', descricao: '', cor: '#3B82F6' })
-  const { tenant } = useAuthStore()
+  const { user, gabinete: tenant } = useAuthStore()
   const supabase = createClient()
 
   const loadCategorias = async () => {
@@ -33,11 +34,18 @@ export default function CategoriasPage() {
 
     setIsLoading(true)
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('categorias')
         .select('*')
-        .eq('gabinete_id', tenant.id)
-        .order('nome')
+      
+      // Filtrar por gabinete apenas se não for super admin
+      if (!isSuperAdmin(user)) {
+        query = query.eq('gabinete_id', tenant.id)
+      }
+      
+      query = query.order('nome')
+
+      const { data, error } = await query
 
       if (error) throw error
 

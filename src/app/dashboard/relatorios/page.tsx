@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
+import { isSuperAdmin } from '@/lib/auth-utils'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
@@ -82,7 +83,7 @@ export default function RelatoriosPage() {
   const [dateRange, setDateRange] = useState({ start: '', end: '' })
   const [isGenerating, setIsGenerating] = useState(false)
   const [activeShortcut, setActiveShortcut] = useState<string | null>(null)
-  const { user, tenant } = useAuthStore()
+  const { user, gabinete: tenant } = useAuthStore()
   const supabase = createClient()
 
   // Função para formatar data no formato YYYY-MM-DD
@@ -130,7 +131,7 @@ export default function RelatoriosPage() {
 
   // Função para buscar providências do banco
   const fetchProvidencias = async (): Promise<Providencia[]> => {
-    if (!user?.gabinete_id) return []
+    if (!user?.gabinete_id && !isSuperAdmin(user)) return []
 
     let query = supabase
       .from('providencias')
@@ -147,7 +148,11 @@ export default function RelatoriosPage() {
         orgao:orgaos(nome, sigla),
         categoria:categorias(nome)
       `)
-      .eq('gabinete_id', user.gabinete_id)
+    
+    // Filtrar por gabinete apenas se não for super admin
+    if (!isSuperAdmin(user)) {
+      query = query.eq('gabinete_id', user.gabinete_id)
+    }
 
     if (dateRange.start) {
       query = query.gte('created_at', dateRange.start)
