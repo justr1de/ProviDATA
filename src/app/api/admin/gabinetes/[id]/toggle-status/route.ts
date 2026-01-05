@@ -1,19 +1,13 @@
-// API Route: /api/admin/gabinetes/[id]/toggle-status
-// Ativa ou desativa um gabinete (somente super-admin)
+// API Route: /api/admin/gabinetes/[id]/toggle-status/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { GabineteProvisioningService } from '@/lib/services/gabinete-provisioning.service';
 
-// Email do super admin geral do sistema
 const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
 
-/**
- * Verifica se o usuário é super admin
- */
 async function isSuperAdmin(): Promise<{ isSuper: boolean; error?: string }> {
   const supabase = await createClient();
-  
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   
   if (authError || !user) {
@@ -27,16 +21,15 @@ async function isSuperAdmin(): Promise<{ isSuper: boolean; error?: string }> {
   return { isSuper: true };
 }
 
-/**
- * PUT /api/admin/gabinetes/[id]/toggle-status
- * Ativa ou desativa um gabinete (somente super-admin)
- */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> } // ✅ Correção 1: params é uma Promise
 ) {
+  // ✅ Correção 2: Aguardar os parâmetros
+  const params = await props.params;
+  const { id } = params;
+
   try {
-    // Verificar se é super admin
     const { isSuper, error: authError } = await isSuperAdmin();
     
     if (!isSuper) {
@@ -45,8 +38,6 @@ export async function PUT(
         { status: 403 }
       );
     }
-    
-    const { id } = params;
     
     // Alterar status
     const result = await GabineteProvisioningService.toggleGabineteStatus(id);
