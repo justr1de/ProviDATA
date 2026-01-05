@@ -8,17 +8,18 @@ const nextConfig: NextConfig = {
   
   // Configuração de imagens
   images: {
-    domains: ['wntiupkhjtgiaxiicxeq.supabase.co'],
+    // ✅ Removido 'domains' para eliminar o warning e proteger a aplicação
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**.supabase.co',
+        hostname: 'wntiupkhjtgiaxiicxeq.supabase.co', // Seu host específico
+        pathname: '/storage/v1/object/public/**', // Segurança adicional: permite apenas arquivos públicos
       },
     ],
   },
 
-  // Suporte a experimental features do Next.js 16
+  // Suporte a experimental features
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
