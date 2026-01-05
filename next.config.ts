@@ -6,21 +6,23 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   
-  // Configuração de imagens
+  // Configuração de imagens (Next.js 15/16)
   images: {
-    // ✅ Removido 'domains' para eliminar o warning e proteger a aplicação
+    // ✅ Formatos modernos para melhor compressão
     formats: ['image/avif', 'image/webp'],
+    // ✅ Padrão seguro que substitui o 'domains' antigo
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'wntiupkhjtgiaxiicxeq.supabase.co', // Seu host específico
-        pathname: '/storage/v1/object/public/**', // Segurança adicional: permite apenas arquivos públicos
+        hostname: 'wntiupkhjtgiaxiicxeq.supabase.co',
+        pathname: '/storage/v1/object/public/**', // Restringe apenas aos arquivos públicos
       },
     ],
   },
 
-  // Suporte a experimental features
+  // Suporte a experimental features do Next.js 16
   experimental: {
+    // Melhora a velocidade do build otimizando ícones e componentes
     optimizePackageImports: ['lucide-react'],
   },
 };
