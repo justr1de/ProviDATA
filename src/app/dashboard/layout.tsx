@@ -125,26 +125,108 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const checkAuth = async () => {
-      const {
-        data: { user: authUser }
-      } = await supabase.auth.getUser()
+      try {
+        // 1. Verificar autenticação
+        const {
+          data: { user: authUser },
+          error: authError
+        } = await supabase.auth.getUser()
 
-      if (!authUser) {
-        router.push('/login')
-        return
-      }
-
-      const { data: userData } = await supabase
-        .from('users')
-        .select('*, gabinete:tenants(*)')
-        .eq('id', authUser.id)
-        .single()
-
-      if (userData) {
-        setUser(userData)
-        if (userData.gabinete) {
-          setGabinete(userData.gabinete)
+        if (authError || !authUser) {
+          console.error('Usuário não autenticado:', authError)
+          router.push('/login')
+          return
         }
+
+        // 2. ✅ CORRETO: Buscar perfil do usuário com gabinete
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select(`
+            *,
+            gabinete:gabinetes!gabinete_id(*)
+          `)
+          .eq('id', authUser.id)
+          .single()
+
+        if (profileError) {
+          console.error('Erro ao buscar perfil:', profileError)
+          
+          // Se o perfil não existe, redirecionar para onboarding
+          if (profileError.code === 'PGRST116') {
+            router.push('/onboarding')
+            return
+          }
+          
+          throw profileError
+        }
+
+        if (!profileData) {
+          console.error('Perfil não encontrado')
+          router.push('/onboarding')
+          return
+        }
+
+        // 3. Mapear Profile para User para compatibilidade com auth-store
+        const userData = {
+          id: profileData.id,
+          gabinete_id: profileData.gabinete_id || '',
+          nome: profileData.full_name || profileData.email,
+          email: profileData.email,
+          telefone: '',
+          cargo: profileData.cargo || '',
+          role: profileData.role as 'admin' | 'assessor' | 'colaborador',
+          avatar_url: profileData.avatar_url || '',
+          ativo: true,
+          created_at: profileData.created_at,
+          updated_at: profileData.updated_at
+        }
+
+        // 4. Atualizar estados
+        setUser(userData)
+        
+        if (profileData.gabinete) {
+          // Mapear gabinete para o formato esperado
+          const gabineteData = {
+            id: profileData.gabinete.id,
+            name: profileData.gabinete.nome,
+            slug: profileData.gabinete.slug || '',
+            type: 'gabinete' as const,
+            parlamentar_name: profileData.gabinete.parlamentar_nome,
+            parlamentar_nickname: '',
+            parlamentar_cargo: profileData.gabinete.parlamentar_cargo,
+            partido: profileData.gabinete.partido,
+            uf: profileData.gabinete.uf,
+            municipio: profileData.gabinete.municipio,
+            endereco: profileData.gabinete.endereco,
+            telefone: profileData.gabinete.telefone,
+            telefone_parlamentar: profileData.gabinete.telefone_parlamentar,
+            telefone_gabinete: profileData.gabinete.telefone_gabinete,
+            telefone_adicional: profileData.gabinete.telefone_adicional,
+            email: profileData.gabinete.email,
+            email_parlamentar: profileData.gabinete.email_parlamentar,
+            email_gabinete: profileData.gabinete.email_gabinete,
+            chefe_de_gabinete: profileData.gabinete.chefe_de_gabinete,
+            assessor_2: profileData.gabinete.assessor_2,
+            logo_url: profileData.gabinete.logo_url,
+            settings: profileData.gabinete.settings,
+            plano: 'basico' as const,
+            ativo: profileData.gabinete.ativo,
+            created_at: profileData.gabinete.created_at,
+            updated_at: profileData.gabinete.updated_at,
+            metadata: {}
+          }
+          setGabinete(gabineteData)
+        }
+
+        // 5. Verificar onboarding (se necessário)
+        if (!profileData.onboarding_completed) {
+          router.push('/onboarding')
+          return
+        }
+
+      } catch (error) {
+        console.error('Erro ao verificar autenticação:', error)
+        router.push('/login')
       }
     }
 
@@ -298,9 +380,9 @@ export default function DashboardLayout({
             }}
           >
             {gabinete
-              ? `Gabinete do ${(gabinete.cargo?.replace('_', ' ') || 'deputado estadual')
+              ? `Gabinete do ${(gabinete.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual')
                   .charAt(0)
-                  .toUpperCase() + (gabinete.cargo?.replace('_', ' ') || 'deputado estadual').slice(1)} ${
+                  .toUpperCase() + (gabinete.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual').slice(1)} ${
                   gabinete.parlamentar_name
                 }`
               : 'Carregando...'}
@@ -316,7 +398,7 @@ export default function DashboardLayout({
             }}
           >
             {(() => {
-              const cargo = gabinete?.cargo?.replace('_', ' ') || 'deputado estadual'
+              const cargo = gabinete?.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual'
               return cargo.charAt(0).toUpperCase() + cargo.slice(1)
             })()}
           </p>
