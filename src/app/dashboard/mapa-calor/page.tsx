@@ -158,7 +158,7 @@ export default function MapaCalorPage() {
     }
 
     fetchData()
-  }, [tenant?.id, supabase])
+  }, [tenant?.id, supabase, user])
 
   // Aplicar filtros
   const aplicarFiltros = useCallback(() => {

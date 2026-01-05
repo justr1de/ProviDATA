@@ -68,7 +68,7 @@ export default function CidadaosPage() {
     }
 
     loadCidadaos()
-  }, [tenant, supabase, search, currentPage])
+  }, [tenant, supabase, search, currentPage, user])
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 

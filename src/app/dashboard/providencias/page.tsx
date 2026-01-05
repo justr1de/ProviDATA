@@ -144,7 +144,7 @@ function ProvidenciasContent() {
     }
 
     loadProvidencias()
-  }, [tenant, supabase, statusFilter, priorityFilter, search, currentPage])
+  }, [tenant, supabase, statusFilter, priorityFilter, search, currentPage, user])
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
