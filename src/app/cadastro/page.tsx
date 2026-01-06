@@ -130,7 +130,7 @@ export default function CadastroPage() {
         .from('users')
         .insert({
           id: authData.user.id,
-          tenant_id: tenantData.id,
+          gabinete_id: tenantData.id,
           nome: formData.nomeUsuario,
           email: formData.email,
           role: 'admin',

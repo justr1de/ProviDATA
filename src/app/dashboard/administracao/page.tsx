@@ -32,7 +32,7 @@ interface Usuario {
   papel: string
   status: string
   created_at: string
-  tenant_id: string
+  gabinete_id: string
   tenant?: {
     nome: string
   }

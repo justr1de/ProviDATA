@@ -49,7 +49,7 @@ export default function OrgaosPage() {
       
       // Filtrar por tenant apenas se não for super admin
       if (!isSuperAdmin(user)) {
-        query = query.eq('tenant_id', tenant.id)
+        query = query.eq('gabinete_id', tenant.id)
       }
       
       query = query.order('nome')
