@@ -16,7 +16,7 @@ interface CacheEntry {
   } | null
   profile: {
     role: string
-    tenant_id?: string
+    gabinete_id?: string
   } | null
   timestamp: number
 }
@@ -124,7 +124,7 @@ export async function middleware(request: NextRequest) {
       if (user) {
         const { data: profile } = await supabase
           .from('users')
-          .select('role, tenant_id')
+          .select('role, gabinete_id')
           .eq('id', user.id)
           .single()
         
@@ -143,7 +143,7 @@ export async function middleware(request: NextRequest) {
     if (user) {
       const { data: profile } = await supabase
         .from('users')
-        .select('role, tenant_id')
+        .select('role, gabinete_id')
         .eq('id', user.id)
         .single()
       
