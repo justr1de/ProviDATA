@@ -46,6 +46,16 @@ function getAccessToken(request: NextRequest): string | null {
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
 
+  // ===== VERIFICAÇÃO DE VARIÁVEIS DE AMBIENTE =====
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  // Se as variáveis não estiverem configuradas, permite acesso sem autenticação
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('Variáveis de ambiente do Supabase não configuradas no middleware')
+    return NextResponse.next()
+  }
+
   // ===== OTIMIZAÇÃO 1: Pular rotas públicas =====
   // Não precisa verificar autenticação em rotas públicas
   const isPublicRoute =
@@ -72,8 +82,8 @@ export async function middleware(request: NextRequest) {
 
   // 2. Configura o cliente Supabase para manipular cookies
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
