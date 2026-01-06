@@ -1,7 +1,7 @@
 // Serviço de Provisionamento de Gabinetes
 // Responsável por criar gabinetes e seus usuários admin iniciais
 import { createClient } from '@supabase/supabase-js';
-import type { Gabinete } from '@/types/onboarding';
+import type { Gabinete } from '@/types/database';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
