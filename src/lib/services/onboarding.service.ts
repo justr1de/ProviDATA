@@ -221,16 +221,7 @@ export class OnboardingService {
         return { success: false, error: 'Erro ao aceitar convite' };
       }
 
-      // Converter gabinete_id para organization_id para compatibilidade
-      const response = data as AcceptInviteResponse;
-      if (response.success && response.gabinete_id) {
-        return {
-          ...response,
-          organization_id: response.gabinete_id, // Compatibilidade
-        };
-      }
-
-      return response;
+      return data as AcceptInviteResponse;
     } catch (error) {
       console.error('Erro no acceptInvite:', error);
       return { success: false, error: 'Erro interno ao aceitar convite' };
