@@ -136,14 +136,24 @@ export default function DashboardLayout({
 
       const { data: userData } = await supabase
         .from('users')
-        .select('*, gabinete:tenants(*)')
+        .select('*')
         .eq('id', authUser.id)
         .single()
 
       if (userData) {
         setUser(userData)
-        if (userData.gabinete) {
-          setGabinete(userData.gabinete)
+        
+        // Buscar gabinete separadamente usando a VIEW tenants
+        if (userData.gabinete_id) {
+          const { data: gabineteData } = await supabase
+            .from('tenants')
+            .select('*')
+            .eq('id', userData.gabinete_id)
+            .single()
+          
+          if (gabineteData) {
+            setGabinete(gabineteData)
+          }
         }
       }
     }
