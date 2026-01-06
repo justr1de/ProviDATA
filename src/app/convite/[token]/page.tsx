@@ -5,13 +5,14 @@ import { useRouter, useParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/client';
-import type { Organization, UserRole } from '@/types/onboarding';
+import type { Gabinete, UserRole } from '@/types/onboarding';
 import { ROLE_LABELS, ROLE_DESCRIPTIONS } from '@/types/onboarding';
 
 interface InviteData {
   email: string;
   role: UserRole;
-  organization: Organization;
+  gabinete?: Gabinete;
+  gabinete_id?: string;
   expires_at: string;
 }
 
@@ -78,7 +79,7 @@ export default function AcceptInvitePage() {
       }
 
       // Sucesso! Redirecionar para dashboard
-      alert('Convite aceito com sucesso! Bem-vindo à organização.');
+      alert('Convite aceito com sucesso! Bem-vindo ao gabinete.');
       router.push('/dashboard');
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Erro ao aceitar convite');
@@ -140,6 +141,10 @@ export default function AcceptInvitePage() {
     return null;
   }
 
+  // Nome do gabinete (com fallback)
+  const gabineteName = invite.gabinete?.name || 'Gabinete';
+  const gabineteType = invite.gabinete?.type || 'gabinete';
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 p-4">
       <Card className="p-8 max-w-2xl w-full bg-white shadow-2xl">
@@ -150,18 +155,18 @@ export default function AcceptInvitePage() {
             Você foi convidado!
           </h1>
           <p className="text-gray-600">
-            Junte-se à organização e comece a colaborar
+            Junte-se ao gabinete e comece a colaborar
           </p>
         </div>
 
         {/* Invite Details */}
         <div className="space-y-6 mb-8">
-          {/* Organization */}
+          {/* Gabinete */}
           <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
-            <h2 className="text-sm font-medium text-gray-600 mb-2">Organização</h2>
-            <p className="text-2xl font-bold text-gray-900">{invite.organization.name}</p>
+            <h2 className="text-sm font-medium text-gray-600 mb-2">Gabinete</h2>
+            <p className="text-2xl font-bold text-gray-900">{gabineteName}</p>
             <p className="text-sm text-gray-600 mt-1 capitalize">
-              Tipo: {invite.organization.type}
+              Tipo: {gabineteType}
             </p>
           </div>
 
@@ -173,7 +178,7 @@ export default function AcceptInvitePage() {
 
           {/* Role */}
           <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-            <h3 className="text-sm font-medium text-gray-600 mb-1">Papel na Organização</h3>
+            <h3 className="text-sm font-medium text-gray-600 mb-1">Papel no Gabinete</h3>
             <p className="text-lg font-semibold text-green-800 mb-2">
               {ROLE_LABELS[invite.role]}
             </p>
@@ -231,8 +236,8 @@ export default function AcceptInvitePage() {
         {/* Footer */}
         <div className="mt-8 pt-6 border-t border-gray-200 text-center">
           <p className="text-sm text-gray-600">
-            Ao aceitar este convite, você concorda em fazer parte da organização{' '}
-            <span className="font-semibold">{invite.organization.name}</span> com o papel de{' '}
+            Ao aceitar este convite, você concorda em fazer parte do gabinete{' '}
+            <span className="font-semibold">{gabineteName}</span> com o papel de{' '}
             <span className="font-semibold">{ROLE_LABELS[invite.role]}</span>.
           </p>
         </div>
