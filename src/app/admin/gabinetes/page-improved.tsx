@@ -10,15 +10,14 @@ import {
   X, 
   Search, 
   Filter, 
-  DoorOpen, 
   Building2, 
   Loader2,
   CheckCircle2,
   XCircle,
-  Users,
   MapPin,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  LogOut
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -99,71 +98,57 @@ export default function GabinetesPage() {
   // Estado do Formulário
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA)
 
-  // --- MEMOIZAÇÕES PARA PERFORMANCE ---
-  
-  // Gabinetes filtrados (otimizado com useMemo)
-  const filteredGabinetes = useMemo(() => {
-    let filtered = [...gabinetes]
+  // --- ESTATÍSTICAS ---
+  const stats = useMemo(() => {
+    const total = gabinetes.length
+    const ativos = gabinetes.filter(g => g.ativo).length
+    const inativos = total - ativos
     
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase().trim()
-      filtered = filtered.filter(g =>
-        g.nome?.toLowerCase().includes(term) ||
-        g.municipio?.toLowerCase().includes(term) ||
-        g.parlamentar_nome?.toLowerCase().includes(term) ||
-        g.partido?.toLowerCase().includes(term)
-      )
-    }
+    // Aplicar filtros para contar resultados
+    const filteredGabinetes = gabinetes.filter(gabinete => {
+      const matchesSearch = searchTerm === '' || 
+        gabinete.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        gabinete.parlamentar_nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        gabinete.municipio?.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      const matchesUF = filterUF === '' || gabinete.uf === filterUF
+      const matchesCargo = filterCargo === '' || gabinete.parlamentar_cargo === filterCargo
+      const matchesPartido = filterPartido === '' || gabinete.partido?.toLowerCase().includes(filterPartido.toLowerCase())
+      const matchesCidade = filterCidade === '' || gabinete.municipio?.toLowerCase().includes(filterCidade.toLowerCase())
+      const matchesStatus = filterStatus === 'all' || 
+        (filterStatus === 'ativo' && gabinete.ativo) ||
+        (filterStatus === 'inativo' && !gabinete.ativo)
+      
+      return matchesSearch && matchesUF && matchesCargo && matchesPartido && matchesCidade && matchesStatus
+    })
     
-    if (filterUF) {
-      filtered = filtered.filter(g => g.uf === filterUF)
-    }
-    
-    if (filterCargo) {
-      filtered = filtered.filter(g => g.parlamentar_cargo === filterCargo)
-    }
-    
-    if (filterPartido) {
-      const partido = filterPartido.toLowerCase()
-      filtered = filtered.filter(g => g.partido?.toLowerCase().includes(partido))
-    }
-    
-    if (filterCidade) {
-      const cidade = filterCidade.toLowerCase()
-      filtered = filtered.filter(g => g.municipio?.toLowerCase().includes(cidade))
-    }
-    
-    if (filterStatus !== 'all') {
-      filtered = filtered.filter(g => g.ativo === (filterStatus === 'ativo'))
-    }
-    
-    return filtered
+    return { total, ativos, inativos, filtrados: filteredGabinetes.length }
   }, [gabinetes, searchTerm, filterUF, filterCargo, filterPartido, filterCidade, filterStatus])
 
-  // Estatísticas
-  const stats = useMemo(() => ({
-    total: gabinetes.length,
-    ativos: gabinetes.filter(g => g.ativo).length,
-    inativos: gabinetes.filter(g => !g.ativo).length,
-    filtrados: filteredGabinetes.length
-  }), [gabinetes, filteredGabinetes.length])
+  // --- GABINETES FILTRADOS ---
+  const filteredGabinetes = useMemo(() => {
+    return gabinetes.filter(gabinete => {
+      const matchesSearch = searchTerm === '' || 
+        gabinete.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        gabinete.parlamentar_nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        gabinete.municipio?.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      const matchesUF = filterUF === '' || gabinete.uf === filterUF
+      const matchesCargo = filterCargo === '' || gabinete.parlamentar_cargo === filterCargo
+      const matchesPartido = filterPartido === '' || gabinete.partido?.toLowerCase().includes(filterPartido.toLowerCase())
+      const matchesCidade = filterCidade === '' || gabinete.municipio?.toLowerCase().includes(filterCidade.toLowerCase())
+      const matchesStatus = filterStatus === 'all' || 
+        (filterStatus === 'ativo' && gabinete.ativo) ||
+        (filterStatus === 'inativo' && !gabinete.ativo)
+      
+      return matchesSearch && matchesUF && matchesCargo && matchesPartido && matchesCidade && matchesStatus
+    })
+  }, [gabinetes, searchTerm, filterUF, filterCargo, filterPartido, filterCidade, filterStatus])
 
-  // Listas únicas para filtros
-  const partidosUnicos = useMemo(
-    () => Array.from(new Set(gabinetes.map(g => g.partido).filter(Boolean))).sort(),
-    [gabinetes]
-  )
-
-  const cidadesUnicas = useMemo(
-    () => Array.from(new Set(gabinetes.map(g => g.municipio).filter(Boolean))).sort(),
-    [gabinetes]
-  )
-
-  // --- FUNÇÕES CALLBACK (OTIMIZADAS) ---
-  
+  // --- FUNÇÕES ---
   const carregarGabinetes = useCallback(async () => {
+    setLoading(true)
     try {
-      setLoading(true)
       const { data, error } = await supabase
         .from('gabinetes')
         .select('*')
@@ -184,46 +169,27 @@ export default function GabinetesPage() {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
+    setSubmitting(true)
     
-    // Validação aprimorada
-    if (!formData.nome?.trim() || !formData.municipio?.trim() || !formData.uf) {
-      toast.error('Preencha todos os campos obrigatórios (Nome, Município e UF)')
-      return
-    }
-
-    // Validação de e-mail
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (formData.email_parlamentar && !emailRegex.test(formData.email_parlamentar)) {
-      toast.error('E-mail do parlamentar inválido')
-      return
-    }
-    if (formData.email_gabinete && !emailRegex.test(formData.email_gabinete)) {
-      toast.error('E-mail do gabinete inválido')
-      return
-    }
-
     try {
-      setSubmitting(true)
-      
-      // Prepara os dados, convertendo strings vazias para null
-      const dataToInsert = {
-        nome: formData.nome.trim(),
-        municipio: formData.municipio.trim(),
-        uf: formData.uf,
-        parlamentar_cargo: formData.parlamentar_cargo,
-        parlamentar_nome: formData.parlamentar_nome?.trim() || null,
-        partido: formData.partido?.trim().toUpperCase() || null,
-        telefone_parlamentar: formData.telefone_parlamentar?.trim() || null,
-        telefone_gabinete: formData.telefone_gabinete?.trim() || null,
-        telefone_adicional: formData.telefone_adicional?.trim() || null,
-        email_parlamentar: formData.email_parlamentar?.trim() || null,
-        email_gabinete: formData.email_gabinete?.trim() || null,
-        assessor_1: formData.assessor_1?.trim() || null,
-        assessor_2: formData.assessor_2?.trim() || null,
-        ativo: true
-      }
-      
-      const { error } = await supabase.from('gabinetes').insert([dataToInsert])
+      const { error } = await supabase
+        .from('gabinetes')
+        .insert([{
+          nome: formData.nome,
+          municipio: formData.municipio,
+          uf: formData.uf,
+          parlamentar_nome: formData.parlamentar_nome,
+          parlamentar_cargo: formData.parlamentar_cargo,
+          partido: formData.partido,
+          telefone_parlamentar: formData.telefone_parlamentar,
+          telefone_gabinete: formData.telefone_gabinete,
+          telefone_adicional: formData.telefone_adicional,
+          email_parlamentar: formData.email_parlamentar,
+          email_gabinete: formData.email_gabinete,
+          assessor_1: formData.assessor_1,
+          assessor_2: formData.assessor_2,
+          ativo: true
+        }])
       
       if (error) {
         throw error
@@ -233,21 +199,15 @@ export default function GabinetesPage() {
       setShowModal(false)
       setFormData(INITIAL_FORM_DATA)
       await carregarGabinetes()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao criar gabinete:', error)
-      const errorMessage = error?.message || 'Erro desconhecido ao criar gabinete'
-      toast.error(`Erro ao criar gabinete: ${errorMessage}`)
+      toast.error('Erro ao criar gabinete. Por favor, tente novamente.')
     } finally {
       setSubmitting(false)
     }
   }, [formData, supabase, carregarGabinetes])
 
   const toggleStatus = useCallback(async (gabinete: Gabinete) => {
-    if (!gabinete?.id) {
-      toast.error('ID do gabinete inválido')
-      return
-    }
-
     try {
       const novoStatus = !gabinete.ativo
       const { error } = await supabase
@@ -324,44 +284,82 @@ export default function GabinetesPage() {
     carregarGabinetes()
   }, [carregarGabinetes])
 
-  // --- ESTILOS COMUNS ---
-  const inputClassName = "w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-shadow"
-  const labelClassName = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-
   // --- JSX (RENDERIZAÇÃO) ---
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div style={{ 
+      minHeight: '100vh', 
+      backgroundColor: 'var(--background)',
+      color: 'var(--foreground)'
+    }}>
       {/* --- HEADER PRINCIPAL --- */}
-      <header className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <header style={{
+        backgroundColor: 'var(--card)',
+        borderBottom: '1px solid var(--border)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 20
+      }}>
+        <div style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: '0 24px'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            height: '64px'
+          }}>
             {/* Logo e Título */}
-            <div className="flex items-center gap-4">
-              <Link href="/admin/gabinetes" className="flex items-center gap-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <Link href="/admin/gabinetes" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Image
                   src="/providata-logo-final.png"
                   alt="ProviDATA"
                   width={180}
                   height={50}
-                  className="h-10 w-auto"
+                  style={{ height: '40px', width: 'auto' }}
                   priority
                 />
               </Link>
-              <div className="hidden sm:block h-6 w-px bg-gray-300 dark:bg-slate-600" />
-              <span className="hidden sm:block text-sm font-medium text-gray-600 dark:text-slate-400">
-                Gestão de Gabinetes
+              <div style={{ 
+                height: '24px', 
+                width: '1px', 
+                backgroundColor: 'var(--border)',
+                display: 'none'
+              }} className="hidden sm:block" />
+              <span style={{ 
+                fontSize: '14px', 
+                fontWeight: 500, 
+                color: 'var(--foreground-muted)',
+                display: 'none'
+              }} className="hidden sm:block">
+                Administração
               </span>
             </div>
 
-            {/* Ações */}
-            <div className="flex items-center gap-3">
+            {/* Ações do Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <ThemeToggle />
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  backgroundColor: 'var(--destructive)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'opacity 0.2s'
+                }}
               >
-                <DoorOpen size={18} />
-                <span className="hidden sm:inline">Sair</span>
+                <LogOut size={18} />
+                <span>Sair</span>
               </button>
             </div>
           </div>
@@ -369,287 +367,506 @@ export default function GabinetesPage() {
       </header>
 
       {/* --- CONTEÚDO PRINCIPAL --- */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Título e Ação Principal */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-              Gerenciar Gabinetes
-            </h1>
-            <p className="mt-1 text-sm text-gray-600 dark:text-slate-400">
-              Visualize e gerencie as organizações cadastradas no sistema
-            </p>
+      <main style={{
+        maxWidth: '1400px',
+        margin: '0 auto',
+        padding: '32px 24px'
+      }}>
+        {/* Título e Botão */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          marginBottom: '32px'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '16px'
+          }}>
+            <div>
+              <h1 style={{
+                fontSize: '28px',
+                fontWeight: 700,
+                color: 'var(--foreground)',
+                margin: 0
+              }}>
+                Gerenciar Gabinetes
+              </h1>
+              <p style={{
+                fontSize: '14px',
+                color: 'var(--foreground-muted)',
+                marginTop: '4px'
+              }}>
+                Visualize e gerencie as organizações cadastradas no sistema
+              </p>
+            </div>
+            <button
+              onClick={() => setShowModal(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 20px',
+                background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '10px',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                boxShadow: '0 4px 14px rgba(22, 163, 74, 0.25)',
+                transition: 'all 0.2s'
+              }}
+            >
+              <Plus size={20} />
+              <span>Novo Gabinete</span>
+            </button>
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors shadow-sm"
-          >
-            <Plus size={20} />
-            <span>Novo Gabinete</span>
-          </button>
         </div>
 
         {/* Cards de Estatísticas */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '16px',
+          marginBottom: '32px'
+        }} className="stats-grid">
           {/* Total */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-gray-200 dark:border-slate-700 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div className="stat-card" style={{
+            backgroundColor: 'var(--card)',
+            borderRadius: '16px',
+            padding: '20px',
+            border: '1px solid var(--border)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                padding: '10px',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderRadius: '10px'
+              }}>
+                <Building2 style={{ width: '20px', height: '20px', color: '#3b82f6' }} />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Total</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+                <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--foreground-muted)', margin: 0 }}>Total</p>
+                <p style={{ fontSize: '24px', fontWeight: 700, color: 'var(--foreground)', margin: 0 }}>{stats.total}</p>
               </div>
             </div>
           </div>
 
           {/* Ativos */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-gray-200 dark:border-slate-700 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+          <div className="stat-card" style={{
+            backgroundColor: 'var(--card)',
+            borderRadius: '16px',
+            padding: '20px',
+            border: '1px solid var(--border)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                padding: '10px',
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                borderRadius: '10px'
+              }}>
+                <CheckCircle2 style={{ width: '20px', height: '20px', color: '#22c55e' }} />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Ativos</p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.ativos}</p>
+                <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--foreground-muted)', margin: 0 }}>Ativos</p>
+                <p style={{ fontSize: '24px', fontWeight: 700, color: '#22c55e', margin: 0 }}>{stats.ativos}</p>
               </div>
             </div>
           </div>
 
           {/* Inativos */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-gray-200 dark:border-slate-700 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+          <div className="stat-card" style={{
+            backgroundColor: 'var(--card)',
+            borderRadius: '16px',
+            padding: '20px',
+            border: '1px solid var(--border)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                padding: '10px',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                borderRadius: '10px'
+              }}>
+                <XCircle style={{ width: '20px', height: '20px', color: '#ef4444' }} />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Inativos</p>
-                <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.inativos}</p>
+                <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--foreground-muted)', margin: 0 }}>Inativos</p>
+                <p style={{ fontSize: '24px', fontWeight: 700, color: '#ef4444', margin: 0 }}>{stats.inativos}</p>
               </div>
             </div>
           </div>
 
           {/* Resultados */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-gray-200 dark:border-slate-700 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                <Search className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <div className="stat-card" style={{
+            backgroundColor: 'var(--card)',
+            borderRadius: '16px',
+            padding: '20px',
+            border: '1px solid var(--border)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                padding: '10px',
+                backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                borderRadius: '10px'
+              }}>
+                <Search style={{ width: '20px', height: '20px', color: '#a855f7' }} />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Resultados</p>
-                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.filtrados}</p>
+                <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--foreground-muted)', margin: 0 }}>Resultados</p>
+                <p style={{ fontSize: '24px', fontWeight: 700, color: '#a855f7', margin: 0 }}>{stats.filtrados}</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Barra de Ferramentas */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-gray-200 dark:border-slate-700 shadow-sm mb-6">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            {/* Campo de Busca */}
-            <div className="relative flex-1 w-full md:max-w-md">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="w-5 h-5 text-gray-400" />
+        <div style={{
+          backgroundColor: 'var(--card)',
+          borderRadius: '16px',
+          padding: '16px',
+          border: '1px solid var(--border)',
+          marginBottom: '24px'
+        }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px'
+          }}>
+            <div style={{
+              display: 'flex',
+              gap: '16px',
+              alignItems: 'center',
+              flexWrap: 'wrap'
+            }}>
+              {/* Campo de Busca */}
+              <div style={{ position: 'relative', flex: 1, minWidth: '250px' }}>
+                <div style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  pointerEvents: 'none'
+                }}>
+                  <Search style={{ width: '20px', height: '20px', color: 'var(--foreground-muted)' }} />
+                </div>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Buscar por nome, município, parlamentar..."
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px 10px 44px',
+                    border: '1px solid var(--border)',
+                    borderRadius: '10px',
+                    backgroundColor: 'var(--background)',
+                    color: 'var(--foreground)',
+                    fontSize: '14px',
+                    outline: 'none'
+                  }}
+                />
               </div>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm transition-shadow"
-                placeholder="Buscar por nome, município, parlamentar..."
-              />
+
+              {/* Botão de Filtros */}
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 16px',
+                  backgroundColor: showFilters ? 'rgba(22, 163, 74, 0.1)' : 'var(--background)',
+                  color: showFilters ? '#16a34a' : 'var(--foreground)',
+                  border: `1px solid ${showFilters ? '#16a34a' : 'var(--border)'}`,
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <Filter size={18} />
+                <span>Filtros</span>
+                {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </button>
             </div>
 
-            {/* Botão de Filtros */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors w-full md:w-auto justify-center border ${
-                showFilters 
-                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' 
-                  : 'bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-600'
-              }`}
-            >
-              <Filter size={18} />
-              <span>Filtros</span>
-              {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </button>
-          </div>
-
-          {/* Painel de Filtros Expansível */}
-          {showFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                {/* Filtro UF */}
+            {/* Painel de Filtros Expansível */}
+            {showFilters && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '16px',
+                paddingTop: '16px',
+                borderTop: '1px solid var(--border)'
+              }}>
                 <div>
-                  <label className={labelClassName}>Estado (UF)</label>
-                  <select 
-                    value={filterUF} 
-                    onChange={(e) => setFilterUF(e.target.value)} 
-                    className={inputClassName}
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground-muted)', marginBottom: '6px' }}>
+                    UF
+                  </label>
+                  <select
+                    value={filterUF}
+                    onChange={(e) => setFilterUF(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      fontSize: '14px'
+                    }}
                   >
-                    <option value="">Todos os estados</option>
-                    {UF_OPTIONS.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+                    <option value="">Todas</option>
+                    {UF_OPTIONS.map(uf => (
+                      <option key={uf} value={uf}>{uf}</option>
+                    ))}
                   </select>
                 </div>
 
-                {/* Filtro Cidade */}
                 <div>
-                  <label className={labelClassName}>Cidade</label>
-                  <select 
-                    value={filterCidade} 
-                    onChange={(e) => setFilterCidade(e.target.value)} 
-                    className={inputClassName}
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground-muted)', marginBottom: '6px' }}>
+                    Cargo
+                  </label>
+                  <select
+                    value={filterCargo}
+                    onChange={(e) => setFilterCargo(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      fontSize: '14px'
+                    }}
                   >
-                    <option value="">Todas as cidades</option>
-                    {cidadesUnicas.map(c => <option key={c} value={c}>{c}</option>)}
+                    {CARGO_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
                   </select>
                 </div>
 
-                {/* Filtro Cargo */}
                 <div>
-                  <label className={labelClassName}>Cargo</label>
-                  <select 
-                    value={filterCargo} 
-                    onChange={(e) => setFilterCargo(e.target.value)} 
-                    className={inputClassName}
-                  >
-                    {CARGO_OPTIONS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-                  </select>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground-muted)', marginBottom: '6px' }}>
+                    Partido
+                  </label>
+                  <input
+                    type="text"
+                    value={filterPartido}
+                    onChange={(e) => setFilterPartido(e.target.value)}
+                    placeholder="Ex: PT, PSDB..."
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      fontSize: '14px'
+                    }}
+                  />
                 </div>
 
-                {/* Filtro Partido */}
                 <div>
-                  <label className={labelClassName}>Partido</label>
-                  <select 
-                    value={filterPartido} 
-                    onChange={(e) => setFilterPartido(e.target.value)} 
-                    className={inputClassName}
-                  >
-                    <option value="">Todos os partidos</option>
-                    {partidosUnicos.map(p => <option key={p} value={p}>{p}</option>)}
-                  </select>
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground-muted)', marginBottom: '6px' }}>
+                    Cidade
+                  </label>
+                  <input
+                    type="text"
+                    value={filterCidade}
+                    onChange={(e) => setFilterCidade(e.target.value)}
+                    placeholder="Ex: Porto Velho..."
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      fontSize: '14px'
+                    }}
+                  />
                 </div>
 
-                {/* Filtro Status */}
                 <div>
-                  <label className={labelClassName}>Status</label>
-                  <select 
-                    value={filterStatus} 
-                    onChange={(e) => setFilterStatus(e.target.value as FilterStatus)} 
-                    className={inputClassName}
+                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground-muted)', marginBottom: '6px' }}>
+                    Status
+                  </label>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      fontSize: '14px'
+                    }}
                   >
                     <option value="all">Todos</option>
                     <option value="ativo">Ativos</option>
                     <option value="inativo">Inativos</option>
                   </select>
                 </div>
-              </div>
 
-              {/* Botão Limpar Filtros */}
-              <div className="mt-4 flex justify-end">
-                <button
-                  onClick={limparFiltros}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
-                >
-                  Limpar Filtros
-                </button>
+                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                  <button
+                    onClick={limparFiltros}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      backgroundColor: 'var(--destructive)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Limpar Filtros
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Área de Conteúdo: Tabela ou Estado Vazio ou Loading */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm overflow-hidden">
+        {/* Tabela de Gabinetes */}
+        <div style={{
+          backgroundColor: 'var(--card)',
+          borderRadius: '16px',
+          border: '1px solid var(--border)',
+          overflow: 'hidden'
+        }}>
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-green-600 mb-4" />
-              <p className="text-gray-500 dark:text-slate-400">Carregando gabinetes...</p>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '64px',
+              color: 'var(--foreground-muted)'
+            }}>
+              <Loader2 style={{ width: '32px', height: '32px', animation: 'spin 1s linear infinite' }} />
+              <span style={{ marginLeft: '12px', fontSize: '16px' }}>Carregando gabinetes...</span>
             </div>
           ) : filteredGabinetes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-16 text-center">
-              <div className="h-20 w-20 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
-                <Building2 size={40} className="text-gray-400 dark:text-slate-500" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
-                {searchTerm || filterStatus !== 'all' ? 'Nenhum resultado encontrado' : 'Nenhum gabinete cadastrado'}
-              </h3>
-              <p className="text-gray-500 dark:text-slate-400 mb-6 max-w-sm">
-                {searchTerm || filterStatus !== 'all' 
-                  ? 'Tente ajustar seus filtros ou termos de busca.'
-                  : 'Comece criando o primeiro gabinete do sistema.'}
-              </p>
-              {gabinetes.length === 0 && (
-                <button
-                  onClick={() => setShowModal(true)}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors shadow-sm"
-                >
-                  <Plus size={20} />
-                  <span>Criar primeiro gabinete</span>
-                </button>
-              )}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '64px',
+              color: 'var(--foreground-muted)'
+            }}>
+              <Building2 style={{ width: '48px', height: '48px', marginBottom: '16px', opacity: 0.5 }} />
+              <p style={{ fontSize: '16px', fontWeight: 500 }}>Nenhum gabinete encontrado</p>
+              <p style={{ fontSize: '14px', marginTop: '4px' }}>Tente ajustar os filtros ou criar um novo gabinete</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-slate-900/50 border-b border-gray-200 dark:border-slate-700">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Gabinete</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Parlamentar</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Cargo</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Localização</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Cadastro</th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ backgroundColor: 'var(--background)' }}>
+                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--foreground-muted)', borderBottom: '1px solid var(--border)' }}>GABINETE</th>
+                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--foreground-muted)', borderBottom: '1px solid var(--border)' }}>PARLAMENTAR</th>
+                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--foreground-muted)', borderBottom: '1px solid var(--border)' }}>CARGO</th>
+                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--foreground-muted)', borderBottom: '1px solid var(--border)' }}>LOCALIZAÇÃO</th>
+                    <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--foreground-muted)', borderBottom: '1px solid var(--border)' }}>CADASTRO</th>
+                    <th style={{ padding: '14px 16px', textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--foreground-muted)', borderBottom: '1px solid var(--border)' }}>STATUS</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
-                  {filteredGabinetes.map((gabinete) => (
-                    <tr key={gabinete.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Building2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <tbody>
+                  {filteredGabinetes.map((gabinete, index) => (
+                    <tr 
+                      key={gabinete.id}
+                      style={{ 
+                        backgroundColor: index % 2 === 0 ? 'transparent' : 'var(--background)',
+                        transition: 'background-color 0.2s'
+                      }}
+                    >
+                      <td style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '8px',
+                            backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <Building2 style={{ width: '18px', height: '18px', color: '#16a34a' }} />
                           </div>
                           <div>
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">{gabinete.nome || '-'}</div>
+                            <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--foreground)', margin: 0 }}>
+                              {gabinete.nome}
+                            </p>
                             {gabinete.partido && (
-                              <div className="text-xs text-gray-500 dark:text-slate-400">{gabinete.partido}</div>
+                              <span style={{
+                                display: 'inline-block',
+                                marginTop: '4px',
+                                padding: '2px 8px',
+                                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                                color: '#16a34a',
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                borderRadius: '4px'
+                              }}>
+                                {gabinete.partido}
+                              </span>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-slate-300">
+                      <td style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', fontSize: '14px', color: 'var(--foreground)' }}>
                         {gabinete.parlamentar_nome || '-'}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-slate-300">
+                      <td style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', fontSize: '14px', color: 'var(--foreground)' }}>
                         {formatCargo(gabinete.parlamentar_cargo)}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-slate-300">
-                          <MapPin className="w-4 h-4 text-gray-400" />
-                          {gabinete.municipio || '-'}/{gabinete.uf || '-'}
+                      <td style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: 'var(--foreground)' }}>
+                          <MapPin style={{ width: '14px', height: '14px', color: 'var(--foreground-muted)' }} />
+                          {gabinete.municipio && gabinete.uf ? `${gabinete.municipio}/${gabinete.uf}` : 'N/A'}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-slate-400">
+                      <td style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', fontSize: '14px', color: 'var(--foreground-muted)' }}>
                         {formatDate(gabinete.created_at)}
                       </td>
-                      <td className="px-6 py-4 text-center">
+                      <td style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>
                         <button
                           onClick={() => toggleStatus(gabinete)}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
-                            gabinete.ativo 
-                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50' 
-                              : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
-                          }`}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '6px 12px',
+                            backgroundColor: gabinete.ativo ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                            color: gabinete.ativo ? '#22c55e' : '#ef4444',
+                            border: 'none',
+                            borderRadius: '20px',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
                         >
                           {gabinete.ativo ? (
                             <>
-                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <CheckCircle2 style={{ width: '14px', height: '14px' }} />
                               Ativo
                             </>
                           ) : (
                             <>
-                              <XCircle className="w-3.5 h-3.5" />
+                              <XCircle style={{ width: '14px', height: '14px' }} />
                               Inativo
                             </>
                           )}
@@ -665,220 +882,259 @@ export default function GabinetesPage() {
       </main>
 
       {/* --- RODAPÉ --- */}
-      <footer className="bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 py-6 mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-sm text-gray-500 dark:text-slate-400 gap-4">
-          <div className="flex items-center gap-2">
-            <span>Desenvolvido por</span>
-            <span className="font-bold text-green-700 dark:text-green-400 flex items-center gap-1">
-              <Building2 size={16} /> DATA-RO INTELIGÊNCIA TERRITORIAL
-            </span>
-          </div>
-          <p>© {new Date().getFullYear()} Todos os direitos reservados.</p>
-        </div>
+      <footer style={{
+        backgroundColor: 'var(--card)',
+        borderTop: '1px solid var(--border)',
+        padding: '24px',
+        textAlign: 'center',
+        marginTop: 'auto'
+      }}>
+        <p style={{ fontSize: '14px', color: 'var(--foreground-muted)', margin: 0 }}>
+          Desenvolvido por <strong style={{ color: '#16a34a' }}>DATA-RO INTELIGÊNCIA TERRITORIAL</strong>
+        </p>
+        <p style={{ fontSize: '12px', color: 'var(--foreground-muted)', marginTop: '4px' }}>
+          © 2026 Todos os direitos reservados.
+        </p>
       </footer>
 
-      {/* --- MODAL NOVO GABINETE --- */}
+      {/* --- MODAL DE NOVO GABINETE --- */}
       {showModal && (
-        <>
-          <div 
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" 
-            onClick={handleCloseModal}
-          />
-          <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700 w-[95%] sm:w-[90%] max-w-3xl max-h-[90vh] overflow-y-auto z-[60]">
-            <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-6 py-5 flex items-center justify-between z-10">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Novo Gabinete</h3>
-              <button 
-                onClick={handleCloseModal} 
-                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-gray-500 dark:text-slate-400"
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
+          padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: 'var(--card)',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '600px',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }}>
+            {/* Header do Modal */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '20px 24px',
+              borderBottom: '1px solid var(--border)'
+            }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--foreground)', margin: 0 }}>
+                Novo Gabinete
+              </h2>
+              <button
+                onClick={handleCloseModal}
+                style={{
+                  padding: '8px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  color: 'var(--foreground-muted)'
+                }}
               >
                 <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
-              {/* Seção 1: Dados Básicos */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-slate-700 pb-2">
-                  Dados do Gabinete
-                </h4>
+            {/* Formulário */}
+            <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
+              <div style={{ display: 'grid', gap: '20px' }}>
+                {/* Nome do Gabinete */}
                 <div>
-                  <label className={labelClassName}>Nome do Gabinete *</label>
-                  <input 
-                    type="text" 
-                    value={formData.nome} 
-                    onChange={(e) => setFormData({ ...formData, nome: e.target.value })} 
-                    required 
-                    className={inputClassName} 
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                    Nome do Gabinete *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.nome}
+                    onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                    required
                     placeholder="Ex: Gabinete do Deputado João Silva"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      fontSize: '14px'
+                    }}
                   />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                {/* Parlamentar */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div>
-                    <label className={labelClassName}>Município *</label>
-                    <input 
-                      type="text" 
-                      value={formData.municipio} 
-                      onChange={(e) => setFormData({ ...formData, municipio: e.target.value })} 
-                      required 
-                      className={inputClassName} 
-                      placeholder="Ex: Porto Velho"
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                      Nome do Parlamentar
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.parlamentar_nome}
+                      onChange={(e) => setFormData({ ...formData, parlamentar_nome: e.target.value })}
+                      placeholder="Nome completo"
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        backgroundColor: 'var(--background)',
+                        color: 'var(--foreground)',
+                        fontSize: '14px'
+                      }}
                     />
                   </div>
                   <div>
-                    <label className={labelClassName}>UF *</label>
-                    <select 
-                      value={formData.uf} 
-                      onChange={(e) => setFormData({ ...formData, uf: e.target.value })} 
-                      required 
-                      className={inputClassName}
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                      Cargo
+                    </label>
+                    <select
+                      value={formData.parlamentar_cargo}
+                      onChange={(e) => setFormData({ ...formData, parlamentar_cargo: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        backgroundColor: 'var(--background)',
+                        color: 'var(--foreground)',
+                        fontSize: '14px'
+                      }}
                     >
-                      {UF_OPTIONS.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+                      {CARGO_OPTIONS.filter(o => o.value !== '').map(option => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
-              </div>
 
-              {/* Seção 2: Dados do Parlamentar */}
-              <div className="space-y-4 pt-4">
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-slate-700 pb-2">
-                  Dados do Parlamentar
-                </h4>
-                <div>
-                  <label className={labelClassName}>Nome do Parlamentar</label>
-                  <input 
-                    type="text" 
-                    value={formData.parlamentar_nome} 
-                    onChange={(e) => setFormData({ ...formData, parlamentar_nome: e.target.value })} 
-                    className={inputClassName}
-                    placeholder="Ex: João Silva"
-                  />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Localização */}
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px' }}>
                   <div>
-                    <label className={labelClassName}>Cargo</label>
-                    <select 
-                      value={formData.parlamentar_cargo} 
-                      onChange={(e) => setFormData({ ...formData, parlamentar_cargo: e.target.value })} 
-                      className={inputClassName}
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                      Município
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.municipio}
+                      onChange={(e) => setFormData({ ...formData, municipio: e.target.value })}
+                      placeholder="Ex: Porto Velho"
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        backgroundColor: 'var(--background)',
+                        color: 'var(--foreground)',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                      UF
+                    </label>
+                    <select
+                      value={formData.uf}
+                      onChange={(e) => setFormData({ ...formData, uf: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        backgroundColor: 'var(--background)',
+                        color: 'var(--foreground)',
+                        fontSize: '14px'
+                      }}
                     >
-                      {CARGO_OPTIONS.filter(c => c.value).map(c => (
-                        <option key={c.value} value={c.value}>{c.label}</option>
+                      {UF_OPTIONS.map(uf => (
+                        <option key={uf} value={uf}>{uf}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className={labelClassName}>Partido</label>
-                    <input 
-                      type="text" 
-                      value={formData.partido} 
-                      onChange={(e) => setFormData({ ...formData, partido: e.target.value })} 
-                      className={inputClassName}
-                      placeholder="Ex: PT, PSDB, MDB..."
+                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                      Partido
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.partido}
+                      onChange={(e) => setFormData({ ...formData, partido: e.target.value })}
+                      placeholder="Ex: PT"
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        backgroundColor: 'var(--background)',
+                        color: 'var(--foreground)',
+                        fontSize: '14px'
+                      }}
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Seção 3: Contatos */}
-              <div className="space-y-4 pt-4">
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-slate-700 pb-2">
-                  Contatos
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClassName}>E-mail do Parlamentar</label>
-                    <input 
-                      type="email" 
-                      value={formData.email_parlamentar} 
-                      onChange={(e) => setFormData({ ...formData, email_parlamentar: e.target.value })} 
-                      className={inputClassName}
-                      placeholder="parlamentar@email.com"
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClassName}>E-mail do Gabinete</label>
-                    <input 
-                      type="email" 
-                      value={formData.email_gabinete} 
-                      onChange={(e) => setFormData({ ...formData, email_gabinete: e.target.value })} 
-                      className={inputClassName}
-                      placeholder="gabinete@email.com"
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClassName}>Telefone do Parlamentar</label>
-                    <input 
-                      type="tel" 
-                      value={formData.telefone_parlamentar} 
-                      onChange={(e) => setFormData({ ...formData, telefone_parlamentar: e.target.value })} 
-                      className={inputClassName}
-                      placeholder="(69) 99999-9999"
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClassName}>Telefone do Gabinete</label>
-                    <input 
-                      type="tel" 
-                      value={formData.telefone_gabinete} 
-                      onChange={(e) => setFormData({ ...formData, telefone_gabinete: e.target.value })} 
-                      className={inputClassName}
-                      placeholder="(69) 99999-9999"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Seção 4: Assessores */}
-              <div className="space-y-4 pt-4">
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-slate-700 pb-2">
-                  Assessores
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClassName}>Assessor 1</label>
-                    <input 
-                      type="text" 
-                      value={formData.assessor_1} 
-                      onChange={(e) => setFormData({ ...formData, assessor_1: e.target.value })} 
-                      className={inputClassName}
-                      placeholder="Nome do assessor"
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClassName}>Assessor 2</label>
-                    <input 
-                      type="text" 
-                      value={formData.assessor_2} 
-                      onChange={(e) => setFormData({ ...formData, assessor_2: e.target.value })} 
-                      className={inputClassName}
-                      placeholder="Nome do assessor"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Botões de Ação */}
-              <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-slate-700">
+              {/* Botões do Formulário */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '12px',
+                marginTop: '24px',
+                paddingTop: '20px',
+                borderTop: '1px solid var(--border)'
+              }}>
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-slate-300 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: 'var(--background)',
+                    color: 'var(--foreground)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer'
+                  }}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400 rounded-lg transition-colors"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 20px',
+                    background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: submitting ? 'not-allowed' : 'pointer',
+                    opacity: submitting ? 0.7 : 1
+                  }}
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }} />
                       Criando...
                     </>
                   ) : (
                     <>
-                      <Plus className="w-4 h-4" />
+                      <Plus size={16} />
                       Criar Gabinete
                     </>
                   )}
@@ -886,8 +1142,28 @@ export default function GabinetesPage() {
               </div>
             </form>
           </div>
-        </>
+        </div>
       )}
+
+      {/* CSS para animação de spin */}
+      <style jsx global>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 1280px) {
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
+        
+        @media (max-width: 640px) {
+          .stats-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
