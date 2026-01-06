@@ -308,9 +308,9 @@ export default function DashboardLayout({
             }}
           >
             {gabinete
-              ? `Gabinete do ${(gabinete.cargo?.replace('_', ' ') || 'deputado estadual')
+              ? `Gabinete do ${(gabinete.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual')
                   .charAt(0)
-                  .toUpperCase() + (gabinete.cargo?.replace('_', ' ') || 'deputado estadual').slice(1)} ${
+                  .toUpperCase() + (gabinete.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual').slice(1)} ${
                   gabinete.parlamentar_nome
                 }`
               : 'Carregando...'}
@@ -326,7 +326,7 @@ export default function DashboardLayout({
             }}
           >
             {(() => {
-              const cargo = gabinete?.cargo?.replace('_', ' ') || 'deputado estadual'
+              const cargo = gabinete?.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual'
               return cargo.charAt(0).toUpperCase() + cargo.slice(1)
             })()}
           </p>
