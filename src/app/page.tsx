@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useTheme } from '@/providers/theme-provider';
-import { createBrowserClient } from '@supabase/ssr';
+// import { createBrowserClient } from '@supabase/ssr';
 import { 
   FileText, 
   Users, 
@@ -28,10 +28,7 @@ import {
   Menu
 } from 'lucide-react';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
-const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
+// Cliente Supabase removido - não utilizado nesta página
 
 const features = [
   {
