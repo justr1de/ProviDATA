@@ -150,7 +150,7 @@ export default function RelatoriosPage() {
       `)
     
     // Filtrar por gabinete apenas se não for super admin
-    if (!isSuperAdmin(user)) {
+    if (user && !isSuperAdmin(user)) {
       query = query.eq('gabinete_id', user.gabinete_id)
     }
 
