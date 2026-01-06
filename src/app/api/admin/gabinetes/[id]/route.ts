@@ -1,103 +1,67 @@
-// API Route: /api/admin/gabinetes/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { GabineteProvisioningService } from '@/lib/services/gabinete-provisioning.service';
 
-// Email do super admin geral do sistema
 const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
 
-/**
- * Verifica se o usuário é super admin
- */
-async function isSuperAdmin(): Promise<{ isSuper: boolean; error?: string }> {
+async function isSuperAdmin() {
   const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  
-  if (authError || !user) {
-    return { isSuper: false, error: 'Não autenticado' };
-  }
-  
-  if (user.email !== SUPER_ADMIN_EMAIL) {
-    return { isSuper: false, error: 'Acesso negado: apenas super admin' };
-  }
-  
-  return { isSuper: true };
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user || user.email !== SUPER_ADMIN_EMAIL) return false;
+  return true;
 }
 
-/**
- * GET /api/admin/gabinetes/[id]
- */
+// ✅ GET - Código corrigido para Next.js 16
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> } // ✅ Correção Next.js 16: params é Promise
+  props: { params: Promise<{ id: string }> }
 ) {
-  // ✅ Aguarda os parâmetros antes de usar
-  const { id } = await context.params;
+  const params = await props.params;
+  const id = params.id;
 
   try {
-    const { isSuper, error: authError } = await isSuperAdmin();
-
-    if (!isSuper) {
-      return NextResponse.json(
-        { error: authError || 'Acesso negado' },
-        { status: 403 }
-      );
+    if (!await isSuperAdmin()) {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
     const { data: gabinete, error } = await GabineteProvisioningService.getGabinete(id);
-
+    
     if (error || !gabinete) {
-      return NextResponse.json(
-        { error: error?.message || 'Gabinete não encontrado' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Gabinete não encontrado' }, { status: 404 });
     }
 
     return NextResponse.json({ gabinete });
-
   } catch (error) {
-    console.error('Erro ao buscar gabinete:', error);
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
   }
 }
 
-/**
- * PATCH /api/admin/gabinetes/[id]
- */
+// ✅ PATCH - Código corrigido para Next.js 16
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> } // ✅ Correção Next.js 16: params é Promise
+  props: { params: Promise<{ id: string }> }
 ) {
-  // ✅ Aguarda os parâmetros antes de usar
-  const { id } = await context.params;
+  const params = await props.params;
+  const id = params.id;
 
   try {
-    const { isSuper, error: authError } = await isSuperAdmin();
-
-    if (!isSuper) {
-      return NextResponse.json(
-        { error: authError || 'Acesso negado' },
-        { status: 403 }
-      );
+    if (!await isSuperAdmin()) {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
 
     const body = await request.json();
-    const { data, error } = await GabineteProvisioningService.updateGabinete(id, body);
-
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 400 });
+    const result = await GabineteProvisioningService.updateGabinete(id, body);
+    
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    return NextResponse.json({ gabinete: data });
-
+    return NextResponse.json({ 
+      success: true, 
+      gabinete: result.gabinete,
+      message: 'Gabinete atualizado com sucesso'
+    });
   } catch (error) {
-    console.error('Erro ao atualizar gabinete:', error);
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
   }
 }
