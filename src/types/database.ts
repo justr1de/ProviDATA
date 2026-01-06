@@ -2,16 +2,14 @@
 // TIPOS PARA MULTI-TENANCY - MODELO UNIFICADO
 // =====================================================
 
-// Tipo unificado para Gabinete (fonte de verdade)
+// Tipo unificado para Gabinete (fonte de verdade - baseado na estrutura do banco)
 export interface Gabinete {
   id: string
-  name: string
-  slug: string
-  type: 'gabinete' | 'organization' | 'municipal' | 'estadual' | 'federal'
+  nome: string
+  slug?: string
   
   // Informações parlamentares
-  parlamentar_name?: string
-  parlamentar_nickname?: string
+  parlamentar_nome?: string
   parlamentar_cargo?: 'vereador' | 'prefeito' | 'deputado_estadual' | 'deputado_federal' | 'senador' | 'governador'
   partido?: string
   
@@ -29,6 +27,15 @@ export interface Gabinete {
   email_parlamentar?: string
   email_gabinete?: string
   
+  // Flags de WhatsApp
+  is_whatsapp_parlamentar?: boolean
+  is_whatsapp_gabinete?: boolean
+  is_whatsapp_adicional?: boolean
+  
+  // Redes sociais
+  twitter_x?: string
+  threads?: string
+  
   // Assessores
   chefe_de_gabinete?: string
   assessor_2?: string
@@ -36,7 +43,7 @@ export interface Gabinete {
   // Configurações
   logo_url?: string
   settings?: Record<string, unknown>
-  plano?: 'basico' | 'profissional' | 'enterprise'
+  subscription_status?: string
   
   // Status
   ativo: boolean
@@ -44,9 +51,6 @@ export interface Gabinete {
   // Timestamps
   created_at: string
   updated_at: string
-  
-  // Metadados
-  metadata?: Record<string, unknown>
 }
 
 // Alias para compatibilidade legada (usar Gabinete ao invés deste)
