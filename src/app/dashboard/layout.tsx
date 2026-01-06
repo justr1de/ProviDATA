@@ -311,7 +311,7 @@ export default function DashboardLayout({
               ? `Gabinete do ${(gabinete.cargo?.replace('_', ' ') || 'deputado estadual')
                   .charAt(0)
                   .toUpperCase() + (gabinete.cargo?.replace('_', ' ') || 'deputado estadual').slice(1)} ${
-                  gabinete.parlamentar_name
+                  gabinete.parlamentar_nome
                 }`
               : 'Carregando...'}
           </p>

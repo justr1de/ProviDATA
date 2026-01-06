@@ -226,8 +226,8 @@ export default function RelatoriosPage() {
       // Usa 'deputado_estadual' como valor padrão se cargo estiver vazio
       const cargoValue = tenant?.cargo || 'deputado_estadual'
       const cargoFormatado = cargoMap[cargoValue] || 'Deputado Estadual'
-      const nomeParlamentar = tenant?.parlamentar_name || ''
-      const apelidoParlamentar = tenant?.parlamentar_nickname ? `"${tenant.parlamentar_nickname}"` : ''
+      const nomeParlamentar = tenant?.parlamentar_nome || ''
+      const apelidoParlamentar = (tenant as any)?.parlamentar_nickname ? `"${(tenant as any).parlamentar_nickname}"` : ''
       const gabineteText = nomeParlamentar 
         ? `Gabinete do ${cargoFormatado} ${nomeParlamentar} ${apelidoParlamentar}`.trim()
         : `Gabinete do ${cargoFormatado}`

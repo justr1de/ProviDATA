@@ -577,7 +577,7 @@ export default function DashboardPage() {
                     color: 'var(--text-muted)',
                     margin: '4px 0 0 0'
                   }}>
-                    Visão geral das demandas · {tenant?.parlamentar_name || 'Gabinete'}
+                    Visão geral das demandas · {tenant?.parlamentar_nome || 'Gabinete'}
                   </p>
                 </div>
               </div>
