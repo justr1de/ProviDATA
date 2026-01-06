@@ -216,14 +216,12 @@ export default function RelatoriosPage() {
       // Informação do Gabinete do Parlamentar
       doc.setFontSize(11)
       doc.setTextColor(60)
-      console.log('Tenant para relatório:', tenant)
       const cargoMap: Record<string, string> = {
         'vereador': 'Vereador',
         'deputado_estadual': 'Deputado Estadual',
         'deputado_federal': 'Deputado Federal',
         'senador': 'Senador'
       }
-      // Usa 'deputado_estadual' como valor padrão se cargo estiver vazio
       const cargoValue = tenant?.parlamentar_cargo || 'deputado_estadual'
       const cargoFormatado = cargoMap[cargoValue] || 'Deputado Estadual'
       const nomeParlamentar = tenant?.parlamentar_nome || ''
@@ -348,14 +346,15 @@ export default function RelatoriosPage() {
 
     const finalY = (doc as any).lastAutoTable.finalY + 10
     doc.setFontSize(12)
-    doc.text(`Total geral: ${providencias.length} providências`, 14, finalY)
+    doc.setTextColor(0)
+    doc.text(`Total de providências: ${providencias.length}`, 14, finalY)
   }
 
   // Relatório: Providências por Órgão
   const generateProvidenciasOrgao = (doc: jsPDF, providencias: Providencia[]) => {
     const orgaoCount: Record<string, number> = {}
     providencias.forEach(p => {
-      const orgao = p.orgao?.sigla || p.orgao?.nome || 'Não definido'
+      const orgao = p.orgao?.nome || p.orgao?.sigla || 'Não definido'
       orgaoCount[orgao] = (orgaoCount[orgao] || 0) + 1
     })
 
@@ -375,6 +374,11 @@ export default function RelatoriosPage() {
       headStyles: { fillColor: [245, 158, 11] },
       styles: { fontSize: 10 }
     })
+
+    const finalY = (doc as any).lastAutoTable.finalY + 10
+    doc.setFontSize(12)
+    doc.setTextColor(0)
+    doc.text(`Total de órgãos: ${Object.keys(orgaoCount).length}`, 14, finalY)
   }
 
   // Relatório: Atendimentos por Cidadão
@@ -387,7 +391,7 @@ export default function RelatoriosPage() {
 
     const tableData = Object.entries(cidadaoCount)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 20)
+      .slice(0, 50)
       .map(([cidadao, count]) => [cidadao, count.toString()])
 
     autoTable(doc, {
@@ -400,40 +404,47 @@ export default function RelatoriosPage() {
     })
 
     const finalY = (doc as any).lastAutoTable.finalY + 10
-    doc.setFontSize(10)
-    doc.text(`Exibindo os 20 cidadãos com mais atendimentos`, 14, finalY)
+    doc.setFontSize(12)
+    doc.setTextColor(0)
+    doc.text(`Total de cidadãos atendidos: ${Object.keys(cidadaoCount).length}`, 14, finalY)
   }
 
   // Relatório: Tempo de Resolução
   const generateTempoResolucao = (doc: jsPDF, providencias: Providencia[]) => {
-    const concluidas = providencias.filter(p => p.status === 'concluida')
-    
-    let tempoTotal = 0
-    concluidas.forEach(p => {
-      const inicio = new Date(p.created_at)
-      const fim = new Date(p.updated_at)
-      tempoTotal += (fim.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24)
-    })
+    const resolvedProvidencias = providencias.filter(p => 
+      p.status === 'concluida' || p.status === 'arquivada'
+    )
 
-    const tempoMedio = concluidas.length > 0 ? tempoTotal / concluidas.length : 0
+    let totalDays = 0
+    const resolutionData = resolvedProvidencias.map(p => {
+      const created = new Date(p.created_at)
+      const updated = new Date(p.updated_at)
+      const days = Math.ceil((updated.getTime() - created.getTime()) / (1000 * 60 * 60 * 24))
+      totalDays += days
+      return [
+        p.protocolo || '-',
+        (p.titulo || '').substring(0, 40),
+        `${days} dias`
+      ]
+    }).slice(0, 30)
 
+    const avgDays = resolvedProvidencias.length > 0 
+      ? (totalDays / resolvedProvidencias.length).toFixed(1) 
+      : '0'
+
+    // Resumo
     doc.setFontSize(12)
-    doc.text('Análise de Tempo de Resolução', 14, 77)
-    
-    const tableData = [
-      ['Total de providências', providencias.length.toString()],
-      ['Providências concluídas', concluidas.length.toString()],
-      ['Tempo médio de resolução', `${tempoMedio.toFixed(1)} dias`],
-      ['Taxa de conclusão', `${((concluidas.length / providencias.length) * 100).toFixed(1)}%`]
-    ]
+    doc.setTextColor(0)
+    doc.text(`Tempo médio de resolução: ${avgDays} dias`, 14, 75)
+    doc.text(`Providências resolvidas: ${resolvedProvidencias.length}`, 14, 82)
 
     autoTable(doc, {
-      startY: 82,
-      head: [['Métrica', 'Valor']],
-      body: tableData,
+      startY: 92,
+      head: [['Protocolo', 'Título', 'Tempo']],
+      body: resolutionData,
       theme: 'striped',
       headStyles: { fillColor: [139, 92, 246] },
-      styles: { fontSize: 10 }
+      styles: { fontSize: 9 }
     })
   }
 
@@ -443,29 +454,42 @@ export default function RelatoriosPage() {
     const prioridadeCount: Record<string, number> = {}
     
     providencias.forEach(p => {
-      statusCount[p.status || 'Não definido'] = (statusCount[p.status || 'Não definido'] || 0) + 1
-      prioridadeCount[p.prioridade || 'normal'] = (prioridadeCount[p.prioridade || 'normal'] || 0) + 1
+      const status = p.status || 'Não definido'
+      const prioridade = p.prioridade || 'Não definida'
+      statusCount[status] = (statusCount[status] || 0) + 1
+      prioridadeCount[prioridade] = (prioridadeCount[prioridade] || 0) + 1
     })
 
+    // Resumo geral
+    doc.setFontSize(14)
+    doc.setTextColor(22, 163, 74)
+    doc.text('Resumo Geral', 14, 75)
+    
+    doc.setFontSize(11)
+    doc.setTextColor(0)
+    doc.text(`Total de Providências: ${providencias.length}`, 14, 85)
+    
+    const concluidas = statusCount['concluida'] || 0
+    const taxaConclusao = providencias.length > 0 
+      ? ((concluidas / providencias.length) * 100).toFixed(1) 
+      : '0'
+    doc.text(`Taxa de Conclusão: ${taxaConclusao}%`, 14, 92)
+
+    // Tabela por Status
     doc.setFontSize(12)
-    doc.text('Resumo por Status', 14, 77)
+    doc.setTextColor(22, 163, 74)
+    doc.text('Por Status', 14, 105)
+
+    const statusData = Object.entries(statusCount).map(([status, count]) => [
+      status,
+      count.toString(),
+      `${((count / providencias.length) * 100).toFixed(1)}%`
+    ])
 
     autoTable(doc, {
-      startY: 82,
-      head: [['Status', 'Quantidade']],
-      body: Object.entries(statusCount).map(([k, v]) => [k, v.toString()]),
-      theme: 'striped',
-      headStyles: { fillColor: [20, 184, 166] },
-      styles: { fontSize: 10 }
-    })
-
-    const finalY1 = (doc as any).lastAutoTable.finalY + 15
-    doc.text('Resumo por Prioridade', 14, finalY1)
-
-    autoTable(doc, {
-      startY: finalY1 + 5,
-      head: [['Prioridade', 'Quantidade']],
-      body: Object.entries(prioridadeCount).map(([k, v]) => [k, v.toString()]),
+      startY: 110,
+      head: [['Status', 'Quantidade', 'Percentual']],
+      body: statusData,
       theme: 'striped',
       headStyles: { fillColor: [20, 184, 166] },
       styles: { fontSize: 10 }
@@ -512,211 +536,230 @@ export default function RelatoriosPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4 lg:gap-6 items-start">
-        {/* Report Types Card */}
-        <div style={cardStyle}>
-          <div style={cardHeaderStyle}>
-            <div>
-              <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>
-                Selecione o tipo de relatório
-              </h2>
-              <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>
-                Escolha um dos relatórios disponíveis abaixo
-              </p>
+      {/* Layout principal com grid: tipos de relatório à esquerda, filtros à direita */}
+      <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        
+        {/* Seção de Tipos de Relatório */}
+        <div style={{ flex: '1 1 600px', minWidth: '0' }}>
+          <div style={cardStyle}>
+            <div style={cardHeaderStyle}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>
+                  Selecione o tipo de relatório
+                </h2>
+                <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>
+                  Escolha um dos relatórios disponíveis abaixo
+                </p>
+              </div>
             </div>
-          </div>
-          <div style={cardContentStyle}>
-            {/* GRID ÚNICO COM TODOS OS 6 TIPOS DE RELATÓRIO */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
-              {reportTypes.map((report) => {
-                const Icon = report.icon
-                const isSelected = selectedReport === report.id
-                return (
-                  <button
-                    key={report.id}
-                    onClick={() => setSelectedReport(report.id)}
-                    style={{
-                      padding: '20px',
-                      borderRadius: '12px',
-                      backgroundColor: isSelected ? 'var(--primary-muted)' : 'var(--muted)',
-                      border: `2px solid ${isSelected ? 'var(--primary)' : 'transparent'}`,
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.2s ease',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '12px'
-                    }}
-                  >
-                    <div style={{
-                      width: '44px',
-                      height: '44px',
-                      borderRadius: '10px',
-                      backgroundColor: `${report.color}20`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}>
-                      <Icon style={{ width: '22px', height: '22px', color: report.color }} />
-                    </div>
-                    <div>
-                      <h3 style={{ fontSize: '15px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>
-                        {report.name}
-                      </h3>
-                      <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', lineHeight: '1.4' }}>
-                        {report.description}
-                      </p>
-                    </div>
-                  </button>
-                )
-              })}
+            <div style={cardContentStyle}>
+              {/* Grid 3x2 com os tipos de relatório */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '16px'
+              }}>
+                {reportTypes.map((report) => {
+                  const Icon = report.icon
+                  const isSelected = selectedReport === report.id
+                  return (
+                    <button
+                      key={report.id}
+                      onClick={() => setSelectedReport(report.id)}
+                      style={{
+                        padding: '20px',
+                        borderRadius: '12px',
+                        backgroundColor: isSelected ? 'var(--primary-muted)' : 'var(--muted)',
+                        border: `2px solid ${isSelected ? 'var(--primary)' : 'transparent'}`,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px',
+                        minHeight: '140px'
+                      }}
+                    >
+                      <div style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '10px',
+                        backgroundColor: `${report.color}20`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <Icon style={{ width: '22px', height: '22px', color: report.color }} />
+                      </div>
+                      <div>
+                        <h3 style={{ fontSize: '15px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>
+                          {report.name}
+                        </h3>
+                        <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', lineHeight: '1.4' }}>
+                          {report.description}
+                        </p>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Filters Card */}
-        <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column' }}>
-          <div style={cardHeaderStyle}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Filter style={{ width: '20px', height: '20px', color: 'var(--primary)' }} />
-              <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--foreground)' }}>
-                Filtros
-              </h2>
+        {/* Seção de Filtros */}
+        <div style={{ flex: '0 0 320px', minWidth: '280px' }}>
+          <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column' }}>
+            <div style={cardHeaderStyle}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Filter style={{ width: '20px', height: '20px', color: 'var(--primary)' }} />
+                <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--foreground)' }}>
+                  Filtros
+                </h2>
+              </div>
             </div>
-          </div>
-          <div style={{ ...cardContentStyle, flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-              {/* Date Range */}
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '8px',
-                  fontSize: '14px', 
-                  fontWeight: '500', 
-                  color: 'var(--foreground)', 
-                  marginBottom: '10px' 
-                }}>
-                  <Calendar style={{ width: '16px', height: '16px' }} />
-                  Período
-                </label>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <input
-                    type="date"
-                    value={dateRange.start}
-                    onChange={(e) => {
-                      setDateRange({ ...dateRange, start: e.target.value })
-                      setActiveShortcut(null)
-                    }}
-                    style={{
-                      flex: 1,
-                      padding: '12px 14px',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border)',
-                      backgroundColor: 'var(--background)',
-                      color: 'var(--foreground)',
-                      fontSize: '14px'
-                    }}
-                  />
-                  <input
-                    type="date"
-                    value={dateRange.end}
-                    onChange={(e) => {
-                      setDateRange({ ...dateRange, end: e.target.value })
-                      setActiveShortcut(null)
-                    }}
-                    style={{
-                      flex: 1,
-                      padding: '12px 14px',
-                      borderRadius: '10px',
-                      border: '1px solid var(--border)',
-                      backgroundColor: 'var(--background)',
-                      color: 'var(--foreground)',
-                      fontSize: '14px'
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Quick Date Filters */}
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ 
-                  display: 'block', 
-                  fontSize: '14px', 
-                  fontWeight: '500', 
-                  color: 'var(--foreground)', 
-                  marginBottom: '10px' 
-                }}>
-                  Atalhos
-                </label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {['Hoje', 'Esta semana', 'Este mês', 'Este ano'].map((label) => (
-                    <button
-                      key={label}
-                      onClick={() => applyDateShortcut(label)}
-                      style={{
-                        padding: '8px 14px',
-                        borderRadius: '8px',
-                        backgroundColor: activeShortcut === label ? 'var(--primary)' : 'var(--muted)',
-                        border: `1px solid ${activeShortcut === label ? 'var(--primary)' : 'var(--border)'}`,
-                        fontSize: '13px',
-                        color: activeShortcut === label ? 'white' : 'var(--foreground)',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease'
+            <div style={{ ...cardContentStyle, flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                {/* Date Range */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '8px',
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    color: 'var(--foreground)', 
+                    marginBottom: '10px' 
+                  }}>
+                    <Calendar style={{ width: '16px', height: '16px' }} />
+                    Período
+                  </label>
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <input
+                      type="date"
+                      value={dateRange.start}
+                      onChange={(e) => {
+                        setDateRange({ ...dateRange, start: e.target.value })
+                        setActiveShortcut(null)
                       }}
-                    >
-                      {label}
-                    </button>
-                  ))}
+                      style={{
+                        flex: 1,
+                        padding: '12px 14px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--border)',
+                        backgroundColor: 'var(--background)',
+                        color: 'var(--foreground)',
+                        fontSize: '14px'
+                      }}
+                    />
+                    <input
+                      type="date"
+                      value={dateRange.end}
+                      onChange={(e) => {
+                        setDateRange({ ...dateRange, end: e.target.value })
+                        setActiveShortcut(null)
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: '12px 14px',
+                        borderRadius: '10px',
+                        border: '1px solid var(--border)',
+                        backgroundColor: 'var(--background)',
+                        color: 'var(--foreground)',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
                 </div>
+
+                {/* Quick Date Filters */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    fontSize: '14px', 
+                    fontWeight: '500', 
+                    color: 'var(--foreground)', 
+                    marginBottom: '10px' 
+                  }}>
+                    Atalhos
+                  </label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {['Hoje', 'Esta semana', 'Este mês', 'Este ano'].map((label) => (
+                      <button
+                        key={label}
+                        onClick={() => applyDateShortcut(label)}
+                        style={{
+                          padding: '8px 14px',
+                          borderRadius: '8px',
+                          backgroundColor: activeShortcut === label ? 'var(--primary)' : 'var(--muted)',
+                          border: `1px solid ${activeShortcut === label ? 'var(--primary)' : 'var(--border)'}`,
+                          fontSize: '13px',
+                          color: activeShortcut === label ? 'white' : 'var(--foreground)',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Spacer to push button to bottom */}
+                <div style={{ flex: 1, minHeight: '20px' }} />
+
+                {/* Generate Button */}
+                <button
+                  onClick={generatePDF}
+                  disabled={!selectedReport || isGenerating}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    padding: '14px 24px',
+                    borderRadius: '10px',
+                    backgroundColor: selectedReport ? 'var(--primary)' : 'var(--muted)',
+                    color: selectedReport ? 'white' : 'var(--foreground-muted)',
+                    border: 'none',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    cursor: selectedReport ? 'pointer' : 'not-allowed',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {isGenerating ? (
+                    <>
+                      <div style={{
+                        width: '20px',
+                        height: '20px',
+                        border: '2px solid white',
+                        borderTopColor: 'transparent',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                      }} />
+                      Gerando PDF...
+                    </>
+                  ) : (
+                    <>
+                      <Download style={{ width: '20px', height: '20px' }} />
+                      Gerar Relatório PDF
+                    </>
+                  )}
+                </button>
               </div>
-
-              {/* Spacer to push button to bottom */}
-              <div style={{ flex: 1 }} />
-
-              {/* Generate Button */}
-              <button
-                onClick={generatePDF}
-                disabled={!selectedReport || isGenerating}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  padding: '14px 24px',
-                  borderRadius: '10px',
-                  backgroundColor: selectedReport ? 'var(--primary)' : 'var(--muted)',
-                  color: selectedReport ? 'white' : 'var(--foreground-muted)',
-                  border: 'none',
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  cursor: selectedReport ? 'pointer' : 'not-allowed',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                {isGenerating ? (
-                  <>
-                    <div style={{
-                      width: '20px',
-                      height: '20px',
-                      border: '2px solid white',
-                      borderTopColor: 'transparent',
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite'
-                    }} />
-                    Gerando PDF...
-                  </>
-                ) : (
-                  <>
-                    <Download style={{ width: '20px', height: '20px' }} />
-                    Gerar Relatório PDF
-                  </>
-                )}
-              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* CSS para animação de loading */}
+      <style jsx>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }
