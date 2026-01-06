@@ -11,9 +11,10 @@ import { OnboardingService } from '@/lib/services/onboarding.service';
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     
     // Verificar autenticação
@@ -28,7 +29,7 @@ export async function DELETE(
 
     // Revogar convite
     const { success, error } = await OnboardingService.revokeInvite(
-      params.id,
+      id,
       user.id
     );
 
@@ -55,9 +56,10 @@ export async function DELETE(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     
     // Verificar autenticação
@@ -72,7 +74,7 @@ export async function PATCH(
 
     // Reenviar convite
     const { data: invite, error } = await OnboardingService.resendInvite(
-      params.id,
+      id,
       user.id
     );
 
