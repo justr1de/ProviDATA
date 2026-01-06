@@ -67,7 +67,7 @@ export default function AdministracaoPage() {
   const [newUserRole, setNewUserRole] = useState('user')
 
   const supabase = createClient()
-  const { tenant, user } = useAuthStore()
+  const { gabinete: tenant, user } = useAuthStore()
 
   const loadUsers = useCallback(async () => {
     setLoading(true)
@@ -791,7 +791,7 @@ function GabinetesAdmin() {
   const [newGabinete, setNewGabinete] = useState<Partial<Tenant>>({})
   const [saving, setSaving] = useState(false)
   const supabase = createClient()
-  const { user, tenant } = useAuthStore()
+  const { user, gabinete: tenant } = useAuthStore()
 
   const loadGabinetes = useCallback(async () => {
     setLoading(true)

@@ -36,7 +36,7 @@ export default function NovoOrgaoPage() {
 
   const router = useRouter()
   const supabase = createClient()
-  const { tenant } = useAuthStore()
+  const { gabinete: tenant } = useAuthStore()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })

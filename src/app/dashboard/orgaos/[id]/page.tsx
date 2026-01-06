@@ -38,7 +38,7 @@ export default function EditarOrgaoPage() {
   const router = useRouter()
   const params = useParams()
   const supabase = createClient()
-  const { tenant } = useAuthStore()
+  const { gabinete: tenant } = useAuthStore()
   const orgaoId = params.id as string
 
   useEffect(() => {

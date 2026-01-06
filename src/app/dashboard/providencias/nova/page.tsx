@@ -61,7 +61,7 @@ export default function NovaProvidenciaPage() {
 
   const router = useRouter()
   const supabase = createClient()
-  const { tenant, user } = useAuthStore()
+  const { gabinete: tenant, user } = useAuthStore()
 
   useEffect(() => {
     const loadData = async () => {

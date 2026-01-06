@@ -121,7 +121,7 @@ function NovoCidadaoForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
-  const { tenant } = useAuthStore()
+  const { gabinete: tenant } = useAuthStore()
 
   const redirect = searchParams.get('redirect')
 

@@ -70,7 +70,7 @@ export default function ProvidenciaDetailPage() {
   const [observacao, setObservacao] = useState('')
   const [isUpdating, setIsUpdating] = useState(false)
   const [currentUser, setCurrentUser] = useState<any>(null)
-  const { tenant, user } = useAuthStore()
+  const { gabinete: tenant, user } = useAuthStore()
   const supabase = createClient()
   const router = useRouter()
   const params = useParams()
