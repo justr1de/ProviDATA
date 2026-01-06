@@ -11,12 +11,12 @@ export type ParlamentarCargo = 'vereador' | 'prefeito' | 'deputado_estadual' | '
 // Tipo unificado para Gabinete (fonte de verdade)
 export interface Gabinete {
   id: string;
-  name: string;
+  nome: string;
   slug: string;
   type: GabineteType;
   
   // Informações parlamentares
-  parlamentar_name?: string;
+  parlamentar_nome?: string;
   parlamentar_nickname?: string;
   parlamentar_cargo?: ParlamentarCargo;
   partido?: string;
