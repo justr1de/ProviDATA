@@ -142,7 +142,7 @@ export default function AcceptInvitePage() {
   }
 
   // Nome do gabinete (com fallback)
-  const gabineteName = invite.gabinete?.nome || 'Gabinete';
+  const gabineteName = (invite.gabinete as any)?.nome || (invite.gabinete as any)?.name || 'Gabinete';
   const gabineteType = invite.gabinete?.type || 'gabinete';
 
   return (
