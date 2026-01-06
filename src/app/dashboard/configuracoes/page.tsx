@@ -180,14 +180,14 @@ export default function ConfiguracoesPage() {
   }
 
   const colorPresets = [
-    { name: 'Azul Padrão', primary: '#3b82f6', secondary: '#60a5fa' },
-    { name: 'Verde Esmeralda', primary: '#10b981', secondary: '#34d399' },
-    { name: 'Roxo Real', primary: '#8b5cf6', secondary: '#a78bfa' },
-    { name: 'Rosa Vibrante', primary: '#ec4899', secondary: '#f472b6' },
-    { name: 'Laranja Energia', primary: '#f97316', secondary: '#fb923c' },
-    { name: 'Vermelho Intenso', primary: '#ef4444', secondary: '#f87171' },
-    { name: 'Ciano Moderno', primary: '#06b6d4', secondary: '#22d3ee' },
-    { name: 'Índigo Profundo', primary: '#6366f1', secondary: '#818cf8' },
+    { name: 'Azul Padrão', primary: '#3b82f6', primaryLight: '#60a5fa', primaryDark: '#2563eb', accent: '#8b5cf6' },
+    { name: 'Verde Esmeralda', primary: '#10b981', primaryLight: '#34d399', primaryDark: '#059669', accent: '#06b6d4' },
+    { name: 'Roxo Real', primary: '#8b5cf6', primaryLight: '#a78bfa', primaryDark: '#7c3aed', accent: '#ec4899' },
+    { name: 'Rosa Vibrante', primary: '#ec4899', primaryLight: '#f472b6', primaryDark: '#db2777', accent: '#8b5cf6' },
+    { name: 'Laranja Energia', primary: '#f97316', primaryLight: '#fb923c', primaryDark: '#ea580c', accent: '#eab308' },
+    { name: 'Vermelho Intenso', primary: '#ef4444', primaryLight: '#f87171', primaryDark: '#dc2626', accent: '#f97316' },
+    { name: 'Ciano Moderno', primary: '#06b6d4', primaryLight: '#22d3ee', primaryDark: '#0891b2', accent: '#3b82f6' },
+    { name: 'Índigo Profundo', primary: '#6366f1', primaryLight: '#818cf8', primaryDark: '#4f46e5', accent: '#8b5cf6' },
   ]
 
   return (
@@ -381,7 +381,7 @@ export default function ConfiguracoesPage() {
               {colorPresets.map((preset) => (
                 <button
                   key={preset.name}
-                  onClick={() => setColors({ primary: preset.primary, secondary: preset.secondary })}
+                  onClick={() => setColors({ primary: preset.primary, primaryLight: preset.primaryLight, primaryDark: preset.primaryDark, accent: preset.accent })}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
