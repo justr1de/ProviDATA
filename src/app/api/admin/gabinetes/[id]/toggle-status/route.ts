@@ -1,64 +1,41 @@
-// API Route: /api/admin/gabinetes/[id]/toggle-status/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { GabineteProvisioningService } from '@/lib/services/gabinete-provisioning.service';
 
 const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br';
 
-async function isSuperAdmin(): Promise<{ isSuper: boolean; error?: string }> {
+async function isSuperAdmin() {
   const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  
-  if (authError || !user) {
-    return { isSuper: false, error: 'Não autenticado' };
-  }
-  
-  if (user.email !== SUPER_ADMIN_EMAIL) {
-    return { isSuper: false, error: 'Acesso negado: apenas super admin' };
-  }
-  
-  return { isSuper: true };
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user || user.email !== SUPER_ADMIN_EMAIL) return false;
+  return true;
 }
 
+// ✅ PUT - Código corrigido para Next.js 16
 export async function PUT(
   request: NextRequest,
-  props: { params: Promise<{ id: string }> } // ✅ Correção 1: params é uma Promise
+  props: { params: Promise<{ id: string }> }
 ) {
-  // ✅ Correção 2: Aguardar os parâmetros
   const params = await props.params;
-  const { id } = params;
+  const id = params.id;
 
   try {
-    const { isSuper, error: authError } = await isSuperAdmin();
-    
-    if (!isSuper) {
-      return NextResponse.json(
-        { error: authError || 'Acesso negado' },
-        { status: 403 }
-      );
+    if (!await isSuperAdmin()) {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
     }
-    
-    // Alterar status
+
     const result = await GabineteProvisioningService.toggleGabineteStatus(id);
     
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: result.error }, { status: 400 });
     }
-    
+
     return NextResponse.json({
       success: true,
       gabinete: result.gabinete,
-      message: `Gabinete ${result.gabinete?.ativo ? 'ativado' : 'desativado'} com sucesso`,
+      message: `Gabinete ${result.gabinete?.ativo ? 'ativado' : 'desativado'} com sucesso`
     });
   } catch (error) {
-    console.error('Erro ao alterar status do gabinete:', error);
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
   }
 }
