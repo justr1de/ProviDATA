@@ -21,7 +21,7 @@ export default async function AdminLayout({
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
           // Apenas leitura no Server Component
         },
       },
