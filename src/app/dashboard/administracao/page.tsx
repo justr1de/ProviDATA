@@ -877,8 +877,8 @@ function GabinetesAdmin() {
             ) : (
               gabinetes.map((g) => (
                 <tr key={g.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '12px 10px' }}>{g.name}</td>
-                  <td style={{ padding: '12px 10px' }}>{g.parlamentar_name}</td>
+                  <td style={{ padding: '12px 10px' }}>{g.nome}</td>
+                  <td style={{ padding: '12px 10px' }}>{g.parlamentar_nome}</td>
                   <td style={{ padding: '12px 10px' }}>{g.municipio}</td>
                   <td style={{ padding: '12px 10px' }}>{g.uf}</td>
                   <td style={{ padding: '12px 10px', textAlign: 'center' }}>
@@ -933,14 +933,14 @@ function GabinetesAdmin() {
             <input
               required
               placeholder="Nome"
-              value={newGabinete.name || ''}
-              onChange={(e) => setNewGabinete((v) => ({ ...v, name: e.target.value }))}
+              value={newGabinete.nome || ''}
+              onChange={(e) => setNewGabinete((v) => ({ ...v, nome: e.target.value }))}
               style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }}
             />
             <input
               placeholder="Parlamentar"
-              value={newGabinete.parlamentar_name || ''}
-              onChange={(e) => setNewGabinete((v) => ({ ...v, parlamentar_name: e.target.value }))}
+              value={newGabinete.parlamentar_nome || ''}
+              onChange={(e) => setNewGabinete((v) => ({ ...v, parlamentar_nome: e.target.value }))}
               style={{ width: '100%', marginBottom: 12, padding: 10, borderRadius: 6, border: '1px solid #e5e7eb' }}
             />
             <input
