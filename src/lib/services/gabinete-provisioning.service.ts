@@ -3,16 +3,22 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Gabinete } from '@/types/database';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Função para criar cliente Supabase Admin sob demanda (evita erro durante build)
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Cliente com service role para operações administrativas
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Variáveis de ambiente do Supabase não configuradas');
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
 
 export interface CreateGabineteRequest {
   // Dados básicos do gabinete
@@ -103,7 +109,7 @@ export class GabineteProvisioningService {
       .replace(/^-+|-+$/g, ''); // Remove hífens do início e fim
     
     // Verificar se o slug já existe
-    const { data: existing } = await supabaseAdmin
+    const { data: existing } = await getSupabaseAdmin()
       .from('tenants')
       .select('id')
       .eq('slug', slug)
@@ -115,7 +121,7 @@ export class GabineteProvisioningService {
       let newSlug = `${slug}-${counter}`;
       
       while (true) {
-        const { data } = await supabaseAdmin
+        const { data } = await getSupabaseAdmin()
           .from('tenants')
           .select('id')
           .eq('slug', newSlug)
@@ -161,7 +167,7 @@ export class GabineteProvisioningService {
       }
       
       // Verificar se o email já está em uso
-      const { data: existingUser } = await supabaseAdmin.auth.admin.listUsers();
+      const { data: existingUser } = await getSupabaseAdmin().auth.admin.listUsers();
       const emailExists = existingUser?.users?.some(u => u.email === request.admin_email);
       
       if (emailExists) {
@@ -172,7 +178,7 @@ export class GabineteProvisioningService {
       const slug = await this.generateSlug(request.name, request.slug);
       
       // 1. Criar gabinete na tabela gabinetes
-      const { data: gabinete, error: gabineteError } = await supabaseAdmin
+      const { data: gabinete, error: gabineteError } = await getSupabaseAdmin()
         .from('tenants')
         .insert({
           name: request.name,
@@ -212,7 +218,7 @@ export class GabineteProvisioningService {
       const temporaryPassword = this.generateTemporaryPassword();
       
       // 3. Criar usuário no Auth com senha temporária
-      const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      const { data: authUser, error: authError } = await getSupabaseAdmin().auth.admin.createUser({
         email: request.admin_email,
         password: temporaryPassword,
         email_confirm: true, // Confirmar email automaticamente
@@ -231,13 +237,13 @@ export class GabineteProvisioningService {
         console.error('Erro ao criar usuário auth:', authError);
         
         // Rollback: Deletar gabinete criado
-        await supabaseAdmin.from('tenants').delete().eq('id', gabinete.id);
+        await getSupabaseAdmin().from('tenants').delete().eq('id', gabinete.id);
         
         return { success: false, error: 'Erro ao criar usuário de autenticação' };
       }
       
       // 4. Criar perfil do usuário vinculado ao gabinete
-      const { error: profileError } = await supabaseAdmin
+      const { error: profileError } = await getSupabaseAdmin()
         .from('profiles')
         .insert({
           id: authUser.user.id,
@@ -257,8 +263,8 @@ export class GabineteProvisioningService {
         console.error('Erro ao criar perfil:', profileError);
         
         // Rollback: Deletar usuário e gabinete
-        await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
-        await supabaseAdmin.from('tenants').delete().eq('id', gabinete.id);
+        await getSupabaseAdmin().auth.admin.deleteUser(authUser.user.id);
+        await getSupabaseAdmin().from('tenants').delete().eq('id', gabinete.id);
         
         return { success: false, error: 'Erro ao criar perfil do usuário' };
       }
@@ -289,7 +295,7 @@ export class GabineteProvisioningService {
     search?: string;
   }): Promise<{ data: Gabinete[] | null; error: string | null }> {
     try {
-      let query = supabaseAdmin.from('tenants').select('*');
+      let query = getSupabaseAdmin().from('tenants').select('*');
       
       // Aplicar filtros
       if (filters?.type) {
@@ -330,7 +336,7 @@ export class GabineteProvisioningService {
    */
   static async getGabinete(gabineteId: string): Promise<{ data: Gabinete | null; error: string | null }> {
     try {
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await getSupabaseAdmin()
         .from('tenants')
         .select('*')
         .eq('id', gabineteId)
@@ -356,7 +362,7 @@ export class GabineteProvisioningService {
     updates: Partial<CreateGabineteRequest>
   ): Promise<{ success: boolean; error?: string; gabinete?: Gabinete }> {
     try {
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await getSupabaseAdmin()
         .from('tenants')
         .update({
           name: updates.name,
@@ -405,7 +411,7 @@ export class GabineteProvisioningService {
   ): Promise<{ success: boolean; error?: string; gabinete?: Gabinete }> {
     try {
       // Buscar status atual
-      const { data: currentGabinete } = await supabaseAdmin
+      const { data: currentGabinete } = await getSupabaseAdmin()
         .from('tenants')
         .select('ativo')
         .eq('id', gabineteId)
@@ -416,7 +422,7 @@ export class GabineteProvisioningService {
       }
       
       // Inverter status
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await getSupabaseAdmin()
         .from('tenants')
         .update({ ativo: !currentGabinete.ativo, updated_at: new Date().toISOString() })
         .eq('id', gabineteId)
@@ -444,7 +450,7 @@ export class GabineteProvisioningService {
     try {
       const temporaryPassword = this.generateTemporaryPassword();
       
-      const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+      const { error } = await getSupabaseAdmin().auth.admin.updateUserById(userId, {
         password: temporaryPassword,
       });
       
