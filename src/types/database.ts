@@ -102,7 +102,7 @@ export interface User {
   email: string
   telefone?: string
   cargo?: string
-  role: 'admin' | 'assessor' | 'colaborador'
+  role: 'super_admin' | 'admin' | 'gestor' | 'assessor' | 'operador' | 'colaborador' | 'visualizador'
   avatar_url?: string
   ativo: boolean
   created_at: string
