@@ -88,8 +88,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       email: invite.email,
       role: invite.role,
-      tenant: invite.tenant, // Novo campo usando Tenant
-      organization: invite.organization, // Legado - compatibilidade
+      gabinete: invite.gabinete, // Gabinete associado ao convite
+      gabinete_id: invite.gabinete_id,
       expires_at: invite.expires_at,
     });
   } catch (error) {
