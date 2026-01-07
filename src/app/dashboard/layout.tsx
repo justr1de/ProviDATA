@@ -812,65 +812,6 @@ export default function DashboardLayout({
             paddingBottom: '40px'
           }}
         >
-          {/* Slogan */}
-          <div
-            style={{
-              textAlign: 'center',
-              marginBottom: '8px'
-            }}
-          >
-            <p
-              style={{
-                fontSize: isDesktop ? '13px' : '11px',
-                fontWeight: '500',
-                color: 'var(--foreground-muted)',
-                margin: 0,
-                letterSpacing: '0.5px',
-                fontStyle: 'italic'
-              }}
-            >
-              A <span style={{ fontWeight: '700', color: 'var(--primary)' }}>EVOLUÇÃO</span> da OUVIDORIA, em{' '}
-              <span style={{ fontWeight: '700', color: 'var(--primary)' }}>QUALQUER LUGAR</span> e à{' '}
-              <span style={{ fontWeight: '700', color: 'var(--primary)' }}>QUALQUER HORA</span>
-            </p>
-          </div>
-
-          {/* Cabeçalho Global - ProviDATA - CENTRALIZADO */}
-          <div
-            style={{
-              marginBottom: '24px',
-              paddingBottom: '16px',
-              borderBottom: '1px solid var(--border)',
-              textAlign: 'center'
-            }}
-          >
-            <h1
-              style={{
-                fontSize: isDesktop ? '24px' : '16px',
-                fontWeight: '700',
-                color: 'var(--foreground)',
-                margin: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '12px',
-                flexWrap: 'wrap'
-              }}
-            >
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}
-              >
-                ProviDATA
-              </span>
-              <span style={{ color: 'var(--foreground-muted)', fontWeight: '400' }}>—</span>
-              <span style={{ fontWeight: '500', color: 'var(--foreground-secondary)' }}>Gestão de Pedidos de Providência</span>
-            </h1>
-          </div>
           {children}
         </main>
       </div>
