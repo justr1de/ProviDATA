@@ -300,7 +300,7 @@ export default function GabinetesPage() {
         zIndex: 20
       }}>
         <div style={{
-          maxWidth: '1400px',
+          maxWidth: '1600px',
           margin: '0 auto',
           padding: '0 24px'
         }}>
@@ -325,15 +325,13 @@ export default function GabinetesPage() {
               <div style={{ 
                 height: '24px', 
                 width: '1px', 
-                backgroundColor: 'var(--border)',
-                display: 'none'
-              }} className="hidden sm:block" />
+                backgroundColor: 'var(--border)'
+              }} />
               <span style={{ 
                 fontSize: '14px', 
                 fontWeight: 500, 
-                color: 'var(--foreground-muted)',
-                display: 'none'
-              }} className="hidden sm:block">
+                color: 'var(--foreground-muted)'
+              }}>
                 Administração
               </span>
             </div>
@@ -368,17 +366,17 @@ export default function GabinetesPage() {
 
       {/* --- CONTEÚDO PRINCIPAL --- */}
       <main style={{
-        maxWidth: '1400px',
+        maxWidth: '1600px',
         margin: '0 auto',
-        padding: '32px 24px'
+        padding: '24px 32px'
       }}>
         {/* Título e Botão */}
         <div style={{
           display: 'flex',
           flexDirection: 'column',
           gap: '8px',
-          marginBottom: '32px'
-        }}>
+marginBottom: '20px'
+          }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -432,7 +430,7 @@ export default function GabinetesPage() {
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
           gap: '16px',
-          marginBottom: '32px'
+          marginBottom: '20px'
         }} className="stats-grid">
           {/* Total */}
           <div className="stat-card" style={{
@@ -889,6 +887,15 @@ export default function GabinetesPage() {
         textAlign: 'center',
         marginTop: 'auto'
       }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '8px' }}>
+          <Image
+            src="/dataro-logo-final.png"
+            alt="DATA-RO"
+            width={120}
+            height={40}
+            style={{ height: '32px', width: 'auto' }}
+          />
+        </div>
         <p style={{ fontSize: '14px', color: 'var(--foreground-muted)', margin: 0 }}>
           Desenvolvido por <strong style={{ color: '#16a34a' }}>DATA-RO INTELIGÊNCIA TERRITORIAL</strong>
         </p>
