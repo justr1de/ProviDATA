@@ -41,6 +41,7 @@ const UF_OPTIONS = [
 
 const CARGO_OPTIONS = [
   { value: '', label: 'Todos os cargos' },
+  { value: 'admin', label: 'Administrador' },
   { value: 'vereador', label: 'Vereador' },
   { value: 'prefeito', label: 'Prefeito' },
   { value: 'deputado_estadual', label: 'Deputado Estadual' },
@@ -2212,6 +2213,7 @@ marginBottom: '20px'
                           color: 'var(--foreground)'
                         }}
                       >
+                        <option value="admin">Administrador</option>
                         <option value="vereador">Vereador</option>
                         <option value="prefeito">Prefeito</option>
                         <option value="deputado_estadual">Deputado Estadual</option>

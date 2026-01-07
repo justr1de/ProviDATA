@@ -56,7 +56,9 @@ const PARLIAMENTARY_CARGO_LABELS: Record<string, string> = {
   vereador: 'Vereador',
   senador: 'Senador',
   prefeito: 'Prefeito',
-  governador: 'Governador'
+  governador: 'Governador',
+  admin: 'Administrador',
+  super_admin: 'Super Administrador'
 }
 
 const SYSTEM_ROLE_LABELS: Record<string, string> = {
@@ -365,11 +367,13 @@ export default function DashboardLayout({
             }}
           >
             {gabinete
-              ? `Gabinete do ${(gabinete.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual')
-                  .charAt(0)
-                  .toUpperCase() + (gabinete.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual').slice(1)} ${
-                  gabinete.parlamentar_nome
-                }`
+              ? gabinete.parlamentar_cargo === 'admin' || gabinete.parlamentar_cargo === 'super_admin'
+                ? gabinete.nome || 'Administração do Sistema'
+                : `Gabinete do ${(gabinete.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual')
+                    .charAt(0)
+                    .toUpperCase() + (gabinete.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual').slice(1)} ${
+                    gabinete.parlamentar_nome
+                  }`
               : 'Carregando...'}
           </p>
           <p
@@ -383,8 +387,11 @@ export default function DashboardLayout({
             }}
           >
             {(() => {
-              const cargo = gabinete?.parlamentar_cargo?.replace('_', ' ') || 'deputado estadual'
-              return cargo.charAt(0).toUpperCase() + cargo.slice(1)
+              const cargo = gabinete?.parlamentar_cargo
+              if (cargo === 'admin') return 'Administrador'
+              if (cargo === 'super_admin') return 'Super Administrador'
+              const cargoFormatado = cargo?.replace('_', ' ') || 'deputado estadual'
+              return cargoFormatado.charAt(0).toUpperCase() + cargoFormatado.slice(1)
             })()}
           </p>
           

@@ -317,6 +317,7 @@ export default function ConfiguracoesPage() {
                   style={inputStyle}
                 >
                   <option value="">Selecione o cargo</option>
+                  <option value="admin">Administrador</option>
                   <option value="vereador">Vereador(a)</option>
                   <option value="deputado_estadual">Deputado(a) Estadual</option>
                   <option value="deputado_federal">Deputado(a) Federal</option>

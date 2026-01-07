@@ -10,7 +10,7 @@ export interface Gabinete {
   
   // Informações parlamentares
   parlamentar_nome?: string
-  parlamentar_cargo?: 'vereador' | 'prefeito' | 'deputado_estadual' | 'deputado_federal' | 'senador' | 'governador'
+  parlamentar_cargo?: 'admin' | 'super_admin' | 'vereador' | 'prefeito' | 'deputado_estadual' | 'deputado_federal' | 'senador' | 'governador'
   partido?: string
   
   // Localização
@@ -291,7 +291,7 @@ export interface GabineteFormData {
   municipio: string
   uf: string
   parlamentar_nome?: string
-  parlamentar_cargo?: 'vereador' | 'prefeito' | 'deputado_estadual' | 'deputado_federal' | 'senador' | 'governador'
+  parlamentar_cargo?: 'admin' | 'super_admin' | 'vereador' | 'prefeito' | 'deputado_estadual' | 'deputado_federal' | 'senador' | 'governador'
   partido?: string
   telefone?: string // Campo legado
   email?: string // Campo legado
