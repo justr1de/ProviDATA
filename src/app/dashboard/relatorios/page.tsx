@@ -537,11 +537,11 @@ export default function RelatoriosPage() {
       </div>
 
       {/* Layout principal com grid: tipos de relatório à esquerda, filtros à direita */}
-      <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '24px', alignItems: 'stretch', flexWrap: 'wrap' }}>
         
         {/* Seção de Tipos de Relatório */}
-        <div style={{ flex: '1 1 600px', minWidth: '0' }}>
-          <div style={cardStyle}>
+        <div style={{ flex: '1 1 600px', minWidth: '0', display: 'flex' }}>
+          <div style={{ ...cardStyle, flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div style={cardHeaderStyle}>
               <div>
                 <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>
@@ -608,8 +608,8 @@ export default function RelatoriosPage() {
         </div>
 
         {/* Seção de Filtros */}
-        <div style={{ flex: '0 0 320px', minWidth: '280px' }}>
-          <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: '0 0 320px', minWidth: '280px', display: 'flex' }}>
+          <div style={{ ...cardStyle, flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div style={cardHeaderStyle}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Filter style={{ width: '20px', height: '20px', color: 'var(--primary)' }} />
