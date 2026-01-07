@@ -151,6 +151,12 @@ export default function GabinetesPage() {
   const [membroForm, setMembroForm] = useState<MembroFormData>(INITIAL_MEMBRO_FORM)
   const [submittingMembro, setSubmittingMembro] = useState(false)
 
+  // Estados do Modal de Edição de Gabinete
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingGabinete, setEditingGabinete] = useState<Gabinete | null>(null)
+  const [editFormData, setEditFormData] = useState<FormData>(INITIAL_FORM_DATA)
+  const [submittingEdit, setSubmittingEdit] = useState(false)
+
   // --- FUNÇÃO PARA FILTRAR GABINETES REAIS (excluir demonstração e DATA-RO) ---
   const gabineteReais = useMemo(() => {
     return gabinetes.filter(g => {
@@ -307,6 +313,75 @@ export default function GabinetesPage() {
       toast.error('Erro ao fazer logout. Por favor, tente novamente.')
     }
   }, [supabase, router])
+
+  // Funções para edição de gabinete
+  const abrirModalEdicao = useCallback((gabinete: Gabinete) => {
+    setEditingGabinete(gabinete)
+    setEditFormData({
+      nome: gabinete.nome || '',
+      municipio: gabinete.municipio || '',
+      uf: gabinete.uf || 'RO',
+      parlamentar_nome: gabinete.parlamentar_nome || '',
+      parlamentar_cargo: gabinete.parlamentar_cargo || 'deputado_estadual',
+      partido: gabinete.partido || '',
+      telefone_parlamentar: gabinete.telefone_parlamentar || '',
+      telefone_gabinete: gabinete.telefone_gabinete || '',
+      telefone_adicional: gabinete.telefone_adicional || '',
+      email_parlamentar: gabinete.email_parlamentar || '',
+      email_gabinete: gabinete.email_gabinete || '',
+      assessor_1: (gabinete as any).chefe_de_gabinete || '',
+      assessor_2: gabinete.assessor_2 || ''
+    })
+    setShowEditModal(true)
+  }, [])
+
+  const fecharModalEdicao = useCallback(() => {
+    setShowEditModal(false)
+    setEditingGabinete(null)
+    setEditFormData(INITIAL_FORM_DATA)
+  }, [])
+
+  const handleEditSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingGabinete) return
+    
+    setSubmittingEdit(true)
+    
+    try {
+      const { error } = await supabase
+        .from('gabinetes')
+        .update({
+          nome: editFormData.nome,
+          municipio: editFormData.municipio,
+          uf: editFormData.uf,
+          parlamentar_nome: editFormData.parlamentar_nome,
+          parlamentar_cargo: editFormData.parlamentar_cargo,
+          partido: editFormData.partido,
+          telefone_parlamentar: editFormData.telefone_parlamentar,
+          telefone_gabinete: editFormData.telefone_gabinete,
+          telefone_adicional: editFormData.telefone_adicional,
+          email_parlamentar: editFormData.email_parlamentar,
+          email_gabinete: editFormData.email_gabinete,
+          chefe_de_gabinete: editFormData.assessor_1,
+          assessor_2: editFormData.assessor_2,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingGabinete.id)
+      
+      if (error) {
+        throw error
+      }
+      
+      toast.success('Gabinete atualizado com sucesso!')
+      fecharModalEdicao()
+      await carregarGabinetes()
+    } catch (error) {
+      console.error('Erro ao atualizar gabinete:', error)
+      toast.error('Erro ao atualizar gabinete. Por favor, tente novamente.')
+    } finally {
+      setSubmittingEdit(false)
+    }
+  }, [editingGabinete, editFormData, supabase, carregarGabinetes, fecharModalEdicao])
 
   const limparFiltros = useCallback(() => {
     setSearchTerm('')
@@ -1112,27 +1187,50 @@ marginBottom: '20px'
                         </button>
                       </td>
                       <td style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>
-                        <button
-                          onClick={() => abrirModalMembros(gabinete)}
-                          title="Gerenciar Membros"
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            padding: '8px 14px',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            color: '#3b82f6',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontSize: '13px',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                          }}
-                        >
-                          <Users style={{ width: '16px', height: '16px' }} />
-                          Membros
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            onClick={() => abrirModalEdicao(gabinete)}
+                            title="Alterar Gabinete"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '8px 14px',
+                              backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                              color: '#f59e0b',
+                              border: 'none',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontWeight: 500,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            <Edit3 style={{ width: '16px', height: '16px' }} />
+                            Alterações
+                          </button>
+                          <button
+                            onClick={() => abrirModalMembros(gabinete)}
+                            title="Gerenciar Membros"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              padding: '8px 14px',
+                              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                              color: '#3b82f6',
+                              border: 'none',
+                              borderRadius: '8px',
+                              fontSize: '13px',
+                              fontWeight: 500,
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            <Users style={{ width: '16px', height: '16px' }} />
+                            Membros
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -1939,6 +2037,408 @@ marginBottom: '20px'
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL DE EDIÇÃO DE GABINETE --- */}
+      {showEditModal && editingGabinete && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
+          padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: 'var(--card)',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '700px',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }}>
+            {/* Header do Modal */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '20px 24px',
+              borderBottom: '1px solid var(--border)',
+              backgroundColor: 'rgba(245, 158, 11, 0.1)'
+            }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--foreground)', margin: 0 }}>
+                  Alterar Gabinete
+                </h2>
+                <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', margin: '4px 0 0 0' }}>
+                  {editingGabinete.nome}
+                </p>
+              </div>
+              <button
+                onClick={fecharModalEdicao}
+                style={{
+                  padding: '8px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  color: 'var(--foreground-muted)'
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Formulário de Edição */}
+            <form onSubmit={handleEditSubmit} style={{ padding: '24px' }}>
+              <div style={{ display: 'grid', gap: '20px' }}>
+                {/* Seção: Dados do Gabinete */}
+                <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '16px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#f59e0b', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Building2 size={16} /> Dados do Gabinete
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        Nome do Gabinete *
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.nome}
+                        onChange={(e) => setEditFormData({ ...editFormData, nome: e.target.value })}
+                        required
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          backgroundColor: 'var(--background)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: 'var(--foreground)'
+                        }}
+                      />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                          Município
+                        </label>
+                        <input
+                          type="text"
+                          value={editFormData.municipio}
+                          onChange={(e) => setEditFormData({ ...editFormData, municipio: e.target.value })}
+                          style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            backgroundColor: 'var(--background)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            color: 'var(--foreground)'
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                          UF
+                        </label>
+                        <select
+                          value={editFormData.uf}
+                          onChange={(e) => setEditFormData({ ...editFormData, uf: e.target.value })}
+                          style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            backgroundColor: 'var(--background)',
+                            border: '1px solid var(--border)',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            color: 'var(--foreground)'
+                          }}
+                        >
+                          {UF_OPTIONS.map(uf => (
+                            <option key={uf} value={uf}>{uf}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Seção: Dados do Parlamentar */}
+                <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '16px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#f59e0b', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Users size={16} /> Dados do Parlamentar
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        Nome do Parlamentar
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.parlamentar_nome}
+                        onChange={(e) => setEditFormData({ ...editFormData, parlamentar_nome: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          backgroundColor: 'var(--background)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: 'var(--foreground)'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        Cargo
+                      </label>
+                      <select
+                        value={editFormData.parlamentar_cargo}
+                        onChange={(e) => setEditFormData({ ...editFormData, parlamentar_cargo: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          backgroundColor: 'var(--background)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: 'var(--foreground)'
+                        }}
+                      >
+                        <option value="vereador">Vereador</option>
+                        <option value="prefeito">Prefeito</option>
+                        <option value="deputado_estadual">Deputado Estadual</option>
+                        <option value="deputado_federal">Deputado Federal</option>
+                        <option value="senador">Senador</option>
+                        <option value="governador">Governador</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        Partido
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.partido}
+                        onChange={(e) => setEditFormData({ ...editFormData, partido: e.target.value })}
+                        placeholder="Ex: PT, PSDB, MDB"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          backgroundColor: 'var(--background)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: 'var(--foreground)'
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Seção: Contatos */}
+                <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '16px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#f59e0b', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Mail size={16} /> Contatos
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        Telefone Parlamentar
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.telefone_parlamentar}
+                        onChange={(e) => setEditFormData({ ...editFormData, telefone_parlamentar: e.target.value })}
+                        placeholder="(00) 00000-0000"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          backgroundColor: 'var(--background)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: 'var(--foreground)'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        Telefone Gabinete
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.telefone_gabinete}
+                        onChange={(e) => setEditFormData({ ...editFormData, telefone_gabinete: e.target.value })}
+                        placeholder="(00) 0000-0000"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          backgroundColor: 'var(--background)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: 'var(--foreground)'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        E-mail Parlamentar
+                      </label>
+                      <input
+                        type="email"
+                        value={editFormData.email_parlamentar}
+                        onChange={(e) => setEditFormData({ ...editFormData, email_parlamentar: e.target.value })}
+                        placeholder="parlamentar@email.com"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          backgroundColor: 'var(--background)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: 'var(--foreground)'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        E-mail Gabinete
+                      </label>
+                      <input
+                        type="email"
+                        value={editFormData.email_gabinete}
+                        onChange={(e) => setEditFormData({ ...editFormData, email_gabinete: e.target.value })}
+                        placeholder="gabinete@email.com"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          backgroundColor: 'var(--background)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: 'var(--foreground)'
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Seção: Equipe */}
+                <div>
+                  <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#f59e0b', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Shield size={16} /> Equipe
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        Chefe de Gabinete
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.assessor_1}
+                        onChange={(e) => setEditFormData({ ...editFormData, assessor_1: e.target.value })}
+                        placeholder="Nome do chefe de gabinete"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          backgroundColor: 'var(--background)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: 'var(--foreground)'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        Assessor Principal
+                      </label>
+                      <input
+                        type="text"
+                        value={editFormData.assessor_2}
+                        onChange={(e) => setEditFormData({ ...editFormData, assessor_2: e.target.value })}
+                        placeholder="Nome do assessor"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          backgroundColor: 'var(--background)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: 'var(--foreground)'
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botões de Ação */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '12px',
+                marginTop: '24px',
+                paddingTop: '20px',
+                borderTop: '1px solid var(--border)'
+              }}>
+                <button
+                  type="button"
+                  onClick={fecharModalEdicao}
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: 'var(--background)',
+                    color: 'var(--foreground)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingEdit}
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#f59e0b',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: submittingEdit ? 'not-allowed' : 'pointer',
+                    opacity: submittingEdit ? 0.7 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  {submittingEdit ? (
+                    <>
+                      <Loader2 style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }} />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save style={{ width: '16px', height: '16px' }} />
+                      Salvar Alterações
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

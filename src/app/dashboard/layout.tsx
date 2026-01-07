@@ -99,6 +99,8 @@ export default function DashboardLayout({
   const [isDesktop, setIsDesktop] = useState(false)
   const [customBgImage, setCustomBgImage] = useState<string | null>(null)
   const [customPrimaryColor, setCustomPrimaryColor] = useState('#16a34a')
+  const [allGabinetes, setAllGabinetes] = useState<any[]>([])
+  const [showGabineteSelector, setShowGabineteSelector] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
@@ -155,6 +157,20 @@ export default function DashboardLayout({
             setGabinete(gabineteData)
           }
         }
+
+        // Se for super admin, carregar todos os gabinetes
+        const isSuperAdmin = userData.role === 'super_admin' || authUser.email === 'contato@dataro-it.com.br'
+        if (isSuperAdmin) {
+          const { data: gabinetes } = await supabase
+            .from('gabinetes')
+            .select('id, nome, parlamentar_nome, municipio, uf, ativo')
+            .eq('ativo', true)
+            .order('nome')
+          
+          if (gabinetes) {
+            setAllGabinetes(gabinetes)
+          }
+        }
       }
     }
 
@@ -166,6 +182,29 @@ export default function DashboardLayout({
     reset()
     router.push('/login')
   }
+
+  // Função para trocar de gabinete (super admin)
+  const handleSwitchGabinete = async (gabineteId: string) => {
+    const selectedGabinete = allGabinetes.find(g => g.id === gabineteId)
+    if (selectedGabinete) {
+      // Buscar dados completos do gabinete
+      const { data: gabineteData } = await supabase
+        .from('tenants')
+        .select('*')
+        .eq('id', gabineteId)
+        .single()
+      
+      if (gabineteData) {
+        setGabinete(gabineteData)
+        setShowGabineteSelector(false)
+        // Recarregar a página para atualizar os dados
+        window.location.reload()
+      }
+    }
+  }
+
+  // Verificar se é super admin
+  const isSuperAdmin = user?.role === 'super_admin' || user?.email === 'contato@dataro-it.com.br'
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -550,8 +589,35 @@ export default function DashboardLayout({
               </button>
             )}
 
-            {/* Spacer for desktop */}
-            {isDesktop && <div />}
+            {/* Slogan centralizado */}
+            {isDesktop && (
+              <div style={{ 
+                flex: 1, 
+                display: 'flex', 
+                flexDirection: 'column',
+                alignItems: 'center', 
+                justifyContent: 'center',
+                textAlign: 'center'
+              }}>
+                <p style={{ 
+                  fontSize: '11px', 
+                  fontWeight: '500', 
+                  color: 'var(--foreground-muted)',
+                  margin: 0,
+                  letterSpacing: '0.5px'
+                }}>
+                  A <span style={{ color: customPrimaryColor, fontWeight: '700' }}>EVOLUÇÃO</span> da OUVIDORIA, em <span style={{ color: customPrimaryColor, fontWeight: '700' }}>QUALQUER LUGAR</span> e à <span style={{ color: customPrimaryColor, fontWeight: '700' }}>QUALQUER HORA</span>
+                </p>
+                <p style={{ 
+                  fontSize: '14px', 
+                  fontWeight: '600', 
+                  color: 'var(--foreground)',
+                  margin: '2px 0 0 0'
+                }}>
+                  <span style={{ color: customPrimaryColor }}>ProviDATA</span> <span style={{ color: 'var(--foreground-muted)', fontWeight: '400' }}>—</span> Gestão de Pedidos de Providência
+                </p>
+              </div>
+            )}
 
             {/* Right side */}
             <div style={{ display: 'flex', alignItems: 'center', gap: isDesktop ? '16px' : '8px' }}>
