@@ -91,6 +91,8 @@ export async function GET() {
       const status = p.status?.toLowerCase() || 'pendente'
       if (status === 'concluido' || status === 'concluida') {
         porStatus.concluida++
+      } else if (status === 'encaminhado' || status === 'encaminhada') {
+        porStatus.encaminhada++
       } else if (status in porStatus) {
         porStatus[status as keyof typeof porStatus]++
       }
