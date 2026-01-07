@@ -27,6 +27,7 @@ import type { Providencia, HistoricoProvidencia } from '@/types/database'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { toast } from 'sonner'
+import { TimelineAndamentos } from '@/components/timeline-andamentos'
 
 const statusOptions = [
   { value: 'pendente', label: 'Pendente' },
@@ -784,6 +785,30 @@ export default function ProvidenciaDetailPage() {
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Timeline de Andamentos */}
+      <div style={{ marginTop: '24px' }}>
+        <div style={cardStyle}>
+          <TimelineAndamentos 
+            providenciaId={providencia.id}
+            cidadaoNome={providencia.cidadao?.nome}
+            cidadaoEmail={providencia.cidadao?.email}
+            cidadaoTelefone={providencia.cidadao?.celular || providencia.cidadao?.telefone}
+            onAndamentoAdded={() => {
+              // Recarregar histórico quando um andamento for adicionado
+              const loadHistorico = async () => {
+                const { data: histData } = await supabase
+                  .from('historico_providencias')
+                  .select(`*, usuario:users(nome)`)
+                  .eq('providencia_id', id)
+                  .order('created_at', { ascending: false })
+                if (histData) setHistorico(histData)
+              }
+              loadHistorico()
+            }}
+          />
         </div>
       </div>
     </div>
