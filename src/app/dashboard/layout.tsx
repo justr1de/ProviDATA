@@ -145,8 +145,23 @@ export default function DashboardLayout({
       if (userData) {
         setUser(userData)
         
-        // Buscar gabinete separadamente usando a VIEW tenants
-        if (userData.gabinete_id) {
+        // Verificar se é super admin e se há gabinete selecionado no localStorage
+        const isSuperAdmin = userData.role === 'super_admin' || authUser.email === 'contato@dataro-it.com.br'
+        const savedGabineteId = localStorage.getItem('selectedGabineteId')
+        
+        // Se for super admin e tiver gabinete salvo no localStorage, usar esse
+        if (isSuperAdmin && savedGabineteId) {
+          const { data: gabineteData } = await supabase
+            .from('gabinetes')
+            .select('*')
+            .eq('id', savedGabineteId)
+            .single()
+          
+          if (gabineteData) {
+            setGabinete(gabineteData)
+          }
+        } else if (userData.gabinete_id) {
+          // Senão, buscar gabinete do usuário usando a VIEW tenants
           const { data: gabineteData } = await supabase
             .from('tenants')
             .select('*')
@@ -159,7 +174,6 @@ export default function DashboardLayout({
         }
 
         // Se for super admin, carregar todos os gabinetes
-        const isSuperAdmin = userData.role === 'super_admin' || authUser.email === 'contato@dataro-it.com.br'
         if (isSuperAdmin) {
           const { data: gabinetes } = await supabase
             .from('gabinetes')
@@ -189,12 +203,16 @@ export default function DashboardLayout({
     if (selectedGabinete) {
       // Buscar dados completos do gabinete
       const { data: gabineteData } = await supabase
-        .from('tenants')
+        .from('gabinetes')
         .select('*')
         .eq('id', gabineteId)
         .single()
       
       if (gabineteData) {
+        // Salvar no localStorage para persistência
+        localStorage.setItem('selectedGabineteId', gabineteId)
+        localStorage.setItem('selectedGabinete', JSON.stringify(gabineteData))
+        
         setGabinete(gabineteData)
         setShowGabineteSelector(false)
         // Recarregar a página para atualizar os dados
