@@ -1121,9 +1121,31 @@ marginBottom: '20px'
                             <Building2 style={{ width: '18px', height: '18px', color: '#16a34a' }} />
                           </div>
                           <div>
-                            <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--foreground)', margin: 0 }}>
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                // Salvar o gabinete selecionado no localStorage e redirecionar para o dashboard
+                                localStorage.setItem('selectedGabineteId', gabinete.id)
+                                window.location.href = '/dashboard'
+                              }}
+                              style={{ 
+                                fontSize: '14px', 
+                                fontWeight: 600, 
+                                color: 'var(--foreground)', 
+                                margin: 0,
+                                padding: 0,
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                transition: 'color 0.2s',
+                                textAlign: 'left'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.color = '#16a34a'}
+                              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--foreground)'}
+                              title="Clique para acessar o dashboard deste gabinete"
+                            >
                               {gabinete.nome}
-                            </p>
+                            </button>
                             {gabinete.partido && (
                               <span style={{
                                 display: 'inline-block',
