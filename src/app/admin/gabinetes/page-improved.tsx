@@ -25,10 +25,12 @@ import {
   Edit3,
   Mail,
   Shield,
-  Save
+  Save,
+  BarChart3
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { AIChat } from '@/components/ai-chat'
 import type { Gabinete } from '@/types/database'
 
 // --- CONSTANTES ---
@@ -149,10 +151,22 @@ export default function GabinetesPage() {
   const [membroForm, setMembroForm] = useState<MembroFormData>(INITIAL_MEMBRO_FORM)
   const [submittingMembro, setSubmittingMembro] = useState(false)
 
-  // --- ESTATÍSTICAS ---
+  // --- FUNÇÃO PARA FILTRAR GABINETES REAIS (excluir demonstração e DATA-RO) ---
+  const gabineteReais = useMemo(() => {
+    return gabinetes.filter(g => {
+      const nomeNormalizado = g.nome?.toLowerCase() || ''
+      return !nomeNormalizado.includes('demonstra') && 
+             !nomeNormalizado.includes('dataro') && 
+             !nomeNormalizado.includes('data-ro') &&
+             !nomeNormalizado.includes('data ro') &&
+             !nomeNormalizado.includes('administração geral')
+    })
+  }, [gabinetes])
+
+  // --- ESTATÍSTICAS (apenas gabinetes reais) ---
   const stats = useMemo(() => {
-    const total = gabinetes.length
-    const ativos = gabinetes.filter(g => g.ativo).length
+    const total = gabineteReais.length
+    const ativos = gabineteReais.filter(g => g.ativo).length
     const inativos = total - ativos
     
     // Aplicar filtros para contar resultados
@@ -464,11 +478,11 @@ export default function GabinetesPage() {
 
   // --- HELPERS DE FORMATAÇÃO ---
   const formatCargo = useCallback((cargo?: string) => {
-    if (!cargo) return '-'
+    if (!cargo || cargo === 'nao_informado') return 'Não Informado'
     return cargo
       .replace(/_/g, ' ')
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ')
   }, [])
 
@@ -523,7 +537,7 @@ export default function GabinetesPage() {
                   alt="ProviDATA"
                   width={180}
                   height={50}
-                  style={{ height: '40px', width: 'auto' }}
+                  style={{ height: '40px', width: 'auto', borderRadius: '8px' }}
                   priority
                 />
               </Link>
@@ -543,6 +557,27 @@ export default function GabinetesPage() {
 
             {/* Ações do Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Link
+                href="/admin/indicadores"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 8px rgba(22, 163, 74, 0.25)'
+                }}
+              >
+                <BarChart3 size={18} />
+                <span>Indicadores</span>
+              </Link>
               <ThemeToggle />
               <button
                 onClick={handleLogout}
@@ -1128,15 +1163,15 @@ marginBottom: '20px'
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {(() => {
                 const cargoCount: Record<string, number> = {}
-                gabinetes.forEach(g => {
-                  const cargo = g.parlamentar_cargo || 'Não informado'
+                gabineteReais.forEach(g => {
+                  const cargo = g.parlamentar_cargo || 'nao_informado'
                   cargoCount[cargo] = (cargoCount[cargo] || 0) + 1
                 })
-                const total = gabinetes.length || 1
+                const total = gabineteReais.length || 1
                 return Object.entries(cargoCount).map(([cargo, count]) => (
                   <div key={cargo}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '13px', color: 'var(--foreground-muted)' }}>{cargo}</span>
+                      <span style={{ fontSize: '13px', color: 'var(--foreground-muted)' }}>{formatCargo(cargo)}</span>
                       <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--foreground)' }}>{count}</span>
                     </div>
                     <div style={{ height: '8px', backgroundColor: 'var(--border)', borderRadius: '4px', overflow: 'hidden' }}>
@@ -1167,11 +1202,11 @@ marginBottom: '20px'
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {(() => {
                 const ufCount: Record<string, number> = {}
-                gabinetes.forEach(g => {
+                gabineteReais.forEach(g => {
                   const uf = g.uf || 'N/A'
                   ufCount[uf] = (ufCount[uf] || 0) + 1
                 })
-                const total = gabinetes.length || 1
+                const total = gabineteReais.length || 1
                 const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
                 return Object.entries(ufCount).slice(0, 6).map(([uf, count], idx) => (
                   <div key={uf}>
@@ -1214,13 +1249,13 @@ marginBottom: '20px'
                     fontWeight: 700, 
                     color: stats.total > 0 ? (stats.ativos / stats.total >= 0.8 ? '#22c55e' : stats.ativos / stats.total >= 0.5 ? '#f59e0b' : '#ef4444') : '#6b7280'
                   }}>
-                    {stats.total > 0 ? Math.round((stats.ativos / stats.total) * 100) : 0}%
+                    {gabineteReais.length > 0 ? Math.round((gabineteReais.filter(g => g.ativo).length / gabineteReais.length) * 100) : 0}%
                   </span>
                 </div>
                 <div style={{ height: '10px', backgroundColor: 'var(--border)', borderRadius: '5px', overflow: 'hidden' }}>
                   <div style={{
                     height: '100%',
-                    width: `${stats.total > 0 ? (stats.ativos / stats.total) * 100 : 0}%`,
+                    width: `${gabineteReais.length > 0 ? (gabineteReais.filter(g => g.ativo).length / gabineteReais.length) * 100 : 0}%`,
                     background: 'linear-gradient(90deg, #22c55e, #16a34a)',
                     borderRadius: '5px',
                     transition: 'width 0.5s ease'
@@ -1234,8 +1269,8 @@ marginBottom: '20px'
                   <span style={{ fontSize: '13px', color: 'var(--foreground-muted)' }}>Cobertura de Dados</span>
                   <span style={{ fontSize: '18px', fontWeight: 700, color: '#3b82f6' }}>
                     {(() => {
-                      const completos = gabinetes.filter(g => g.parlamentar_nome && g.parlamentar_cargo && g.municipio).length
-                      return stats.total > 0 ? Math.round((completos / stats.total) * 100) : 0
+                      const completos = gabineteReais.filter(g => g.parlamentar_nome && g.parlamentar_cargo && g.municipio).length
+                      return gabineteReais.length > 0 ? Math.round((completos / gabineteReais.length) * 100) : 0
                     })()}%
                   </span>
                 </div>
@@ -1243,8 +1278,8 @@ marginBottom: '20px'
                   <div style={{
                     height: '100%',
                     width: `${(() => {
-                      const completos = gabinetes.filter(g => g.parlamentar_nome && g.parlamentar_cargo && g.municipio).length
-                      return stats.total > 0 ? (completos / stats.total) * 100 : 0
+                      const completos = gabineteReais.filter(g => g.parlamentar_nome && g.parlamentar_cargo && g.municipio).length
+                      return gabineteReais.length > 0 ? (completos / gabineteReais.length) * 100 : 0
                     })()}%`,
                     background: 'linear-gradient(90deg, #3b82f6, #1d4ed8)',
                     borderRadius: '5px',
@@ -1294,7 +1329,7 @@ marginBottom: '20px'
           alt="DATA-RO"
           width={80}
           height={30}
-          style={{ height: '24px', width: 'auto' }}
+          style={{ height: '24px', width: 'auto', borderRadius: '6px' }}
         />
         <p style={{ fontSize: '12px', color: 'var(--foreground-muted)', margin: 0 }}>
           Desenvolvido por <strong style={{ color: '#16a34a' }}>DATA-RO INTELIGÊNCIA TERRITORIAL</strong> • © 2026
@@ -1907,6 +1942,9 @@ marginBottom: '20px'
           </div>
         </div>
       )}
+
+      {/* Assistente de IA */}
+      <AIChat />
 
       {/* CSS para animação de spin */}
       <style jsx global>{`
