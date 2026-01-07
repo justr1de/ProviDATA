@@ -17,7 +17,15 @@ import {
   MapPin,
   ChevronDown,
   ChevronUp,
-  LogOut
+  LogOut,
+  Users,
+  UserPlus,
+  Trash2,
+  Edit2,
+  Edit3,
+  Mail,
+  Shield,
+  Save
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -41,6 +49,39 @@ const CARGO_OPTIONS = [
 
 // --- TIPOS ---
 type FilterStatus = 'all' | 'ativo' | 'inativo'
+
+interface Membro {
+  id: string
+  email: string
+  full_name: string | null
+  role: string
+  cargo: string | null
+  avatar_url: string | null
+  created_at: string
+}
+
+interface MembroFormData {
+  email: string
+  full_name: string
+  role: string
+  cargo: string
+}
+
+const INITIAL_MEMBRO_FORM: MembroFormData = {
+  email: '',
+  full_name: '',
+  role: 'assessor',
+  cargo: ''
+}
+
+const ROLE_OPTIONS = [
+  { value: 'admin', label: 'Administrador' },
+  { value: 'gestor', label: 'Gestor' },
+  { value: 'assessor', label: 'Assessor' },
+  { value: 'operador', label: 'Operador' },
+  { value: 'colaborador', label: 'Colaborador' },
+  { value: 'visualizador', label: 'Visualizador' }
+] as const
 
 interface FormData {
   nome: string
@@ -97,6 +138,16 @@ export default function GabinetesPage() {
 
   // Estado do Formulário
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA)
+
+  // Estados do Modal de Membros
+  const [showMembrosModal, setShowMembrosModal] = useState(false)
+  const [selectedGabinete, setSelectedGabinete] = useState<Gabinete | null>(null)
+  const [membros, setMembros] = useState<Membro[]>([])
+  const [loadingMembros, setLoadingMembros] = useState(false)
+  const [showAddMembro, setShowAddMembro] = useState(false)
+  const [editingMembro, setEditingMembro] = useState<Membro | null>(null)
+  const [membroForm, setMembroForm] = useState<MembroFormData>(INITIAL_MEMBRO_FORM)
+  const [submittingMembro, setSubmittingMembro] = useState(false)
 
   // --- ESTATÍSTICAS ---
   const stats = useMemo(() => {
@@ -255,6 +306,160 @@ export default function GabinetesPage() {
   const handleCloseModal = useCallback(() => {
     setShowModal(false)
     setFormData(INITIAL_FORM_DATA)
+  }, [])
+
+  // --- FUNÇÕES DE GERENCIAMENTO DE MEMBROS ---
+  const abrirModalMembros = useCallback(async (gabinete: Gabinete) => {
+    setSelectedGabinete(gabinete)
+    setShowMembrosModal(true)
+    setLoadingMembros(true)
+    
+    try {
+      const response = await fetch(`/api/admin/gabinetes/${gabinete.id}/membros`)
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao carregar membros')
+      }
+      
+      setMembros(data.membros || [])
+    } catch (error) {
+      console.error('Erro ao carregar membros:', error)
+      toast.error('Erro ao carregar membros do gabinete')
+      setMembros([])
+    } finally {
+      setLoadingMembros(false)
+    }
+  }, [])
+
+  const fecharModalMembros = useCallback(() => {
+    setShowMembrosModal(false)
+    setSelectedGabinete(null)
+    setMembros([])
+    setShowAddMembro(false)
+    setEditingMembro(null)
+    setMembroForm(INITIAL_MEMBRO_FORM)
+  }, [])
+
+  const handleAddMembro = useCallback(async () => {
+    if (!selectedGabinete || !membroForm.email || !membroForm.full_name) {
+      toast.error('Preencha todos os campos obrigatórios')
+      return
+    }
+    
+    setSubmittingMembro(true)
+    
+    try {
+      const response = await fetch(`/api/admin/gabinetes/${selectedGabinete.id}/membros`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(membroForm)
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao adicionar membro')
+      }
+      
+      toast.success(data.message || 'Membro adicionado com sucesso!')
+      setShowAddMembro(false)
+      setMembroForm(INITIAL_MEMBRO_FORM)
+      
+      // Recarregar membros
+      const membrosResponse = await fetch(`/api/admin/gabinetes/${selectedGabinete.id}/membros`)
+      const membrosData = await membrosResponse.json()
+      setMembros(membrosData.membros || [])
+    } catch (error: unknown) {
+      console.error('Erro ao adicionar membro:', error)
+      toast.error(error instanceof Error ? error.message : 'Erro ao adicionar membro')
+    } finally {
+      setSubmittingMembro(false)
+    }
+  }, [selectedGabinete, membroForm])
+
+  const handleEditMembro = useCallback(async () => {
+    if (!selectedGabinete || !editingMembro) return
+    
+    setSubmittingMembro(true)
+    
+    try {
+      const response = await fetch(`/api/admin/gabinetes/${selectedGabinete.id}/membros`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          memberId: editingMembro.id,
+          ...membroForm
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao atualizar membro')
+      }
+      
+      toast.success('Membro atualizado com sucesso!')
+      setEditingMembro(null)
+      setMembroForm(INITIAL_MEMBRO_FORM)
+      
+      // Recarregar membros
+      const membrosResponse = await fetch(`/api/admin/gabinetes/${selectedGabinete.id}/membros`)
+      const membrosData = await membrosResponse.json()
+      setMembros(membrosData.membros || [])
+    } catch (error: unknown) {
+      console.error('Erro ao atualizar membro:', error)
+      toast.error(error instanceof Error ? error.message : 'Erro ao atualizar membro')
+    } finally {
+      setSubmittingMembro(false)
+    }
+  }, [selectedGabinete, editingMembro, membroForm])
+
+  const handleRemoveMembro = useCallback(async (membro: Membro) => {
+    if (!selectedGabinete) return
+    
+    if (!confirm(`Tem certeza que deseja remover ${membro.full_name || membro.email} do gabinete?`)) {
+      return
+    }
+    
+    try {
+      const response = await fetch(
+        `/api/admin/gabinetes/${selectedGabinete.id}/membros?memberId=${membro.id}`,
+        { method: 'DELETE' }
+      )
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao remover membro')
+      }
+      
+      toast.success('Membro removido do gabinete com sucesso!')
+      setMembros(prev => prev.filter(m => m.id !== membro.id))
+    } catch (error: unknown) {
+      console.error('Erro ao remover membro:', error)
+      toast.error(error instanceof Error ? error.message : 'Erro ao remover membro')
+    }
+  }, [selectedGabinete])
+
+  const iniciarEdicaoMembro = useCallback((membro: Membro) => {
+    setEditingMembro(membro)
+    setMembroForm({
+      email: membro.email,
+      full_name: membro.full_name || '',
+      role: membro.role,
+      cargo: membro.cargo || ''
+    })
+  }, [])
+
+  const cancelarEdicaoMembro = useCallback(() => {
+    setEditingMembro(null)
+    setMembroForm(INITIAL_MEMBRO_FORM)
+  }, [])
+
+  const getRoleLabel = useCallback((role: string) => {
+    const option = ROLE_OPTIONS.find(r => r.value === role)
+    return option ? option.label : role
   }, [])
 
   // --- HELPERS DE FORMATAÇÃO ---
@@ -779,6 +984,7 @@ marginBottom: '20px'
                     <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--foreground-muted)', borderBottom: '1px solid var(--border)' }}>LOCALIZAÇÃO</th>
                     <th style={{ padding: '14px 16px', textAlign: 'left', fontSize: '13px', fontWeight: 600, color: 'var(--foreground-muted)', borderBottom: '1px solid var(--border)' }}>CADASTRO</th>
                     <th style={{ padding: '14px 16px', textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--foreground-muted)', borderBottom: '1px solid var(--border)' }}>STATUS</th>
+                    <th style={{ padding: '14px 16px', textAlign: 'center', fontSize: '13px', fontWeight: 600, color: 'var(--foreground-muted)', borderBottom: '1px solid var(--border)' }}>AÇÕES</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -868,6 +1074,29 @@ marginBottom: '20px'
                               Inativo
                             </>
                           )}
+                        </button>
+                      </td>
+                      <td style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>
+                        <button
+                          onClick={() => abrirModalMembros(gabinete)}
+                          title="Gerenciar Membros"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 14px',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            color: '#3b82f6',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <Users style={{ width: '16px', height: '16px' }} />
+                          Membros
                         </button>
                       </td>
                     </tr>
@@ -1316,6 +1545,365 @@ marginBottom: '20px'
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL DE GERENCIAMENTO DE MEMBROS --- */}
+      {showMembrosModal && selectedGabinete && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
+          padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: 'var(--card)',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '800px',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }}>
+            {/* Header do Modal */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '20px 24px',
+              borderBottom: '1px solid var(--border)'
+            }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--foreground)', margin: 0 }}>
+                  Membros do Gabinete
+                </h2>
+                <p style={{ fontSize: '14px', color: 'var(--foreground-muted)', margin: '4px 0 0 0' }}>
+                  {selectedGabinete.nome}
+                </p>
+              </div>
+              <button
+                onClick={fecharModalMembros}
+                style={{
+                  padding: '8px',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  color: 'var(--foreground-muted)'
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Conteúdo */}
+            <div style={{ padding: '24px' }}>
+              {/* Botão Adicionar Membro */}
+              {!showAddMembro && !editingMembro && (
+                <button
+                  onClick={() => setShowAddMembro(true)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 16px',
+                    background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    marginBottom: '20px'
+                  }}
+                >
+                  <UserPlus size={18} />
+                  Adicionar Membro
+                </button>
+              )}
+
+              {/* Formulário de Adicionar/Editar Membro */}
+              {(showAddMembro || editingMembro) && (
+                <div style={{
+                  backgroundColor: 'var(--background)',
+                  borderRadius: '12px',
+                  padding: '20px',
+                  marginBottom: '20px',
+                  border: '1px solid var(--border)'
+                }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--foreground)', margin: '0 0 16px 0' }}>
+                    {editingMembro ? 'Editar Membro' : 'Adicionar Novo Membro'}
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        Email *
+                      </label>
+                      <input
+                        type="email"
+                        value={membroForm.email}
+                        onChange={(e) => setMembroForm({ ...membroForm, email: e.target.value })}
+                        disabled={!!editingMembro}
+                        placeholder="email@exemplo.com"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          backgroundColor: editingMembro ? 'var(--card)' : 'var(--background)',
+                          color: 'var(--foreground)',
+                          fontSize: '14px',
+                          opacity: editingMembro ? 0.7 : 1
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        Nome Completo *
+                      </label>
+                      <input
+                        type="text"
+                        value={membroForm.full_name}
+                        onChange={(e) => setMembroForm({ ...membroForm, full_name: e.target.value })}
+                        placeholder="Nome do membro"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          backgroundColor: 'var(--background)',
+                          color: 'var(--foreground)',
+                          fontSize: '14px'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        Função no Sistema
+                      </label>
+                      <select
+                        value={membroForm.role}
+                        onChange={(e) => setMembroForm({ ...membroForm, role: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          backgroundColor: 'var(--background)',
+                          color: 'var(--foreground)',
+                          fontSize: '14px'
+                        }}
+                      >
+                        {ROLE_OPTIONS.map(option => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                        Cargo/Função
+                      </label>
+                      <input
+                        type="text"
+                        value={membroForm.cargo}
+                        onChange={(e) => setMembroForm({ ...membroForm, cargo: e.target.value })}
+                        placeholder="Ex: Chefe de Gabinete"
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          backgroundColor: 'var(--background)',
+                          color: 'var(--foreground)',
+                          fontSize: '14px'
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '16px', justifyContent: 'flex-end' }}>
+                    <button
+                      type="button"
+                      onClick={editingMembro ? cancelarEdicaoMembro : () => { setShowAddMembro(false); setMembroForm(INITIAL_MEMBRO_FORM); }}
+                      style={{
+                        padding: '10px 16px',
+                        backgroundColor: 'var(--background)',
+                        color: 'var(--foreground)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={editingMembro ? handleEditMembro : handleAddMembro}
+                      disabled={submittingMembro}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 16px',
+                        background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        cursor: submittingMembro ? 'not-allowed' : 'pointer',
+                        opacity: submittingMembro ? 0.7 : 1
+                      }}
+                    >
+                      {submittingMembro ? (
+                        <>
+                          <Loader2 style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }} />
+                          {editingMembro ? 'Salvando...' : 'Adicionando...'}
+                        </>
+                      ) : (
+                        <>
+                          {editingMembro ? <Save size={16} /> : <UserPlus size={16} />}
+                          {editingMembro ? 'Salvar Alterações' : 'Adicionar Membro'}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Lista de Membros */}
+              {loadingMembros ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '40px',
+                  color: 'var(--foreground-muted)'
+                }}>
+                  <Loader2 style={{ width: '24px', height: '24px', animation: 'spin 1s linear infinite' }} />
+                  <span style={{ marginLeft: '12px' }}>Carregando membros...</span>
+                </div>
+              ) : membros.length === 0 ? (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '40px',
+                  color: 'var(--foreground-muted)',
+                  backgroundColor: 'var(--background)',
+                  borderRadius: '12px',
+                  border: '1px dashed var(--border)'
+                }}>
+                  <Users style={{ width: '40px', height: '40px', marginBottom: '12px', opacity: 0.5 }} />
+                  <p style={{ fontSize: '15px', fontWeight: 500, margin: 0 }}>Nenhum membro cadastrado</p>
+                  <p style={{ fontSize: '13px', marginTop: '4px' }}>Clique em "Adicionar Membro" para começar</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {membros.map((membro) => (
+                    <div
+                      key={membro.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '16px',
+                        backgroundColor: 'var(--background)',
+                        borderRadius: '12px',
+                        border: '1px solid var(--border)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        <div style={{
+                          width: '44px',
+                          height: '44px',
+                          borderRadius: '50%',
+                          backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '18px',
+                          fontWeight: 600,
+                          color: '#16a34a'
+                        }}>
+                          {membro.full_name ? membro.full_name.charAt(0).toUpperCase() : membro.email.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p style={{ fontSize: '15px', fontWeight: 600, color: 'var(--foreground)', margin: 0 }}>
+                            {membro.full_name || 'Sem nome'}
+                          </p>
+                          <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', margin: '2px 0 0 0' }}>
+                            {membro.email}
+                          </p>
+                          <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                            <span style={{
+                              padding: '2px 8px',
+                              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                              color: '#3b82f6',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              borderRadius: '4px'
+                            }}>
+                              {getRoleLabel(membro.role)}
+                            </span>
+                            {membro.cargo && (
+                              <span style={{
+                                padding: '2px 8px',
+                                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                                color: '#8b5cf6',
+                                fontSize: '11px',
+                                fontWeight: 600,
+                                borderRadius: '4px'
+                              }}>
+                                {membro.cargo}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={() => iniciarEdicaoMembro(membro)}
+                          title="Editar membro"
+                          style={{
+                            padding: '8px',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            color: '#3b82f6',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleRemoveMembro(membro)}
+                          title="Remover membro"
+                          style={{
+                            padding: '8px',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            color: '#ef4444',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
