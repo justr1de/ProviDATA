@@ -615,6 +615,7 @@ export default function MapaCalorPage() {
             <MapaLeaflet 
               providencias={providenciasFiltradas}
               uf={tenant?.uf || 'RO'}
+              municipio={tenant?.municipio}
             />
           )}
         </div>

@@ -27,6 +27,21 @@ interface Providencia {
 interface MapaLeafletProps {
   providencias: Providencia[]
   uf?: string
+  municipio?: string
+}
+
+// Centros dos municípios brasileiros (adicionar conforme necessário)
+const municipiosCentros: Record<string, { lat: number; lng: number; zoom: number }> = {
+  // Bahia
+  'livramento de nossa senhora': { lat: -13.6432, lng: -41.8422, zoom: 13 },
+  'salvador': { lat: -12.9714, lng: -38.5014, zoom: 12 },
+  'feira de santana': { lat: -12.2667, lng: -38.9667, zoom: 12 },
+  // Rondônia
+  'porto velho': { lat: -8.7612, lng: -63.9004, zoom: 12 },
+  'ji-paraná': { lat: -10.8853, lng: -61.9517, zoom: 12 },
+  'ariquemes': { lat: -9.9133, lng: -63.0408, zoom: 12 },
+  'vilhena': { lat: -12.7406, lng: -60.1458, zoom: 12 },
+  // Adicionar mais municípios conforme necessário
 }
 
 // Centros dos estados brasileiros
@@ -78,7 +93,7 @@ const statusLabels: Record<string, string> = {
   arquivada: 'Arquivada'
 }
 
-export default function MapaLeaflet({ providencias, uf = 'RO' }: MapaLeafletProps) {
+export default function MapaLeaflet({ providencias, uf = 'RO', municipio }: MapaLeafletProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
   const markersRef = useRef<L.CircleMarker[]>([])
@@ -88,11 +103,21 @@ export default function MapaLeaflet({ providencias, uf = 'RO' }: MapaLeafletProp
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return
 
-    // Determinar centro do mapa
+    // Determinar centro do mapa - prioridade: município > estado
     let center = estadosCentros[uf] || estadosCentros['RO']
+    let usarMunicipio = false
     
-    // Se tiver providências, centralizar nelas
-    if (providencias.length > 0) {
+    // Se tiver município configurado, usar como centro prioritário
+    if (municipio) {
+      const municipioNormalizado = municipio.toLowerCase().trim()
+      if (municipiosCentros[municipioNormalizado]) {
+        center = municipiosCentros[municipioNormalizado]
+        usarMunicipio = true
+      }
+    }
+    
+    // Se não tiver município configurado e tiver providências, centralizar nelas
+    if (!usarMunicipio && providencias.length > 0) {
       const lats = providencias.map(p => p.latitude)
       const lngs = providencias.map(p => p.longitude)
       const avgLat = lats.reduce((a, b) => a + b, 0) / lats.length
@@ -177,11 +202,8 @@ export default function MapaLeaflet({ providencias, uf = 'RO' }: MapaLeafletProp
       markersRef.current.push(marker)
     })
 
-    // Ajustar visualização para mostrar todos os marcadores
-    if (providencias.length > 0) {
-      const bounds = L.latLngBounds(providencias.map(p => [p.latitude, p.longitude]))
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 })
-    }
+    // Não ajustar bounds automaticamente - manter o centro do município
+    // O usuário pode navegar manualmente pelo mapa
 
   }, [providencias, mapReady])
 
