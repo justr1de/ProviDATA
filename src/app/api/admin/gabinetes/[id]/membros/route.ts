@@ -59,7 +59,7 @@ export async function POST(
   try {
     const { id: gabineteId } = await params
     const body = await request.json()
-    const { email, full_name, role, cargo } = body
+    const { email, full_name, role, cargo, password } = body
     
     if (!email || !full_name || !role) {
       return NextResponse.json(
@@ -107,8 +107,10 @@ export async function POST(
     }
     
     // Criar novo usuário no Auth
+    const userPassword = password || `Temp@${Date.now()}`
     const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
       email,
+      password: userPassword,
       email_confirm: true,
       user_metadata: {
         full_name,

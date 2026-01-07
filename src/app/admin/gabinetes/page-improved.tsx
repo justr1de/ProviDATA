@@ -68,13 +68,15 @@ interface MembroFormData {
   full_name: string
   role: string
   cargo: string
+  password?: string
 }
 
 const INITIAL_MEMBRO_FORM: MembroFormData = {
   email: '',
   full_name: '',
   role: 'assessor',
-  cargo: ''
+  cargo: '',
+  password: ''
 }
 
 const ROLE_OPTIONS = [
@@ -1881,6 +1883,28 @@ marginBottom: '20px'
                         }}
                       />
                     </div>
+                    {!editingMembro && (
+                      <div style={{ gridColumn: '1 / -1' }}>
+                        <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: 'var(--foreground)', marginBottom: '6px' }}>
+                          Senha (opcional - se não informada, será gerada automaticamente)
+                        </label>
+                        <input
+                          type="password"
+                          value={membroForm.password || ''}
+                          onChange={(e) => setMembroForm({ ...membroForm, password: e.target.value })}
+                          placeholder="Deixe em branco para gerar senha temporária"
+                          style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            border: '1px solid var(--border)',
+                            borderRadius: '8px',
+                            backgroundColor: 'var(--background)',
+                            color: 'var(--foreground)',
+                            fontSize: '14px'
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: 'flex', gap: '12px', marginTop: '16px', justifyContent: 'flex-end' }}>
                     <button
