@@ -577,7 +577,8 @@ input, textarea, select {
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   border: 1px solid transparent;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
 }
 
 .dark .stat-card {
@@ -587,13 +588,14 @@ input, textarea, select {
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.25);
+  border-color: rgba(34, 197, 94, 0.5) !important;
 }
 
 .dark .stat-card:hover {
   border-color: #22c55e !important;
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.15);
+  box-shadow: 0 8px 30px rgba(34, 197, 94, 0.35), 0 0 20px rgba(34, 197, 94, 0.2);
 }
 
 /* Card de Taxa de Conclusão */

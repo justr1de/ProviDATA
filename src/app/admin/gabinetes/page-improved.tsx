@@ -314,7 +314,7 @@ export default function GabinetesPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <Link href="/admin/gabinetes" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Image
-                  src="/providata-logo-final.png"
+                  src="/providata-logo-rounded.png"
                   alt="ProviDATA"
                   width={180}
                   height={50}
