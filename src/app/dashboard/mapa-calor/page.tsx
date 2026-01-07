@@ -594,7 +594,7 @@ export default function MapaCalorPage() {
       <div style={cardStyle}>
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--foreground)', margin: 0 }}>
-            Mapa de Rondônia - {providenciasFiltradas.length} providências no mapa
+            Mapa de {tenant?.municipio ? `${tenant.municipio}/${tenant.uf}` : (tenant?.uf || 'Rondônia')} - {providenciasFiltradas.length} providências no mapa
           </h2>
         </div>
         <div style={{ padding: '24px' }}>
