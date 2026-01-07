@@ -877,30 +877,198 @@ marginBottom: '20px'
             </div>
           )}
         </div>
+
+        {/* --- SEÇÃO DE ANÁLISES E GRÁFICOS --- */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '20px',
+          marginTop: '24px'
+        }} className="analytics-grid">
+          
+          {/* Gráfico de Distribuição por Cargo */}
+          <div className="stat-card" style={{
+            backgroundColor: 'var(--card)',
+            borderRadius: '16px',
+            padding: '20px',
+            border: '1px solid var(--border)'
+          }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--foreground)', marginBottom: '16px' }}>
+              📊 Distribuição por Cargo
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {(() => {
+                const cargoCount: Record<string, number> = {}
+                gabinetes.forEach(g => {
+                  const cargo = g.parlamentar_cargo || 'Não informado'
+                  cargoCount[cargo] = (cargoCount[cargo] || 0) + 1
+                })
+                const total = gabinetes.length || 1
+                return Object.entries(cargoCount).map(([cargo, count]) => (
+                  <div key={cargo}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '13px', color: 'var(--foreground-muted)' }}>{cargo}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--foreground)' }}>{count}</span>
+                    </div>
+                    <div style={{ height: '8px', backgroundColor: 'var(--border)', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${(count / total) * 100}%`,
+                        backgroundColor: '#16a34a',
+                        borderRadius: '4px',
+                        transition: 'width 0.5s ease'
+                      }} />
+                    </div>
+                  </div>
+                ))
+              })()}
+            </div>
+          </div>
+
+          {/* Gráfico de Distribuição por UF */}
+          <div className="stat-card" style={{
+            backgroundColor: 'var(--card)',
+            borderRadius: '16px',
+            padding: '20px',
+            border: '1px solid var(--border)'
+          }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--foreground)', marginBottom: '16px' }}>
+              🗺️ Distribuição por UF
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {(() => {
+                const ufCount: Record<string, number> = {}
+                gabinetes.forEach(g => {
+                  const uf = g.uf || 'N/A'
+                  ufCount[uf] = (ufCount[uf] || 0) + 1
+                })
+                const total = gabinetes.length || 1
+                const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']
+                return Object.entries(ufCount).slice(0, 6).map(([uf, count], idx) => (
+                  <div key={uf}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '13px', color: 'var(--foreground-muted)' }}>{uf}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--foreground)' }}>{count} ({Math.round((count / total) * 100)}%)</span>
+                    </div>
+                    <div style={{ height: '8px', backgroundColor: 'var(--border)', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${(count / total) * 100}%`,
+                        backgroundColor: colors[idx % colors.length],
+                        borderRadius: '4px',
+                        transition: 'width 0.5s ease'
+                      }} />
+                    </div>
+                  </div>
+                ))
+              })()}
+            </div>
+          </div>
+
+          {/* Indicadores de Saúde */}
+          <div className="stat-card" style={{
+            backgroundColor: 'var(--card)',
+            borderRadius: '16px',
+            padding: '20px',
+            border: '1px solid var(--border)'
+          }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--foreground)', marginBottom: '16px' }}>
+              💡 Indicadores de Saúde
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Taxa de Ativação */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--foreground-muted)' }}>Taxa de Ativação</span>
+                  <span style={{ 
+                    fontSize: '18px', 
+                    fontWeight: 700, 
+                    color: stats.total > 0 ? (stats.ativos / stats.total >= 0.8 ? '#22c55e' : stats.ativos / stats.total >= 0.5 ? '#f59e0b' : '#ef4444') : '#6b7280'
+                  }}>
+                    {stats.total > 0 ? Math.round((stats.ativos / stats.total) * 100) : 0}%
+                  </span>
+                </div>
+                <div style={{ height: '10px', backgroundColor: 'var(--border)', borderRadius: '5px', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${stats.total > 0 ? (stats.ativos / stats.total) * 100 : 0}%`,
+                    background: 'linear-gradient(90deg, #22c55e, #16a34a)',
+                    borderRadius: '5px',
+                    transition: 'width 0.5s ease'
+                  }} />
+                </div>
+              </div>
+
+              {/* Cobertura de Dados */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--foreground-muted)' }}>Cobertura de Dados</span>
+                  <span style={{ fontSize: '18px', fontWeight: 700, color: '#3b82f6' }}>
+                    {(() => {
+                      const completos = gabinetes.filter(g => g.parlamentar_nome && g.parlamentar_cargo && g.municipio).length
+                      return stats.total > 0 ? Math.round((completos / stats.total) * 100) : 0
+                    })()}%
+                  </span>
+                </div>
+                <div style={{ height: '10px', backgroundColor: 'var(--border)', borderRadius: '5px', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${(() => {
+                      const completos = gabinetes.filter(g => g.parlamentar_nome && g.parlamentar_cargo && g.municipio).length
+                      return stats.total > 0 ? (completos / stats.total) * 100 : 0
+                    })()}%`,
+                    background: 'linear-gradient(90deg, #3b82f6, #1d4ed8)',
+                    borderRadius: '5px',
+                    transition: 'width 0.5s ease'
+                  }} />
+                </div>
+              </div>
+
+              {/* Score Geral */}
+              <div style={{
+                backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                borderRadius: '12px',
+                padding: '16px',
+                textAlign: 'center',
+                marginTop: '8px'
+              }}>
+                <p style={{ fontSize: '12px', color: 'var(--foreground-muted)', marginBottom: '4px' }}>Score Geral do Sistema</p>
+                <p style={{ fontSize: '32px', fontWeight: 700, color: '#16a34a', margin: 0 }}>
+                  {(() => {
+                    const taxaAtivacao = stats.total > 0 ? (stats.ativos / stats.total) : 0
+                    const completos = gabinetes.filter(g => g.parlamentar_nome && g.parlamentar_cargo && g.municipio).length
+                    const cobertura = stats.total > 0 ? (completos / stats.total) : 0
+                    return Math.round(((taxaAtivacao + cobertura) / 2) * 100)
+                  })()}
+                </p>
+                <p style={{ fontSize: '11px', color: 'var(--foreground-muted)', marginTop: '4px' }}>de 100 pontos</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
 
-      {/* --- RODAPÉ --- */}
+      {/* --- RODAPÉ FIXO --- */}
       <footer style={{
         backgroundColor: 'var(--card)',
         borderTop: '1px solid var(--border)',
-        padding: '24px',
+        padding: '12px 24px',
         textAlign: 'center',
-        marginTop: 'auto'
+        marginTop: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '16px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '8px' }}>
-          <Image
-            src="/dataro-logo-final.png"
-            alt="DATA-RO"
-            width={120}
-            height={40}
-            style={{ height: '32px', width: 'auto' }}
-          />
-        </div>
-        <p style={{ fontSize: '14px', color: 'var(--foreground-muted)', margin: 0 }}>
-          Desenvolvido por <strong style={{ color: '#16a34a' }}>DATA-RO INTELIGÊNCIA TERRITORIAL</strong>
-        </p>
-        <p style={{ fontSize: '12px', color: 'var(--foreground-muted)', marginTop: '4px' }}>
-          © 2026 Todos os direitos reservados.
+        <Image
+          src="/dataro-logo-final.png"
+          alt="DATA-RO"
+          width={80}
+          height={30}
+          style={{ height: '24px', width: 'auto' }}
+        />
+        <p style={{ fontSize: '12px', color: 'var(--foreground-muted)', margin: 0 }}>
+          Desenvolvido por <strong style={{ color: '#16a34a' }}>DATA-RO INTELIGÊNCIA TERRITORIAL</strong> • © 2026
         </p>
       </footer>
 
