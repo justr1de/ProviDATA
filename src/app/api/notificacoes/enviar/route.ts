@@ -16,7 +16,7 @@ async function enviarEmail(destinatario: string, assunto: string, mensagem: stri
   console.log('Mensagem:', mensagem)
   
   // Simulação de sucesso
-  return { success: true, messageId: `msg_${Date.now()}` }
+  return { success: true, messageId: `msg_${Date.now()}`, error: '' }
 }
 
 // POST - Enviar notificação para cidadão

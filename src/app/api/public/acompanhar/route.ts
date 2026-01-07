@@ -97,11 +97,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       providencia: {
         ...providencia,
-        cidadao_nome: providencia.cidadao?.nome,
-        orgao_nome: providencia.orgao?.nome,
-        categoria_nome: providencia.categoria?.nome,
-        gabinete_nome: providencia.gabinete?.nome,
-        parlamentar: providencia.gabinete?.parlamentar
+        cidadao_nome: (providencia.cidadao as any)?.[0]?.nome || (providencia.cidadao as any)?.nome,
+        orgao_nome: (providencia.orgao as any)?.[0]?.nome || (providencia.orgao as any)?.nome,
+        categoria_nome: (providencia.categoria as any)?.[0]?.nome || (providencia.categoria as any)?.nome,
+        gabinete_nome: (providencia.gabinete as any)?.[0]?.nome || (providencia.gabinete as any)?.nome,
+        parlamentar: (providencia.gabinete as any)?.[0]?.parlamentar || (providencia.gabinete as any)?.parlamentar
       },
       andamentos: andamentos || [],
       token_info: {
