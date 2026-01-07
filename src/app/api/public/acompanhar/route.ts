@@ -1,11 +1,20 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
-// Cliente Supabase com service role para acesso público
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Força a rota a ser dinâmica (não pré-renderizada)
+export const dynamic = 'force-dynamic'
+
+// Função para criar o cliente Supabase apenas em runtime
+function getSupabaseAdmin(): SupabaseClient {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Variáveis de ambiente do Supabase não configuradas')
+  }
+  
+  return createClient(supabaseUrl, supabaseKey)
+}
 
 // GET - Buscar providência por token (acesso público)
 export async function GET(request: NextRequest) {
@@ -19,6 +28,9 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       )
     }
+    
+    // Obter cliente Supabase
+    const supabaseAdmin = getSupabaseAdmin()
     
     // Buscar e validar token
     const { data: tokenData, error: tokenError } = await supabaseAdmin
