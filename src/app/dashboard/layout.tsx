@@ -369,6 +369,87 @@ export default function DashboardLayout({
               return cargo.charAt(0).toUpperCase() + cargo.slice(1)
             })()}
           </p>
+          
+          {/* Seletor de Gabinetes - Apenas para Super Admin */}
+          {isSuperAdmin && allGabinetes.length > 0 && (
+            <div style={{ marginTop: '12px' }}>
+              <button
+                onClick={() => setShowGabineteSelector(!showGabineteSelector)}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  backgroundColor: 'rgba(22, 163, 74, 0.15)',
+                  border: '1px solid rgba(22, 163, 74, 0.3)',
+                  borderRadius: '8px',
+                  color: '#22c55e',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '8px',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <span>Trocar Gabinete</span>
+                {showGabineteSelector ? (
+                  <ChevronUp style={{ width: '16px', height: '16px' }} />
+                ) : (
+                  <ChevronDown style={{ width: '16px', height: '16px' }} />
+                )}
+              </button>
+              
+              {showGabineteSelector && (
+                <div
+                  style={{
+                    marginTop: '8px',
+                    backgroundColor: 'var(--background-secondary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    maxHeight: '200px',
+                    overflowY: 'auto'
+                  }}
+                >
+                  {allGabinetes.map((gab) => (
+                    <button
+                      key={gab.id}
+                      onClick={() => handleSwitchGabinete(gab.id)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        backgroundColor: gabinete?.id === gab.id ? 'rgba(22, 163, 74, 0.2)' : 'transparent',
+                        border: 'none',
+                        borderBottom: '1px solid var(--border)',
+                        color: gabinete?.id === gab.id ? '#22c55e' : 'var(--foreground)',
+                        fontSize: '11px',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (gabinete?.id !== gab.id) {
+                          e.currentTarget.style.backgroundColor = 'rgba(22, 163, 74, 0.1)'
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (gabinete?.id !== gab.id) {
+                          e.currentTarget.style.backgroundColor = 'transparent'
+                        }
+                      }}
+                    >
+                      <div style={{ fontWeight: '500', marginBottom: '2px' }}>
+                        {gab.parlamentar_nome || gab.nome}
+                      </div>
+                      <div style={{ fontSize: '10px', color: 'var(--foreground-muted)' }}>
+                        {gab.municipio}/{gab.uf}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Navigation - Botões com ícones e efeito de brilho */}
