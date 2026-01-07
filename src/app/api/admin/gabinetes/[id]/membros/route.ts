@@ -7,7 +7,11 @@ function getSupabaseAdmin() {
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   
   if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error('Variáveis de ambiente do Supabase não configuradas')
+    console.error('Variaveis de ambiente nao configuradas:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseServiceKey
+    })
+    throw new Error('Variaveis de ambiente do Supabase nao configuradas')
   }
   
   return createClient(supabaseUrl, supabaseServiceKey, {
@@ -27,25 +31,38 @@ export async function GET(
     const { id: gabineteId } = await params
     const supabase = getSupabaseAdmin()
     
+    // Buscar na tabela users (tabela principal do sistema)
     const { data: membros, error } = await supabase
-      .from('profiles')
-      .select('id, email, full_name, role, cargo, avatar_url, created_at')
+      .from('users')
+      .select('id, email, nome, role, cargo, avatar_url, ativo, created_at')
       .eq('gabinete_id', gabineteId)
       .order('created_at', { ascending: false })
     
     if (error) {
       console.error('Erro ao buscar membros:', error)
       return NextResponse.json(
-        { error: 'Erro ao buscar membros do gabinete' },
+        { error: 'Erro ao buscar membros do gabinete', details: error.message },
         { status: 500 }
       )
     }
     
-    return NextResponse.json({ membros })
+    // Mapear para o formato esperado pelo frontend
+    const membrosFormatados = (membros || []).map(m => ({
+      id: m.id,
+      email: m.email,
+      full_name: m.nome,
+      role: m.role,
+      cargo: m.cargo,
+      avatar_url: m.avatar_url,
+      ativo: m.ativo,
+      created_at: m.created_at
+    }))
+    
+    return NextResponse.json({ membros: membrosFormatados })
   } catch (error) {
     console.error('Erro na API de membros:', error)
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro interno do servidor', details: String(error) },
       { status: 500 }
     )
   }
@@ -63,29 +80,29 @@ export async function POST(
     
     if (!email || !full_name || !role) {
       return NextResponse.json(
-        { error: 'Email, nome completo e papel são obrigatórios' },
+        { error: 'Email, nome completo e papel sao obrigatorios' },
         { status: 400 }
       )
     }
     
     const supabase = getSupabaseAdmin()
     
-    // Verificar se o email já existe
+    // Verificar se o email ja existe na tabela users
     const { data: existingUser } = await supabase
-      .from('profiles')
+      .from('users')
       .select('id, gabinete_id')
       .eq('email', email)
       .single()
     
     if (existingUser) {
-      // Se o usuário já existe, atualizar o gabinete_id
+      // Se o usuario ja existe, atualizar o gabinete_id
       const { data: updatedUser, error: updateError } = await supabase
-        .from('profiles')
+        .from('users')
         .update({ 
           gabinete_id: gabineteId,
           role,
           cargo,
-          full_name,
+          nome: full_name,
           updated_at: new Date().toISOString()
         })
         .eq('id', existingUser.id)
@@ -95,18 +112,24 @@ export async function POST(
       if (updateError) {
         console.error('Erro ao atualizar membro:', updateError)
         return NextResponse.json(
-          { error: 'Erro ao atualizar membro' },
+          { error: 'Erro ao atualizar membro', details: updateError.message },
           { status: 500 }
         )
       }
       
       return NextResponse.json({ 
-        membro: updatedUser,
+        membro: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          full_name: updatedUser.nome,
+          role: updatedUser.role,
+          cargo: updatedUser.cargo
+        },
         message: 'Membro atualizado e vinculado ao gabinete'
       })
     }
     
-    // Criar novo usuário no Auth
+    // Criar novo usuario no Auth
     const userPassword = password || `Temp@${Date.now()}`
     const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
       email,
@@ -120,49 +143,55 @@ export async function POST(
     })
     
     if (authError) {
-      console.error('Erro ao criar usuário no Auth:', authError)
+      console.error('Erro ao criar usuario no Auth:', authError)
       return NextResponse.json(
-        { error: `Erro ao criar usuário: ${authError.message}` },
+        { error: `Erro ao criar usuario: ${authError.message}` },
         { status: 500 }
       )
     }
     
-    // Criar perfil do usuário
-    const { data: newProfile, error: profileError } = await supabase
-      .from('profiles')
+    // Criar registro na tabela users
+    const { data: newUser, error: userError } = await supabase
+      .from('users')
       .insert({
         id: authUser.user.id,
         email,
-        full_name,
+        nome: full_name,
         role,
         cargo,
         gabinete_id: gabineteId,
-        onboarding_completed: false,
+        ativo: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
       .select()
       .single()
     
-    if (profileError) {
-      console.error('Erro ao criar perfil:', profileError)
-      // Tentar deletar o usuário do Auth se o perfil falhar
+    if (userError) {
+      console.error('Erro ao criar usuario na tabela users:', userError)
+      // Tentar deletar o usuario do Auth se falhar
       await supabase.auth.admin.deleteUser(authUser.user.id)
       return NextResponse.json(
-        { error: 'Erro ao criar perfil do membro' },
+        { error: 'Erro ao criar registro do membro', details: userError.message },
         { status: 500 }
       )
     }
     
     return NextResponse.json({ 
-      membro: newProfile,
+      membro: {
+        id: newUser.id,
+        email: newUser.email,
+        full_name: newUser.nome,
+        role: newUser.role,
+        cargo: newUser.cargo
+      },
       message: 'Membro criado com sucesso'
     }, { status: 201 })
     
   } catch (error) {
     console.error('Erro na API de membros:', error)
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro interno do servidor', details: String(error) },
       { status: 500 }
     )
   }
@@ -180,7 +209,7 @@ export async function PUT(
     
     if (!memberId) {
       return NextResponse.json(
-        { error: 'ID do membro é obrigatório' },
+        { error: 'ID do membro e obrigatorio' },
         { status: 400 }
       )
     }
@@ -188,9 +217,9 @@ export async function PUT(
     const supabase = getSupabaseAdmin()
     
     const { data: updatedMembro, error } = await supabase
-      .from('profiles')
+      .from('users')
       .update({ 
-        full_name,
+        nome: full_name,
         role,
         cargo,
         updated_at: new Date().toISOString()
@@ -203,26 +232,32 @@ export async function PUT(
     if (error) {
       console.error('Erro ao atualizar membro:', error)
       return NextResponse.json(
-        { error: 'Erro ao atualizar membro' },
+        { error: 'Erro ao atualizar membro', details: error.message },
         { status: 500 }
       )
     }
     
     return NextResponse.json({ 
-      membro: updatedMembro,
+      membro: {
+        id: updatedMembro.id,
+        email: updatedMembro.email,
+        full_name: updatedMembro.nome,
+        role: updatedMembro.role,
+        cargo: updatedMembro.cargo
+      },
       message: 'Membro atualizado com sucesso'
     })
     
   } catch (error) {
     console.error('Erro na API de membros:', error)
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro interno do servidor', details: String(error) },
       { status: 500 }
     )
   }
 }
 
-// DELETE - Remover membro do gabinete (desvincular, não deletar)
+// DELETE - Remover membro do gabinete (desvincular, nao deletar)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -234,16 +269,16 @@ export async function DELETE(
     
     if (!memberId) {
       return NextResponse.json(
-        { error: 'ID do membro é obrigatório' },
+        { error: 'ID do membro e obrigatorio' },
         { status: 400 }
       )
     }
     
     const supabase = getSupabaseAdmin()
     
-    // Desvincular o membro do gabinete (não deletar o usuário)
+    // Desvincular o membro do gabinete (nao deletar o usuario)
     const { error } = await supabase
-      .from('profiles')
+      .from('users')
       .update({ 
         gabinete_id: null,
         updated_at: new Date().toISOString()
@@ -254,7 +289,7 @@ export async function DELETE(
     if (error) {
       console.error('Erro ao remover membro:', error)
       return NextResponse.json(
-        { error: 'Erro ao remover membro do gabinete' },
+        { error: 'Erro ao remover membro do gabinete', details: error.message },
         { status: 500 }
       )
     }
@@ -266,7 +301,7 @@ export async function DELETE(
   } catch (error) {
     console.error('Erro na API de membros:', error)
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Erro interno do servidor', details: String(error) },
       { status: 500 }
     )
   }
