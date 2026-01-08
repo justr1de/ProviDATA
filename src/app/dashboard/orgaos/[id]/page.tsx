@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
+import { isSuperAdmin } from '@/lib/auth-utils'
 import { ArrowLeft, Save, Building2 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -38,7 +39,7 @@ export default function EditarOrgaoPage() {
   const router = useRouter()
   const params = useParams()
   const supabase = createClient()
-  const { gabinete: tenant } = useAuthStore()
+  const { user, gabinete: tenant } = useAuthStore()
   const orgaoId = params.id as string
 
   useEffect(() => {
@@ -46,12 +47,17 @@ export default function EditarOrgaoPage() {
       if (!tenant || !orgaoId) return
 
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('orgaos')
           .select('*')
           .eq('id', orgaoId)
-          .eq('gabinete_id', tenant.id)
-          .single()
+        
+        // Filtrar por gabinete apenas se não for super admin
+        if (!isSuperAdmin(user)) {
+          query = query.eq('gabinete_id', tenant.id)
+        }
+        
+        const { data, error } = await query.single()
 
         if (error) throw error
 
@@ -98,7 +104,7 @@ export default function EditarOrgaoPage() {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase
+      let updateQuery = supabase
         .from('orgaos')
         .update({
           nome: formData.nome,
@@ -110,7 +116,13 @@ export default function EditarOrgaoPage() {
           responsavel: formData.responsavel || null,
         })
         .eq('id', orgaoId)
-        .eq('gabinete_id', tenant.id)
+      
+      // Filtrar por gabinete apenas se não for super admin
+      if (!isSuperAdmin(user)) {
+        updateQuery = updateQuery.eq('gabinete_id', tenant.id)
+      }
+
+      const { error } = await updateQuery
 
       if (error) throw error
 
