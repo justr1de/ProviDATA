@@ -69,30 +69,55 @@ export default function CategoriasPage() {
       return
     }
 
+    // Verificar se já existe uma categoria com o mesmo nome no gabinete
+    const nomeNormalizado = formData.nome.trim().toLowerCase()
+    const categoriaExistente = categorias.find(
+      cat => cat.nome.trim().toLowerCase() === nomeNormalizado && cat.id !== editingId
+    )
+    
+    if (categoriaExistente) {
+      toast.error('Já existe uma categoria com este nome neste gabinete')
+      return
+    }
+
     try {
       if (editingId) {
         const { error } = await supabase
           .from('categorias')
           .update({
-            nome: formData.nome,
-            descricao: formData.descricao || null,
+            nome: formData.nome.trim(),
+            descricao: formData.descricao?.trim() || null,
             cor: formData.cor,
           })
           .eq('id', editingId)
 
-        if (error) throw error
+        if (error) {
+          // Tratar erro de constraint unique
+          if (error.code === '23505') {
+            toast.error('Já existe uma categoria com este nome neste gabinete')
+            return
+          }
+          throw error
+        }
         toast.success('Categoria atualizada com sucesso')
       } else {
         const { error } = await supabase
           .from('categorias')
           .insert({
             gabinete_id: tenant.id,
-            nome: formData.nome,
-            descricao: formData.descricao || null,
+            nome: formData.nome.trim(),
+            descricao: formData.descricao?.trim() || null,
             cor: formData.cor,
           })
 
-        if (error) throw error
+        if (error) {
+          // Tratar erro de constraint unique
+          if (error.code === '23505') {
+            toast.error('Já existe uma categoria com este nome neste gabinete')
+            return
+          }
+          throw error
+        }
         toast.success('Categoria criada com sucesso')
       }
 
@@ -100,9 +125,15 @@ export default function CategoriasPage() {
       setShowForm(false)
       setEditingId(null)
       loadCategorias()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving categoria:', error)
-      toast.error('Erro ao salvar categoria')
+      if (error?.code === '23505') {
+        toast.error('Já existe uma categoria com este nome neste gabinete')
+      } else if (error?.code === '42501' || error?.message?.includes('permission')) {
+        toast.error('Você não tem permissão para realizar esta operação')
+      } else {
+        toast.error('Erro ao salvar categoria')
+      }
     }
   }
 
