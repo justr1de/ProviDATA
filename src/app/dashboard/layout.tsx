@@ -333,39 +333,14 @@ export default function DashboardLayout({
         >
           <Link 
             href="/dashboard" 
+            className="logo-link"
             style={{ 
               display: 'block', 
               textDecoration: 'none', 
-              width: '100%',
-              transition: 'all 0.3s ease'
+              width: '100%'
             }}
-            className="logo-link"
           >
-            <div
-              style={{
-                position: 'relative',
-                padding: '8px',
-                borderRadius: '12px',
-                background: 'linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(22, 163, 74, 0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
-                transition: 'all 0.3s ease',
-                overflow: 'hidden'
-              }}
-              className="logo-wrapper"
-            >
-              {/* Efeito de brilho animado */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: '-100%',
-                  width: '100%',
-                  height: '100%',
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
-                  animation: 'shimmer 3s infinite',
-                  pointerEvents: 'none'
-                }}
-              />
+            <div className="logo-wrapper">
               <Image
                 src="/providata-logo-final.png"
                 alt="ProviDATA"
@@ -375,30 +350,12 @@ export default function DashboardLayout({
                   width: '100%',
                   height: 'auto',
                   objectFit: 'cover',
-                  display: 'block',
-                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
-                  transition: 'all 0.3s ease'
+                  display: 'block'
                 }}
                 priority
               />
             </div>
           </Link>
-          <style jsx global>{`
-            @keyframes shimmer {
-              0% { left: -100%; }
-              50%, 100% { left: 100%; }
-            }
-            .logo-link:hover .logo-wrapper {
-              transform: scale(1.02);
-              box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(22, 163, 74, 0.3), inset 0 1px 0 rgba(255,255,255,0.15);
-            }
-            .logo-link:hover img {
-              filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)) brightness(1.05);
-            }
-            .logo-link:active .logo-wrapper {
-              transform: scale(0.98);
-            }
-          `}</style>
         </div>
 
         {/* Gabinete Info */}
