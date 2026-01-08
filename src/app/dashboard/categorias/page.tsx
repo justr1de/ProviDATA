@@ -69,6 +69,11 @@ export default function CategoriasPage() {
       return
     }
 
+    if (!formData.descricao || !formData.descricao.trim()) {
+      toast.error('A descrição é obrigatória')
+      return
+    }
+
     // Verificar se já existe uma categoria com o mesmo nome no gabinete
     const nomeNormalizado = formData.nome.trim().toLowerCase()
     const categoriaExistente = categorias.find(
@@ -311,12 +316,13 @@ export default function CategoriasPage() {
                   />
                 </div>
                 <div>
-                  <label style={labelStyle}>Descrição</label>
+                  <label style={labelStyle}>Descrição *</label>
                   <input
                     type="text"
-                    placeholder="Descrição opcional"
+                    placeholder="Descrição da categoria"
                     value={formData.descricao}
                     onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                    required
                     style={inputStyle}
                   />
                 </div>
