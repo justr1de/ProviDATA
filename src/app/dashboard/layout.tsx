@@ -212,7 +212,8 @@ export default function DashboardLayout({
       
       if (gabineteData) {
         // Salvar no localStorage para persistência
-        localStorage.setItem('selectedGabineteId', gabineteId)
+        // Usar o ID do gabineteData para garantir consistência
+        localStorage.setItem('selectedGabineteId', gabineteData.id)
         localStorage.setItem('selectedGabinete', JSON.stringify(gabineteData))
         
         setGabinete(gabineteData)
