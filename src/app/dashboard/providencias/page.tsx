@@ -107,10 +107,8 @@ function ProvidenciasContent() {
             orgao_destino:orgaos(nome, sigla)
           `, { count: 'exact' })
         
-        // Filtrar por gabinete apenas se não for super admin
-        if (!isSuperAdmin(user)) {
-          query = query.eq('gabinete_id', tenant.id)
-        }
+        // Filtrar por gabinete - mesmo super admin filtra pelo gabinete selecionado
+        query = query.eq('gabinete_id', tenant.id)
         
         query = query.order('created_at', { ascending: false })
 
