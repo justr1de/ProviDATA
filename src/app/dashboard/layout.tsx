@@ -163,9 +163,9 @@ export default function DashboardLayout({
             setGabinete(gabineteData)
           }
         } else if (userData.gabinete_id) {
-          // Senão, buscar gabinete do usuário usando a VIEW tenants
+          // Senão, buscar gabinete do usuário usando a tabela gabinetes
           const { data: gabineteData } = await supabase
-            .from('tenants')
+            .from('gabinetes')
             .select('*')
             .eq('id', userData.gabinete_id)
             .single()
