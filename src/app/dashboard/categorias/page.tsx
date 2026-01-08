@@ -117,21 +117,45 @@ export default function CategoriasPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta categoria?')) return
-
+    // Primeiro, verificar se há providências usando esta categoria
     try {
+      const { count, error: countError } = await supabase
+        .from('providencias')
+        .select('*', { count: 'exact', head: true })
+        .eq('categoria_id', id)
+
+      if (countError) throw countError
+
+      if (count && count > 0) {
+        toast.error(`Não é possível excluir esta categoria. Existem ${count} providência(s) vinculada(s) a ela. Remova ou altere a categoria das providências antes de excluir.`)
+        return
+      }
+
+      if (!confirm('Tem certeza que deseja excluir esta categoria?')) return
+
       const { error } = await supabase
         .from('categorias')
         .delete()
         .eq('id', id)
 
-      if (error) throw error
+      if (error) {
+        // Tratar erro de foreign key de forma mais amigável
+        if (error.code === '23503') {
+          toast.error('Não é possível excluir esta categoria. Existem providências vinculadas a ela.')
+          return
+        }
+        throw error
+      }
 
       toast.success('Categoria excluída com sucesso')
       loadCategorias()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting categoria:', error)
-      toast.error('Erro ao excluir categoria')
+      if (error?.code === '23503') {
+        toast.error('Não é possível excluir esta categoria. Existem providências vinculadas a ela.')
+      } else {
+        toast.error('Erro ao excluir categoria')
+      }
     }
   }
 
