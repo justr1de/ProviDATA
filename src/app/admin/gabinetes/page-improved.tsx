@@ -1128,6 +1128,7 @@ marginBottom: '20px'
                               onClick={() => {
                                 // Salvar o gabinete selecionado no localStorage e redirecionar para o dashboard
                                 localStorage.setItem('selectedGabineteId', gabinete.id)
+                                localStorage.setItem('selectedGabinete', JSON.stringify(gabinete))
                                 window.location.href = '/dashboard'
                               }}
                               style={{ 
