@@ -220,18 +220,16 @@ function ProvidenciasContent() {
   return (
     <div className="px-1 md:px-2">
       {/* Header */}
-      <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-            <FileText style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
-            <h1 className="text-xl md:text-2xl lg:text-[28px] font-bold" style={{ color: 'var(--foreground)' }}>
-              Providências
-            </h1>
-          </div>
-          <p className="text-sm md:text-base" style={{ color: 'var(--foreground-muted)' }}>
-            Gerencie todas as providências do gabinete
-          </p>
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+          <FileText style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
+          <h1 className="text-xl md:text-2xl lg:text-[28px] font-bold" style={{ color: 'var(--foreground)' }}>
+            Providências
+          </h1>
         </div>
+        <p className="text-sm md:text-base" style={{ color: 'var(--foreground-muted)', marginBottom: '16px' }}>
+          Gerencie todas as providências do gabinete
+        </p>
         <Link href="/dashboard/providencias/nova" style={{ textDecoration: 'none' }}>
           <button style={buttonStyle}>
             <Plus style={{ width: '18px', height: '18px' }} />
