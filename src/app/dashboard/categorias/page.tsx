@@ -273,18 +273,16 @@ export default function CategoriasPage() {
   return (
     <div className="px-1 md:px-2">
       {/* Header */}
-      <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-            <FolderOpen style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
-            <h1 className="text-xl md:text-2xl lg:text-[28px] font-bold" style={{ color: 'var(--foreground)' }}>
-              Categorias
-            </h1>
-          </div>
-          <p className="text-sm md:text-base" style={{ color: 'var(--foreground-muted)' }}>
-            Gerencie as categorias de providências
-          </p>
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+          <FolderOpen style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
+          <h1 className="text-xl md:text-2xl lg:text-[28px] font-bold" style={{ color: 'var(--foreground)' }}>
+            Categorias
+          </h1>
         </div>
+        <p className="text-sm md:text-base" style={{ color: 'var(--foreground-muted)', marginBottom: '16px' }}>
+          Gerencie as categorias de providências
+        </p>
         {!showForm && (
           <button style={buttonStyle} onClick={() => setShowForm(true)}>
             <Plus style={{ width: '18px', height: '18px' }} />
