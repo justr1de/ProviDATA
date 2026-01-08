@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
-import { isSuperAdmin } from '@/lib/utils'
+import { isSuperAdmin } from '@/lib/auth-utils'
 import { 
   ArrowLeft, 
   Save, 
