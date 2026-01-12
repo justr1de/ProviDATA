@@ -1,5 +1,9 @@
 # ProviDATA
 
+[![CI/CD Pipeline](https://github.com/justr1de/ProviDATA/actions/workflows/ci.yml/badge.svg)](https://github.com/justr1de/ProviDATA/actions/workflows/ci.yml)
+[![Deploy to Vercel](https://github.com/justr1de/ProviDATA/actions/workflows/deploy.yml/badge.svg)](https://github.com/justr1de/ProviDATA/actions/workflows/deploy.yml)
+[![Security Check](https://github.com/justr1de/ProviDATA/actions/workflows/security.yml/badge.svg)](https://github.com/justr1de/ProviDATA/actions/workflows/security.yml)
+
 Sistema de Gestão de Providências Parlamentares desenvolvido pela **DATA-RO INTELIGÊNCIA TERRITORIAL**.
 
 ## Sobre o Sistema
@@ -88,6 +92,42 @@ O sistema utiliza Supabase com as seguintes tabelas principais:
 - Isolamento de dados por tenant
 - Autenticação via Supabase Auth
 - Conformidade com LGPD
+
+## CI/CD e Workflows
+
+O projeto utiliza GitHub Actions para automatizar processos de CI/CD, deploy e verificações de segurança:
+
+### 🔄 CI/CD Pipeline (`ci.yml`)
+
+Executa em todos os pushs e pull requests:
+
+- **Lint**: Validação de código com ESLint
+- **Type Check**: Verificação de tipos TypeScript
+- **Build**: Build do Next.js para garantir que o código compila
+
+### 🚀 Deploy Automático (`deploy.yml`)
+
+Executa apenas em pushs na branch `main`:
+
+- Deploy automático para Vercel em produção
+- Notificação de sucesso no deploy
+
+### 🔒 Verificações de Segurança (`security.yml`)
+
+Executa em pushs na `main`, pull requests e semanalmente às segundas-feiras:
+
+- **Dependency Check**: Auditoria de dependências com `pnpm audit`
+- **CodeQL**: Análise de código para identificar vulnerabilidades de segurança
+
+### Secrets Necessários
+
+Os seguintes secrets devem estar configurados no repositório:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
 
 ## Licença
 
