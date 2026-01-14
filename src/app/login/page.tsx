@@ -51,7 +51,7 @@ export default function LoginPage() {
       // Buscar o perfil do usuário para verificar o role
       const { data: profile } = await supabase
         .from('users')
-        .select('role, gabinete_id')
+        .select('role, gabinete_id, nome')
         .eq('id', data.user?.id)
         .single()
 
