@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { ArrowRight, Eye, EyeOff, Shield, BarChart, Map, FileText, Users, Building, MapPin, Sparkles, Lock, RefreshCw, Clock, Zap, Headphones, GraduationCap, BookOpen } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
+import { trackLogin, getGeoLocation } from '@/lib/monitoring'
 
 // Email do super admin geral do sistema
 const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br'
@@ -32,6 +33,18 @@ export default function LoginPage() {
         toast.error('Erro ao fazer login', {
           description: error.message === 'Invalid login credentials' ? 'E-mail ou senha incorretos' : error.message,
         })
+        
+        // Rastrear tentativa de login falha
+        try {
+          await trackLogin({
+            userId: '',
+            email: email,
+            success: false,
+            failureReason: error.message
+          });
+        } catch (trackError) {
+          console.error('Error tracking failed login:', trackError);
+        }
         return
       }
 
@@ -43,6 +56,22 @@ export default function LoginPage() {
         .single()
 
       toast.success('Login realizado com sucesso!')
+
+      // Rastrear login bem-sucedido
+      try {
+        const { ip } = await getGeoLocation();
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('providata_user_ip', ip);
+        }
+        await trackLogin({
+          userId: data.user?.id || '',
+          email: data.user?.email || '',
+          userName: profile?.nome || data.user?.email?.split('@')[0] || '',
+          success: true
+        });
+      } catch (trackError) {
+        console.error('Error tracking login:', trackError);
+      }
 
       // Verificar se é super admin
       const isSuperAdmin = data.user?.email === SUPER_ADMIN_EMAIL || profile?.role === 'super_admin'

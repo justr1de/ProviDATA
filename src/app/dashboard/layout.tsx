@@ -29,6 +29,7 @@ import {
   Files
 } from 'lucide-react'
 import { Toaster } from 'sonner'
+import { trackPageView } from '@/lib/monitoring'
 
 const SIDEBAR_WIDTH = 280
 
@@ -192,6 +193,21 @@ export default function DashboardLayout({
 
     checkAuth()
   }, [router, setGabinete, setUser, supabase])
+
+  // Rastrear navegação de páginas
+  useEffect(() => {
+    if (user && pathname) {
+      // Rastrear visualização de página de forma assíncrona
+      trackPageView({
+        userId: user.id,
+        email: user.email || '',
+        userName: user.nome || user.email?.split('@')[0] || '',
+        pagePath: pathname,
+        pageTitle: typeof document !== 'undefined' ? document.title : '',
+        referrer: typeof document !== 'undefined' ? document.referrer : ''
+      }).catch(err => console.error('Error tracking page view:', err));
+    }
+  }, [pathname, user]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut()

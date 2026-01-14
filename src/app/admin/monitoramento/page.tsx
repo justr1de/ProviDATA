@@ -1,0 +1,656 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
+import { 
+  ArrowLeft, 
+  Activity, 
+  Users, 
+  Globe, 
+  Monitor, 
+  Smartphone, 
+  Tablet,
+  Clock,
+  MapPin,
+  Eye,
+  LogIn,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  Search,
+  Filter,
+  ChevronDown,
+  ChevronUp,
+  BarChart3,
+  TrendingUp
+} from 'lucide-react'
+import { toast, Toaster } from 'sonner'
+
+interface LoginLog {
+  id: string
+  user_id: string
+  email: string
+  user_name: string
+  ip_address: string
+  user_agent: string
+  browser: string
+  browser_version: string
+  os: string
+  os_version: string
+  device_type: string
+  country: string
+  region: string
+  city: string
+  latitude: number
+  longitude: number
+  timezone: string
+  isp: string
+  session_id: string
+  success: boolean
+  failure_reason: string
+  created_at: string
+}
+
+interface PageView {
+  id: string
+  user_id: string
+  email: string
+  user_name: string
+  page_path: string
+  page_title: string
+  referrer: string
+  session_id: string
+  ip_address: string
+  user_agent: string
+  browser: string
+  os: string
+  device_type: string
+  created_at: string
+}
+
+interface UserStats {
+  id: string
+  user_id: string
+  email: string
+  user_name: string
+  total_logins: number
+  last_login_at: string
+  last_ip_address: string
+  last_browser: string
+  last_os: string
+  last_city: string
+  last_country: string
+  total_page_views: number
+  last_page_viewed: string
+  last_page_viewed_at: string
+  created_at: string
+  updated_at: string
+}
+
+export default function MonitoramentoPage() {
+  const [loginLogs, setLoginLogs] = useState<LoginLog[]>([])
+  const [pageViews, setPageViews] = useState<PageView[]>([])
+  const [userStats, setUserStats] = useState<UserStats[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'logins' | 'pages' | 'users'>('logins')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  
+  const router = useRouter()
+  const supabase = createClient()
+
+  useEffect(() => {
+    checkAccess()
+  }, [])
+
+  const checkAccess = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
+    // Verificar se é super admin
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (userData?.role !== 'super_admin' && user.email !== 'contato@dataro-it.com.br') {
+      toast.error('Acesso negado. Apenas super administradores podem acessar esta página.')
+      router.push('/dashboard')
+      return
+    }
+
+    setIsSuperAdmin(true)
+    loadData()
+  }
+
+  const loadData = async () => {
+    setIsLoading(true)
+    try {
+      // Carregar logs de login
+      const { data: logs, error: logsError } = await supabase
+        .from('login_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(500)
+
+      if (logsError) throw logsError
+      setLoginLogs(logs || [])
+
+      // Carregar visualizações de página
+      const { data: views, error: viewsError } = await supabase
+        .from('page_views')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(500)
+
+      if (viewsError) throw viewsError
+      setPageViews(views || [])
+
+      // Carregar estatísticas de usuários
+      const { data: stats, error: statsError } = await supabase
+        .from('user_stats')
+        .select('*')
+        .order('total_logins', { ascending: false })
+
+      if (statsError) throw statsError
+      setUserStats(stats || [])
+
+    } catch (error) {
+      console.error('Error loading monitoring data:', error)
+      toast.error('Erro ao carregar dados de monitoramento')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const toggleRowExpansion = (id: string) => {
+    const newExpanded = new Set(expandedRows)
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id)
+    } else {
+      newExpanded.add(id)
+    }
+    setExpandedRows(newExpanded)
+  }
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '-'
+    return new Date(dateString).toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
+  }
+
+  const getDeviceIcon = (deviceType: string) => {
+    switch (deviceType) {
+      case 'mobile':
+        return <Smartphone className="w-4 h-4" />
+      case 'tablet':
+        return <Tablet className="w-4 h-4" />
+      default:
+        return <Monitor className="w-4 h-4" />
+    }
+  }
+
+  const filteredLoginLogs = loginLogs.filter(log => 
+    log.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    log.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    log.ip_address?.includes(searchTerm) ||
+    log.city?.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const filteredPageViews = pageViews.filter(view =>
+    view.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    view.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    view.page_path?.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const filteredUserStats = userStats.filter(stat =>
+    stat.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    stat.user_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  // Estatísticas gerais
+  const totalLogins = loginLogs.length
+  const successfulLogins = loginLogs.filter(l => l.success).length
+  const failedLogins = loginLogs.filter(l => !l.success).length
+  const uniqueUsers = new Set(loginLogs.filter(l => l.user_id).map(l => l.user_id)).size
+  const totalPageViews = pageViews.length
+
+  if (!isSuperAdmin) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-center">
+          <Activity className="w-12 h-12 mx-auto mb-4 animate-spin" />
+          <p>Verificando permissões...</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white">
+      <Toaster position="top-right" richColors />
+      
+      {/* Header */}
+      <div className="bg-gray-800 border-b border-gray-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link 
+              href="/admin/gabinetes"
+              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                <Activity className="w-6 h-6 text-green-500" />
+                Monitoramento de Atividades
+              </h1>
+              <p className="text-gray-400 text-sm">Acompanhe logins, acessos e navegação dos usuários</p>
+            </div>
+          </div>
+          <button
+            onClick={loadData}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Atualizar
+          </button>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="px-6 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-500/20 rounded-lg">
+                <LogIn className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Total de Logins</p>
+                <p className="text-2xl font-bold">{totalLogins}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-500/20 rounded-lg">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Logins Bem-sucedidos</p>
+                <p className="text-2xl font-bold text-green-400">{successfulLogins}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-500/20 rounded-lg">
+                <XCircle className="w-5 h-5 text-red-400" />
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Logins Falhos</p>
+                <p className="text-2xl font-bold text-red-400">{failedLogins}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-500/20 rounded-lg">
+                <Users className="w-5 h-5 text-purple-400" />
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Usuários Únicos</p>
+                <p className="text-2xl font-bold">{uniqueUsers}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-yellow-500/20 rounded-lg">
+                <Eye className="w-5 h-5 text-yellow-400" />
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Páginas Visualizadas</p>
+                <p className="text-2xl font-bold">{totalPageViews}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setActiveTab('logins')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'logins' 
+                ? 'bg-green-600 text-white' 
+                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+            }`}
+          >
+            <LogIn className="w-4 h-4 inline mr-2" />
+            Logs de Login ({loginLogs.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('pages')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'pages' 
+                ? 'bg-green-600 text-white' 
+                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+            }`}
+          >
+            <Eye className="w-4 h-4 inline mr-2" />
+            Páginas Visitadas ({pageViews.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'users' 
+                ? 'bg-green-600 text-white' 
+                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4 inline mr-2" />
+            Estatísticas por Usuário ({userStats.length})
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Buscar por email, nome, IP ou cidade..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-500"
+          />
+        </div>
+
+        {/* Content */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <RefreshCw className="w-8 h-8 animate-spin text-green-500" />
+          </div>
+        ) : (
+          <>
+            {/* Login Logs Tab */}
+            {activeTab === 'logins' && (
+              <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-700/50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Status</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Usuário</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">IP</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Localização</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Dispositivo</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Navegador</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Data/Hora</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Detalhes</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      {filteredLoginLogs.map((log) => (
+                        <>
+                          <tr key={log.id} className="hover:bg-gray-700/50 transition-colors">
+                            <td className="px-4 py-3">
+                              {log.success ? (
+                                <span className="flex items-center gap-1 text-green-400">
+                                  <CheckCircle className="w-4 h-4" />
+                                  Sucesso
+                                </span>
+                              ) : (
+                                <span className="flex items-center gap-1 text-red-400">
+                                  <XCircle className="w-4 h-4" />
+                                  Falha
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div>
+                                <p className="font-medium">{log.user_name || '-'}</p>
+                                <p className="text-sm text-gray-400">{log.email}</p>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 font-mono text-sm">{log.ip_address || '-'}</td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-1">
+                                <MapPin className="w-4 h-4 text-gray-400" />
+                                <span>{log.city ? `${log.city}, ${log.region || log.country}` : '-'}</span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                {getDeviceIcon(log.device_type)}
+                                <span className="capitalize">{log.device_type || '-'}</span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div>
+                                <p>{log.browser} {log.browser_version}</p>
+                                <p className="text-sm text-gray-400">{log.os} {log.os_version}</p>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 text-sm">{formatDate(log.created_at)}</td>
+                            <td className="px-4 py-3">
+                              <button
+                                onClick={() => toggleRowExpansion(log.id)}
+                                className="p-1 hover:bg-gray-600 rounded transition-colors"
+                              >
+                                {expandedRows.has(log.id) ? (
+                                  <ChevronUp className="w-4 h-4" />
+                                ) : (
+                                  <ChevronDown className="w-4 h-4" />
+                                )}
+                              </button>
+                            </td>
+                          </tr>
+                          {expandedRows.has(log.id) && (
+                            <tr className="bg-gray-700/30">
+                              <td colSpan={8} className="px-4 py-4">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                  <div>
+                                    <p className="text-gray-400">User Agent</p>
+                                    <p className="font-mono text-xs break-all">{log.user_agent}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-gray-400">ISP</p>
+                                    <p>{log.isp || '-'}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-gray-400">Timezone</p>
+                                    <p>{log.timezone || '-'}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-gray-400">Coordenadas</p>
+                                    <p>{log.latitude && log.longitude ? `${log.latitude}, ${log.longitude}` : '-'}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-gray-400">Session ID</p>
+                                    <p className="font-mono text-xs">{log.session_id || '-'}</p>
+                                  </div>
+                                  {!log.success && log.failure_reason && (
+                                    <div className="col-span-2">
+                                      <p className="text-gray-400">Motivo da Falha</p>
+                                      <p className="text-red-400">{log.failure_reason}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </>
+                      ))}
+                    </tbody>
+                  </table>
+                  {filteredLoginLogs.length === 0 && (
+                    <div className="text-center py-12 text-gray-400">
+                      <LogIn className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>Nenhum log de login encontrado</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Page Views Tab */}
+            {activeTab === 'pages' && (
+              <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-700/50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Usuário</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Página</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Dispositivo</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Navegador</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Data/Hora</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      {filteredPageViews.map((view) => (
+                        <tr key={view.id} className="hover:bg-gray-700/50 transition-colors">
+                          <td className="px-4 py-3">
+                            <div>
+                              <p className="font-medium">{view.user_name || '-'}</p>
+                              <p className="text-sm text-gray-400">{view.email}</p>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div>
+                              <p className="font-mono text-sm">{view.page_path}</p>
+                              {view.page_title && (
+                                <p className="text-sm text-gray-400">{view.page_title}</p>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              {getDeviceIcon(view.device_type)}
+                              <span className="capitalize">{view.device_type || '-'}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div>
+                              <p>{view.browser}</p>
+                              <p className="text-sm text-gray-400">{view.os}</p>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-sm">{formatDate(view.created_at)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {filteredPageViews.length === 0 && (
+                    <div className="text-center py-12 text-gray-400">
+                      <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>Nenhuma visualização de página encontrada</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* User Stats Tab */}
+            {activeTab === 'users' && (
+              <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-700/50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Usuário</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Total Logins</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Páginas Vistas</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Último Login</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Última Localização</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Último Dispositivo</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Última Página</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      {filteredUserStats.map((stat) => (
+                        <tr key={stat.id} className="hover:bg-gray-700/50 transition-colors">
+                          <td className="px-4 py-3">
+                            <div>
+                              <p className="font-medium">{stat.user_name || '-'}</p>
+                              <p className="text-sm text-gray-400">{stat.email}</p>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium">
+                              {stat.total_logins || 0}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-sm font-medium">
+                              {stat.total_page_views || 0}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm">{formatDate(stat.last_login_at)}</td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-1">
+                              <MapPin className="w-4 h-4 text-gray-400" />
+                              <span>{stat.last_city ? `${stat.last_city}, ${stat.last_country}` : '-'}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div>
+                              <p>{stat.last_browser || '-'}</p>
+                              <p className="text-sm text-gray-400">{stat.last_os || '-'}</p>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <p className="font-mono text-sm">{stat.last_page_viewed || '-'}</p>
+                            {stat.last_page_viewed_at && (
+                              <p className="text-xs text-gray-400">{formatDate(stat.last_page_viewed_at)}</p>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {filteredUserStats.length === 0 && (
+                    <div className="text-center py-12 text-gray-400">
+                      <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>Nenhuma estatística de usuário encontrada</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="px-6 py-4 border-t border-gray-700 mt-8">
+        <div className="flex items-center justify-center gap-2 text-gray-500 text-sm">
+          <img src="/dataro-logo-final.png" alt="DATA-RO" className="h-6" />
+          <span>DATA-RO Inteligência Territorial - Todos os direitos reservados</span>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -26,7 +26,8 @@ import {
   Mail,
   Shield,
   Save,
-  BarChart3
+  BarChart3,
+  Activity
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -635,6 +636,27 @@ export default function GabinetesPage() {
 
             {/* Ações do Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Link
+                href="/admin/monitoramento"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 8px rgba(139, 92, 246, 0.25)'
+                }}
+              >
+                <Activity size={18} />
+                <span>Monitoramento</span>
+              </Link>
               <Link
                 href="/admin/indicadores"
                 style={{
