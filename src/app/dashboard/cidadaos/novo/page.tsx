@@ -170,7 +170,18 @@ function NovoCidadaoForm() {
   const redirect = searchParams.get('redirect')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+    
+    // Se a UF for alterada e o órgão emissor estiver vazio, sugere automaticamente
+    if (name === 'uf' && value && !formData.rg_orgao_emissor) {
+      setFormData({ 
+        ...formData, 
+        [name]: value,
+        rg_orgao_emissor: getSugestaoOrgaoEmissor(value)
+      })
+    } else {
+      setFormData({ ...formData, [name]: value })
+    }
   }
 
   const formatCPF = (value: string) => {
