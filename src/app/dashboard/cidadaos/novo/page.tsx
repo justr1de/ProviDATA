@@ -240,13 +240,19 @@ function NovoCidadaoForm() {
         return
       }
       
+      // Atualiza os dados do endereço e sugere órgão emissor automaticamente
+      const ufEncontrada = data.uf || ''
       setFormData(prev => ({
         ...prev,
         endereco: data.logradouro || '',
         bairro: data.bairro || '',
         cidade: data.localidade || '',
-        uf: data.uf || '',
+        uf: ufEncontrada,
         complemento: data.complemento || prev.complemento,
+        // Se o órgão emissor estiver vazio e a UF foi encontrada, sugere automaticamente
+        rg_orgao_emissor: (!prev.rg_orgao_emissor && ufEncontrada) 
+          ? getSugestaoOrgaoEmissor(ufEncontrada) 
+          : prev.rg_orgao_emissor,
       }))
       
       toast.success('Endereço encontrado!')
