@@ -25,7 +25,9 @@ import {
   ChevronDown,
   ChevronUp,
   BarChart3,
-  TrendingUp
+  TrendingUp,
+  Calendar,
+  X
 } from 'lucide-react'
 import { toast, Toaster } from 'sonner'
 
@@ -99,6 +101,10 @@ export default function MonitoramentoPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [startTime, setStartTime] = useState('')
+  const [endTime, setEndTime] = useState('')
   
   const router = useRouter()
   const supabase = createClient()
@@ -205,18 +211,62 @@ export default function MonitoramentoPage() {
     }
   }
 
-  const filteredLoginLogs = loginLogs.filter(log => 
-    log.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.ip_address?.includes(searchTerm) ||
-    log.city?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // Função para filtrar por data/hora
+  const filterByDateTime = (dateString: string) => {
+    if (!dateString) return true
+    const date = new Date(dateString)
+    
+    // Filtro de data inicial
+    if (startDate) {
+      const start = new Date(startDate)
+      if (startTime) {
+        const [hours, minutes] = startTime.split(':')
+        start.setHours(parseInt(hours), parseInt(minutes), 0, 0)
+      } else {
+        start.setHours(0, 0, 0, 0)
+      }
+      if (date < start) return false
+    }
+    
+    // Filtro de data final
+    if (endDate) {
+      const end = new Date(endDate)
+      if (endTime) {
+        const [hours, minutes] = endTime.split(':')
+        end.setHours(parseInt(hours), parseInt(minutes), 59, 999)
+      } else {
+        end.setHours(23, 59, 59, 999)
+      }
+      if (date > end) return false
+    }
+    
+    return true
+  }
 
-  const filteredPageViews = pageViews.filter(view =>
-    view.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    view.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    view.page_path?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // Limpar filtros de data
+  const clearDateFilters = () => {
+    setStartDate('')
+    setEndDate('')
+    setStartTime('')
+    setEndTime('')
+  }
+
+  const filteredLoginLogs = loginLogs.filter(log => {
+    const matchesSearch = log.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.ip_address?.includes(searchTerm) ||
+      log.city?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesDate = filterByDateTime(log.created_at)
+    return matchesSearch && matchesDate
+  })
+
+  const filteredPageViews = pageViews.filter(view => {
+    const matchesSearch = view.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      view.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      view.page_path?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesDate = filterByDateTime(view.created_at)
+    return matchesSearch && matchesDate
+  })
 
   const filteredUserStats = userStats.filter(stat =>
     stat.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -375,16 +425,171 @@ export default function MonitoramentoPage() {
           </button>
         </div>
 
-        {/* Search */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar por email, nome, IP ou cidade..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-500"
-          />
+        {/* Search and Date Filters */}
+        <div className="space-y-4 mb-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar por email, nome, IP ou cidade..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-green-500"
+            />
+          </div>
+          
+          {/* Date/Time Filters */}
+          <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-green-400" />
+                <span className="font-medium">Filtrar por Período</span>
+              </div>
+              {(startDate || endDate || startTime || endTime) && (
+                <button
+                  onClick={clearDateFilters}
+                  className="flex items-center gap-1 px-3 py-1 text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                  Limpar Filtros
+                </button>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Data Inicial */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Data Inicial</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-green-500"
+                />
+              </div>
+              
+              {/* Hora Inicial */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Hora Inicial</label>
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-green-500"
+                />
+              </div>
+              
+              {/* Data Final */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Data Final</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-green-500"
+                />
+              </div>
+              
+              {/* Hora Final */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Hora Final</label>
+                <input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-green-500"
+                />
+              </div>
+            </div>
+            
+            {/* Filtros rápidos */}
+            <div className="flex flex-wrap gap-2 mt-3">
+              <button
+                onClick={() => {
+                  const today = new Date().toISOString().split('T')[0]
+                  setStartDate(today)
+                  setEndDate(today)
+                  setStartTime('')
+                  setEndTime('')
+                }}
+                className="px-3 py-1 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              >
+                Hoje
+              </button>
+              <button
+                onClick={() => {
+                  const today = new Date()
+                  const yesterday = new Date(today)
+                  yesterday.setDate(yesterday.getDate() - 1)
+                  setStartDate(yesterday.toISOString().split('T')[0])
+                  setEndDate(yesterday.toISOString().split('T')[0])
+                  setStartTime('')
+                  setEndTime('')
+                }}
+                className="px-3 py-1 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              >
+                Ontem
+              </button>
+              <button
+                onClick={() => {
+                  const today = new Date()
+                  const weekAgo = new Date(today)
+                  weekAgo.setDate(weekAgo.getDate() - 7)
+                  setStartDate(weekAgo.toISOString().split('T')[0])
+                  setEndDate(today.toISOString().split('T')[0])
+                  setStartTime('')
+                  setEndTime('')
+                }}
+                className="px-3 py-1 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              >
+                Últimos 7 dias
+              </button>
+              <button
+                onClick={() => {
+                  const today = new Date()
+                  const monthAgo = new Date(today)
+                  monthAgo.setDate(monthAgo.getDate() - 30)
+                  setStartDate(monthAgo.toISOString().split('T')[0])
+                  setEndDate(today.toISOString().split('T')[0])
+                  setStartTime('')
+                  setEndTime('')
+                }}
+                className="px-3 py-1 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              >
+                Últimos 30 dias
+              </button>
+              <button
+                onClick={() => {
+                  const today = new Date()
+                  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1)
+                  setStartDate(firstDay.toISOString().split('T')[0])
+                  setEndDate(today.toISOString().split('T')[0])
+                  setStartTime('')
+                  setEndTime('')
+                }}
+                className="px-3 py-1 text-sm bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+              >
+                Este mês
+              </button>
+            </div>
+            
+            {/* Indicador de filtro ativo */}
+            {(startDate || endDate) && (
+              <div className="mt-3 p-2 bg-green-500/10 border border-green-500/30 rounded-lg">
+                <p className="text-sm text-green-400">
+                  <Filter className="w-4 h-4 inline mr-1" />
+                  Filtro ativo: 
+                  {startDate && ` De ${new Date(startDate + 'T00:00:00').toLocaleDateString('pt-BR')}${startTime ? ` às ${startTime}` : ''}`}
+                  {endDate && ` até ${new Date(endDate + 'T00:00:00').toLocaleDateString('pt-BR')}${endTime ? ` às ${endTime}` : ''}`}
+                  {' | '}
+                  {activeTab === 'logins' && `${filteredLoginLogs.length} de ${loginLogs.length} registros`}
+                  {activeTab === 'pages' && `${filteredPageViews.length} de ${pageViews.length} registros`}
+                  {activeTab === 'users' && `${filteredUserStats.length} de ${userStats.length} registros`}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Content */}
