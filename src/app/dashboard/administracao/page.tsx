@@ -19,7 +19,8 @@ import {
   X,
   Loader2,
   Eye,
-  EyeOff
+  EyeOff,
+  Save
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -46,8 +47,10 @@ const tabs = [
 
 const roleOptions = [
   { value: 'user', label: 'Usuário' },
+  { value: 'gestor', label: 'Gestor' },
   { value: 'admin', label: 'Administrador' },
-  { value: 'super_admin', label: 'Super Admin' }
+  { value: 'super_admin', label: 'Super Admin' },
+  { value: 'estagiario', label: 'Estagiário' }
 ]
 
 // --- Componente Principal ---
@@ -57,17 +60,25 @@ export default function AdministracaoPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [loading, setLoading] = useState(true)
   const [showNewUserModal, setShowNewUserModal] = useState(false)
+  const [showEditUserModal, setShowEditUserModal] = useState(false)
   const [savingUser, setSavingUser] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showLogsModal, setShowLogsModal] = useState(false)
   const [logs, setLogs] = useState<any[]>([])
   const [loadingLogs, setLoadingLogs] = useState(false)
 
-  // Form state
+  // Form state para novo usuário
   const [newUserName, setNewUserName] = useState('')
   const [newUserEmail, setNewUserEmail] = useState('')
   const [newUserPassword, setNewUserPassword] = useState('')
   const [newUserRole, setNewUserRole] = useState('user')
+
+  // Form state para edição de usuário
+  const [editingUser, setEditingUser] = useState<any>(null)
+  const [editUserName, setEditUserName] = useState('')
+  const [editUserEmail, setEditUserEmail] = useState('')
+  const [editUserRole, setEditUserRole] = useState('')
+  const [editUserCargo, setEditUserCargo] = useState('')
 
   const supabase = createClient()
   const { gabinete: tenant, user } = useAuthStore()
@@ -139,6 +150,88 @@ export default function AdministracaoPage() {
     } else {
       toast.error('Erro ao atualizar status do usuário')
     }
+  }
+
+  // Função para abrir modal de edição
+  const handleOpenEditModal = (usuario: any) => {
+    setEditingUser(usuario)
+    setEditUserName(usuario.nome || '')
+    setEditUserEmail(usuario.email || '')
+    setEditUserRole(usuario.role || 'user')
+    setEditUserCargo(usuario.cargo || '')
+    setShowEditUserModal(true)
+  }
+
+  // Função para salvar edição do usuário
+  const handleEditUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!editUserName || !editUserEmail) {
+      toast.error('Preencha todos os campos obrigatórios')
+      return
+    }
+
+    setSavingUser(true)
+
+    try {
+      // Atualizar na tabela users
+      const { error: userError } = await supabase
+        .from('users')
+        .update({
+          nome: editUserName,
+          email: editUserEmail,
+          role: editUserRole,
+          cargo: editUserCargo,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingUser.id)
+
+      if (userError) {
+        console.error('Erro ao atualizar usuário:', userError)
+        toast.error('Erro ao atualizar usuário na tabela users')
+        setSavingUser(false)
+        return
+      }
+
+      // Atualizar também na tabela profiles se existir
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          full_name: editUserName,
+          email: editUserEmail,
+          role: editUserRole,
+          cargo: editUserCargo,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingUser.id)
+
+      if (profileError) {
+        console.log('Nota: Perfil não encontrado ou erro ao atualizar profiles:', profileError.message)
+      }
+
+      toast.success('Usuário atualizado com sucesso!')
+      setShowEditUserModal(false)
+      resetEditForm()
+      loadUsers()
+    } catch (error: any) {
+      console.error('Error updating user:', error)
+      toast.error('Erro ao atualizar usuário')
+    } finally {
+      setSavingUser(false)
+    }
+  }
+
+  const resetEditForm = () => {
+    setEditingUser(null)
+    setEditUserName('')
+    setEditUserEmail('')
+    setEditUserRole('user')
+    setEditUserCargo('')
+  }
+
+  const closeEditModal = () => {
+    setShowEditUserModal(false)
+    resetEditForm()
   }
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -358,13 +451,17 @@ export default function AdministracaoPage() {
                                   ? 'rgba(139, 92, 246, 0.1)'
                                   : u.role === 'admin'
                                   ? 'rgba(59, 130, 246, 0.1)'
+                                  : u.role === 'gestor'
+                                  ? 'rgba(34, 197, 94, 0.1)'
+                                  : u.role === 'estagiario'
+                                  ? 'rgba(245, 158, 11, 0.1)'
                                   : 'var(--muted)',
-                              color: u.role === 'super_admin' ? '#8b5cf6' : u.role === 'admin' ? '#3b82f6' : 'var(--foreground)',
+                              color: u.role === 'super_admin' ? '#8b5cf6' : u.role === 'admin' ? '#3b82f6' : u.role === 'gestor' ? '#22c55e' : u.role === 'estagiario' ? '#f59e0b' : 'var(--foreground)',
                               fontSize: '13px',
                               fontWeight: '500'
                             }}
                           >
-                            {u.role === 'super_admin' ? 'Super Admin' : u.role === 'admin' ? 'Administrador' : 'Usuário'}
+                            {u.role === 'super_admin' ? 'Super Admin' : u.role === 'admin' ? 'Administrador' : u.role === 'gestor' ? 'Gestor' : u.role === 'estagiario' ? 'Estagiário' : 'Usuário'}
                           </span>
                         </td>
                         <td style={{ padding: '16px', textAlign: 'center' }}>
@@ -386,13 +483,14 @@ export default function AdministracaoPage() {
                         <td style={{ padding: '16px' }}>
                           <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
                             <button
+                              onClick={() => handleOpenEditModal(u)}
                               style={{
                                 padding: '8px',
                                 borderRadius: '8px',
-                                backgroundColor: 'var(--muted)',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
                                 border: 'none',
                                 cursor: 'pointer',
-                                color: 'var(--foreground-muted)'
+                                color: '#3b82f6'
                               }}
                               title="Editar"
                             >
@@ -546,40 +644,40 @@ export default function AdministracaoPage() {
           <div
             style={{
               backgroundColor: 'var(--card)',
-              borderRadius: '20px',
+              borderRadius: '16px',
               width: '100%',
               maxWidth: '480px',
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              border: '1px solid var(--border)'
+              overflow: 'hidden'
             }}
           >
             {/* Modal Header */}
             <div
               style={{
                 display: 'flex',
-                alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '24px',
+                alignItems: 'center',
+                padding: '20px 24px',
                 borderBottom: '1px solid var(--border)'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div
                   style={{
-                    width: '44px',
-                    height: '44px',
-                    borderRadius: '12px',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '10px',
                     backgroundColor: 'var(--primary)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}
                 >
-                  <UserPlus style={{ width: '22px', height: '22px', color: 'white' }} />
+                  <UserPlus style={{ width: '20px', height: '20px', color: 'white' }} />
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--foreground)', margin: 0 }}>Novo Usuário</h2>
-                  <p style={{ fontSize: '13px', color: 'var(--foreground-muted)', margin: 0 }}>Adicione um novo membro ao gabinete</p>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--foreground)' }}>Novo Usuário</h3>
+                  <p style={{ fontSize: '13px', color: 'var(--foreground-muted)' }}>Adicione um novo membro à equipe</p>
                 </div>
               </div>
               <button
@@ -597,7 +695,6 @@ export default function AdministracaoPage() {
               </button>
             </div>
 
-            {/* Modal Body */}
             <form onSubmit={handleCreateUser}>
               <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {/* Nome */}
@@ -811,6 +908,276 @@ export default function AdministracaoPage() {
                     <>
                       <UserPlus style={{ width: '18px', height: '18px' }} />
                       Criar Usuário
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Editar Usuário */}
+      {showEditUserModal && editingUser && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            padding: '20px'
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'var(--card)',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '480px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Modal Header */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '20px 24px',
+                borderBottom: '1px solid var(--border)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    backgroundColor: '#3b82f6',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <Edit style={{ width: '20px', height: '20px', color: 'white' }} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--foreground)' }}>Editar Usuário</h3>
+                  <p style={{ fontSize: '13px', color: 'var(--foreground-muted)' }}>Atualize as informações do usuário</p>
+                </div>
+              </div>
+              <button
+                onClick={closeEditModal}
+                style={{
+                  padding: '8px',
+                  borderRadius: '8px',
+                  backgroundColor: 'var(--muted)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--foreground-muted)'
+                }}
+              >
+                <X style={{ width: '20px', height: '20px' }} />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditUser}>
+              <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {/* Nome */}
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    Nome Completo *
+                  </label>
+                  <input
+                    type="text"
+                    value={editUserName}
+                    onChange={(e) => setEditUserName(e.target.value)}
+                    placeholder="Digite o nome completo"
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      fontSize: '15px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    E-mail *
+                  </label>
+                  <input
+                    type="email"
+                    value={editUserEmail}
+                    onChange={(e) => setEditUserEmail(e.target.value)}
+                    placeholder="usuario@email.com"
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      fontSize: '15px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                {/* Cargo */}
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    Cargo
+                  </label>
+                  <input
+                    type="text"
+                    value={editUserCargo}
+                    onChange={(e) => setEditUserCargo(e.target.value)}
+                    placeholder="Ex: Assessor, Secretário, etc."
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      fontSize: '15px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+
+                {/* Role */}
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: 'var(--foreground)',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    Função
+                  </label>
+                  <select
+                    value={editUserRole}
+                    onChange={(e) => setEditUserRole(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      fontSize: '15px',
+                      borderRadius: '10px',
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {roleOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '12px',
+                  padding: '20px 24px',
+                  borderTop: '1px solid var(--border)',
+                  backgroundColor: 'var(--muted)'
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  disabled={savingUser}
+                  style={{
+                    flex: 1,
+                    padding: '12px 20px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    borderRadius: '10px',
+                    border: '1px solid var(--border)',
+                    backgroundColor: 'var(--background)',
+                    color: 'var(--foreground)',
+                    cursor: savingUser ? 'not-allowed' : 'pointer',
+                    opacity: savingUser ? 0.5 : 1
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingUser}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '12px 20px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    borderRadius: '10px',
+                    border: 'none',
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    cursor: savingUser ? 'not-allowed' : 'pointer',
+                    opacity: savingUser ? 0.7 : 1
+                  }}
+                >
+                  {savingUser ? (
+                    <>
+                      <Loader2 style={{ width: '18px', height: '18px', animation: 'spin 1s linear infinite' }} />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save style={{ width: '18px', height: '18px' }} />
+                      Salvar Alterações
                     </>
                   )}
                 </button>
