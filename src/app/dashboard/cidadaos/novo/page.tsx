@@ -63,6 +63,49 @@ const ufOptions = [
   { value: 'TO', label: 'TO' },
 ]
 
+// Mapeamento de órgãos emissores por UF
+const orgaoEmissorPorUF: Record<string, string[]> = {
+  'AC': ['SSP/AC', 'SEJUSP/AC', 'PC/AC', 'DETRAN/AC'],
+  'AL': ['SSP/AL', 'PC/AL', 'DETRAN/AL', 'IML/AL'],
+  'AP': ['SSP/AP', 'SEJUSP/AP', 'PC/AP', 'DETRAN/AP'],
+  'AM': ['SSP/AM', 'PC/AM', 'DETRAN/AM', 'SEJUSC/AM'],
+  'BA': ['SSP/BA', 'PC/BA', 'DETRAN/BA', 'PM/BA'],
+  'CE': ['SSP/CE', 'SSPDS/CE', 'PC/CE', 'DETRAN/CE'],
+  'DF': ['SSP/DF', 'PCDF', 'DETRAN/DF', 'IFP/DF'],
+  'ES': ['SSP/ES', 'SESP/ES', 'PC/ES', 'DETRAN/ES'],
+  'GO': ['SSP/GO', 'DGPC/GO', 'PC/GO', 'DETRAN/GO'],
+  'MA': ['SSP/MA', 'SEJUSP/MA', 'PC/MA', 'DETRAN/MA'],
+  'MT': ['SSP/MT', 'SEJUSP/MT', 'PJC/MT', 'DETRAN/MT'],
+  'MS': ['SSP/MS', 'SEJUSP/MS', 'PC/MS', 'DETRAN/MS'],
+  'MG': ['SSP/MG', 'PC/MG', 'DETRAN/MG', 'MAI/MG'],
+  'PA': ['SSP/PA', 'SEGUP/PA', 'PC/PA', 'DETRAN/PA'],
+  'PB': ['SSP/PB', 'SEDS/PB', 'PC/PB', 'DETRAN/PB'],
+  'PR': ['SSP/PR', 'SESP/PR', 'PC/PR', 'DETRAN/PR', 'II/PR'],
+  'PE': ['SSP/PE', 'SDS/PE', 'PC/PE', 'DETRAN/PE'],
+  'PI': ['SSP/PI', 'PC/PI', 'DETRAN/PI', 'IML/PI'],
+  'RJ': ['SSP/RJ', 'DETRAN/RJ', 'IFP/RJ', 'PCERJ'],
+  'RN': ['SSP/RN', 'ITEP/RN', 'PC/RN', 'DETRAN/RN'],
+  'RS': ['SSP/RS', 'SJS/RS', 'PC/RS', 'DETRAN/RS', 'IGP/RS'],
+  'RO': ['SSP/RO', 'SEJUCEL/RO', 'PC/RO', 'DETRAN/RO', 'SESDEC/RO'],
+  'RR': ['SSP/RR', 'SESP/RR', 'PC/RR', 'DETRAN/RR'],
+  'SC': ['SSP/SC', 'PC/SC', 'DETRAN/SC', 'IGP/SC'],
+  'SP': ['SSP/SP', 'PC/SP', 'DETRAN/SP', 'IIRGD/SP'],
+  'SE': ['SSP/SE', 'PC/SE', 'DETRAN/SE', 'IML/SE'],
+  'TO': ['SSP/TO', 'PC/TO', 'DETRAN/TO', 'IGP/TO'],
+}
+
+// Função para obter sugestão de órgão emissor com base na UF
+const getSugestaoOrgaoEmissor = (uf: string): string => {
+  if (!uf || !orgaoEmissorPorUF[uf]) return ''
+  return orgaoEmissorPorUF[uf][0] // Retorna o primeiro (SSP) como padrão
+}
+
+// Função para obter opções de órgão emissor com base na UF
+const getOrgaoEmissorOptions = (uf: string): string[] => {
+  if (!uf || !orgaoEmissorPorUF[uf]) return []
+  return orgaoEmissorPorUF[uf]
+}
+
 // Função para validar CPF
 const validateCPF = (cpf: string): boolean => {
   // Remove caracteres não numéricos
@@ -490,14 +533,49 @@ function NovoCidadaoForm() {
 
               <div>
                 <label style={labelStyle}>Órgão Emissor</label>
-                <input
-                  type="text"
-                  name="rg_orgao_emissor"
-                  placeholder="Ex: SSP/RO, DETRAN/RO"
-                  value={formData.rg_orgao_emissor}
-                  onChange={handleChange}
-                  style={inputStyle}
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    name="rg_orgao_emissor"
+                    placeholder={formData.uf ? `Sugestão: ${getSugestaoOrgaoEmissor(formData.uf)}` : "Selecione a UF primeiro"}
+                    value={formData.rg_orgao_emissor}
+                    onChange={handleChange}
+                    list="orgao-emissor-options"
+                    style={inputStyle}
+                  />
+                  <datalist id="orgao-emissor-options">
+                    {getOrgaoEmissorOptions(formData.uf).map(orgao => (
+                      <option key={orgao} value={orgao} />
+                    ))}
+                  </datalist>
+                  {formData.uf && !formData.rg_orgao_emissor && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, rg_orgao_emissor: getSugestaoOrgaoEmissor(prev.uf) }))}
+                      style={{
+                        position: 'absolute',
+                        right: '8px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'var(--primary)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '4px 8px',
+                        fontSize: '11px',
+                        cursor: 'pointer',
+                        fontWeight: '500'
+                      }}
+                    >
+                      Usar SSP/{formData.uf}
+                    </button>
+                  )}
+                </div>
+                {formData.uf && (
+                  <p style={{ fontSize: '11px', color: 'var(--foreground-muted)', marginTop: '4px' }}>
+                    Opções para {formData.uf}: {getOrgaoEmissorOptions(formData.uf).join(', ')}
+                  </p>
+                )}
               </div>
 
               <div>
