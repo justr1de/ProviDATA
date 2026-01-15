@@ -103,6 +103,7 @@ function NovoCidadaoForm() {
     nome: '',
     cpf: '',
     rg: '',
+    rg_orgao_emissor: '',
     data_nascimento: '',
     genero: '',
     email: '',
@@ -242,6 +243,7 @@ function NovoCidadaoForm() {
           nome: formData.nome,
           cpf: formData.cpf || null,
           rg: formData.rg || null,
+          rg_orgao_emissor: formData.rg_orgao_emissor || null,
           data_nascimento: formData.data_nascimento || null,
           genero: formData.genero || null,
           email: formData.email || null,
@@ -481,6 +483,18 @@ function NovoCidadaoForm() {
                   name="rg"
                   placeholder="Número do RG"
                   value={formData.rg}
+                  onChange={handleChange}
+                  style={inputStyle}
+                />
+              </div>
+
+              <div>
+                <label style={labelStyle}>Órgão Emissor</label>
+                <input
+                  type="text"
+                  name="rg_orgao_emissor"
+                  placeholder="Ex: SSP/RO, DETRAN/RO"
+                  value={formData.rg_orgao_emissor}
                   onChange={handleChange}
                   style={inputStyle}
                 />
