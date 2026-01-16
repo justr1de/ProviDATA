@@ -1,16 +1,30 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-// Interface para o payload de e-mail do Gmail MCP
-interface GmailPayload {
+// Interface para o payload de e-mail
+interface EmailPayload {
   to: string[]
   subject: string
   content: string
   cc?: string[]
   bcc?: string[]
+  attachments?: string[]
 }
 
-// POST - Enviar notificação para cidadão
+// Interface para a fila de e-mails
+interface EmailQueue {
+  id: string
+  providencia_id: string
+  cidadao_id: string
+  gabinete_id: string
+  destinatario: string
+  assunto: string
+  mensagem: string
+  status: 'pendente' | 'aprovado' | 'enviado' | 'erro'
+  created_at: string
+}
+
+// POST - Adicionar e-mail à fila para envio via Gmail MCP
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -28,7 +42,6 @@ export async function POST(request: NextRequest) {
     const {
       providencia_id,
       andamento_id,
-      tipo_notificacao = 'email',
       assunto,
       mensagem,
       incluir_link_acompanhamento = true
@@ -67,39 +80,18 @@ export async function POST(request: NextRequest) {
     }
     
     const cidadao = providencia.cidadao
-    let destinatario = ''
-    let mensagemFinal = mensagem
     
-    // Determinar destinatário baseado no tipo de notificação
-    switch (tipo_notificacao) {
-      case 'email':
-        if (!cidadao.email) {
-          return NextResponse.json(
-            { error: 'Cidadão não possui email cadastrado' },
-            { status: 400 }
-          )
-        }
-        destinatario = cidadao.email
-        break
-      case 'sms':
-      case 'whatsapp':
-        if (!cidadao.telefone) {
-          return NextResponse.json(
-            { error: 'Cidadão não possui telefone cadastrado' },
-            { status: 400 }
-          )
-        }
-        destinatario = cidadao.telefone
-        break
-      default:
-        return NextResponse.json(
-          { error: 'Tipo de notificação inválido' },
-          { status: 400 }
-        )
+    if (!cidadao.email) {
+      return NextResponse.json(
+        { error: 'Cidadão não possui email cadastrado' },
+        { status: 400 }
+      )
     }
     
-    // Se solicitado, gerar link de acompanhamento
+    let mensagemFinal = mensagem
     let tokenAcesso = null
+    
+    // Se solicitado, gerar link de acompanhamento
     if (incluir_link_acompanhamento) {
       // Verificar se já existe token
       const { data: tokenExistente } = await supabase
@@ -137,8 +129,8 @@ export async function POST(request: NextRequest) {
     // Formatar assunto do e-mail
     const assuntoFinal = assunto || `[ProviDATA] Atualização da Providência ${providencia.protocolo}`
     
-    // Formatar mensagem completa para e-mail
-    const mensagemCompleta = tipo_notificacao === 'email' ? `
+    // Formatar mensagem completa
+    const mensagemCompleta = `
 Prezado(a) ${cidadao.nome},
 
 ${mensagemFinal}
@@ -150,9 +142,9 @@ Protocolo: ${providencia.protocolo}
 
 Este é um e-mail automático do sistema ProviDATA.
 Por favor, não responda diretamente a este e-mail.
-    `.trim() : mensagemFinal
+    `.trim()
     
-    // Registrar notificação
+    // Registrar na tabela de notificações
     const { data: notificacao, error: notificacaoError } = await supabase
       .from('notificacoes_cidadao')
       .insert({
@@ -160,16 +152,16 @@ Por favor, não responda diretamente a este e-mail.
         andamento_id,
         cidadao_id: cidadao.id,
         gabinete_id: providencia.gabinete_id,
-        tipo_notificacao,
+        tipo_notificacao: 'email',
         assunto: assuntoFinal,
         mensagem: mensagemCompleta,
-        destinatario,
+        destinatario: cidadao.email,
         status: 'pendente',
         enviado_por: user.id,
         metadados: { 
           token_acesso: tokenAcesso,
-          gmail_mcp: tipo_notificacao === 'email',
-          aguardando_aprovacao: tipo_notificacao === 'email'
+          gmail_mcp: true,
+          aguardando_aprovacao: true
         }
       })
       .select()
@@ -183,50 +175,24 @@ Por favor, não responda diretamente a este e-mail.
       )
     }
     
-    // Se for e-mail, preparar payload para Gmail MCP
-    let gmailPayload: GmailPayload | null = null
-    if (tipo_notificacao === 'email') {
-      gmailPayload = {
-        to: [destinatario],
-        subject: assuntoFinal,
-        content: mensagemCompleta
-      }
+    // Retornar payload formatado para o Gmail MCP
+    const gmailPayload: EmailPayload = {
+      to: [cidadao.email],
+      subject: assuntoFinal,
+      content: mensagemCompleta
     }
     
-    // Registrar andamento de notificação
-    await supabase
-      .from('andamentos')
-      .insert({
-        providencia_id,
-        gabinete_id: providencia.gabinete_id,
-        tipo_acao: 'notificacao',
-        descricao: `Notificação preparada para ${cidadao.nome} via ${tipo_notificacao}${tipo_notificacao === 'email' ? ' (aguardando aprovação no Gmail MCP)' : ''}`,
-        usuario_id: user.id,
-        usuario_nome: user.email,
-        visivel_cidadao: false,
-        metadados: { notificacao_id: notificacao.id }
-      })
-    
     return NextResponse.json({
-      notificacao: {
-        ...notificacao,
-        status: 'pendente'
-      },
-      envio: { 
-        success: true, 
-        messageId: `notif_${notificacao.id}`,
-        aguardando_aprovacao: tipo_notificacao === 'email'
-      },
+      success: true,
+      notificacao_id: notificacao.id,
       gmail_payload: gmailPayload,
-      instrucoes: tipo_notificacao === 'email' 
-        ? 'E-mail preparado! Use o Gmail MCP para enviar. O comando é: gmail_send_messages com o payload fornecido.'
-        : null,
+      instrucoes: 'Use o Gmail MCP para enviar este e-mail. Após o envio, atualize o status da notificação.',
       link_acompanhamento: tokenAcesso 
         ? `${process.env.NEXT_PUBLIC_APP_URL || 'https://providata.vercel.app'}/acompanhar/${tokenAcesso}`
         : null
     }, { status: 201 })
   } catch (error) {
-    console.error('Erro na API de notificações:', error)
+    console.error('Erro na API de email:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }
@@ -234,57 +200,7 @@ Por favor, não responda diretamente a este e-mail.
   }
 }
 
-// GET - Listar notificações de uma providência
-export async function GET(request: NextRequest) {
-  try {
-    const supabase = await createClient()
-    const { searchParams } = new URL(request.url)
-    const providenciaId = searchParams.get('providencia_id')
-    const status = searchParams.get('status')
-    const gabineteId = searchParams.get('gabinete_id')
-    
-    let query = supabase
-      .from('notificacoes_cidadao')
-      .select(`
-        *,
-        cidadao:cidadaos(nome, email),
-        providencia:providencias(protocolo, titulo)
-      `)
-      .order('created_at', { ascending: false })
-    
-    if (providenciaId) {
-      query = query.eq('providencia_id', providenciaId)
-    }
-    
-    if (status) {
-      query = query.eq('status', status)
-    }
-    
-    if (gabineteId) {
-      query = query.eq('gabinete_id', gabineteId)
-    }
-    
-    const { data: notificacoes, error } = await query
-    
-    if (error) {
-      console.error('Erro ao buscar notificações:', error)
-      return NextResponse.json(
-        { error: 'Erro ao buscar notificações' },
-        { status: 500 }
-      )
-    }
-    
-    return NextResponse.json({ notificacoes })
-  } catch (error) {
-    console.error('Erro na API de notificações:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
-  }
-}
-
-// PUT - Atualizar status da notificação após envio via Gmail MCP
+// PUT - Atualizar status do e-mail após envio via Gmail MCP
 export async function PUT(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -332,7 +248,50 @@ export async function PUT(request: NextRequest) {
     
     return NextResponse.json({ success: true, notificacao: data })
   } catch (error) {
-    console.error('Erro na API de notificações:', error)
+    console.error('Erro na API de email:', error)
+    return NextResponse.json(
+      { error: 'Erro interno do servidor' },
+      { status: 500 }
+    )
+  }
+}
+
+// GET - Listar e-mails pendentes de envio
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { searchParams } = new URL(request.url)
+    const status = searchParams.get('status') || 'pendente'
+    const gabinete_id = searchParams.get('gabinete_id')
+    
+    let query = supabase
+      .from('notificacoes_cidadao')
+      .select(`
+        *,
+        cidadao:cidadaos(nome, email),
+        providencia:providencias(protocolo, titulo)
+      `)
+      .eq('tipo_notificacao', 'email')
+      .eq('status', status)
+      .order('created_at', { ascending: false })
+    
+    if (gabinete_id) {
+      query = query.eq('gabinete_id', gabinete_id)
+    }
+    
+    const { data: emails, error } = await query
+    
+    if (error) {
+      console.error('Erro ao buscar emails:', error)
+      return NextResponse.json(
+        { error: 'Erro ao buscar emails' },
+        { status: 500 }
+      )
+    }
+    
+    return NextResponse.json({ emails })
+  } catch (error) {
+    console.error('Erro na API de email:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

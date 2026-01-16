@@ -205,9 +205,14 @@ export function TimelineAndamentos({
         setShowNotifyForm(false)
         await carregarAndamentos()
         
-        alert(data.envio?.success 
-          ? 'Notificação enviada com sucesso!' 
-          : 'Notificação registrada, mas houve erro no envio.')
+        // Mostrar mensagem apropriada para Gmail MCP
+        if (data.gmail_payload) {
+          alert(`✅ E-mail preparado com sucesso!\n\nPara enviar, use o Gmail MCP com o seguinte comando:\n\ngmail_send_messages\n\nDestinatário: ${data.gmail_payload.to[0]}\nAssunto: ${data.gmail_payload.subject}\n\nO e-mail será enviado após sua aprovação.`)
+        } else if (data.envio?.success) {
+          alert('Notificação registrada com sucesso!')
+        } else {
+          alert('Notificação registrada, mas houve erro no envio.')
+        }
       }
     } catch (error) {
       console.error('Erro ao enviar notificação:', error)
