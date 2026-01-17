@@ -34,7 +34,9 @@ import {
   Brain,
   Zap,
   HelpCircle,
-  ChevronDown
+  ChevronDown,
+  Mail,
+  MessageCircle
 } from 'lucide-react'
 import { Tooltip } from '@/components/ui/tooltip'
 
@@ -57,6 +59,11 @@ interface Stats {
   em_analise: number
   encaminhadas: number
   urgentes: number
+}
+
+interface MessageStats {
+  emails24h: number
+  whatsapp24h: number
 }
 
 interface CustomChart {
@@ -232,6 +239,10 @@ export default function DashboardPage() {
     encaminhadas: 0,
     urgentes: 0,
   })
+  const [messageStats, setMessageStats] = useState<MessageStats>({
+    emails24h: 0,
+    whatsapp24h: 0,
+  })
   const [recentProvidencias, setRecentProvidencias] = useState<Providencia[]>([])
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [showChartBuilder, setShowChartBuilder] = useState(true)
@@ -325,6 +336,39 @@ export default function DashboardPage() {
       if (recent) {
         setRecentProvidencias(recent as unknown as Providencia[])
       }
+
+      // Carregar estatísticas de mensagens das últimas 24 horas
+      const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      
+      // Contar e-mails enviados nas últimas 24h
+      let emailQuery = supabase
+        .from('email_tracking')
+        .select('id', { count: 'exact', head: true })
+        .gte('enviado_em', last24h)
+      
+      if (!isSuperAdmin(user)) {
+        emailQuery = emailQuery.eq('gabinete_id', tenant?.id)
+      }
+      
+      const { count: emailCount } = await emailQuery
+      
+      // Contar WhatsApp enviados nas últimas 24h
+      let whatsappQuery = supabase
+        .from('notificacoes_cidadao')
+        .select('id', { count: 'exact', head: true })
+        .eq('tipo_notificacao', 'whatsapp')
+        .gte('created_at', last24h)
+      
+      if (!isSuperAdmin(user)) {
+        whatsappQuery = whatsappQuery.eq('gabinete_id', tenant?.id)
+      }
+      
+      const { count: whatsappCount } = await whatsappQuery
+      
+      setMessageStats({
+        emails24h: emailCount || 0,
+        whatsapp24h: whatsappCount || 0,
+      })
     } catch (error) {
       console.error('Erro ao carregar dados:', error)
     } finally {
@@ -847,6 +891,91 @@ export default function DashboardPage() {
               </Link>
             </div>
           </div>
+
+          {/* Card de Mensagens Enviadas - Últimas 24h */}
+          <Link href="/dashboard/mensagens" style={{ textDecoration: 'none', display: 'block', marginBottom: '24px' }}>
+            <div style={{
+              backgroundColor: 'var(--card)',
+              borderRadius: '16px',
+              border: '1px solid var(--border)',
+              padding: '20px',
+              cursor: 'pointer',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+            className="stat-card"
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '10px',
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Send style={{ width: '20px', height: '20px', color: 'white' }} />
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>Mensagens Enviadas</h3>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>Últimas 24 horas</p>
+                  </div>
+                </div>
+                <ChevronRight style={{ width: '20px', height: '20px', color: 'var(--text-muted)' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '14px',
+                  backgroundColor: 'var(--muted-bg)',
+                  borderRadius: '12px'
+                }}>
+                  <div style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '10px',
+                    backgroundColor: '#dbeafe',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Mail style={{ width: '22px', height: '22px', color: '#2563eb' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{messageStats.emails24h}</p>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>E-mails</p>
+                  </div>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '14px',
+                  backgroundColor: 'var(--muted-bg)',
+                  borderRadius: '12px'
+                }}>
+                  <div style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '10px',
+                    backgroundColor: '#dcfce7',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <MessageCircle style={{ width: '22px', height: '22px', color: '#25D366' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{messageStats.whatsapp24h}</p>
+                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>WhatsApp</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
 
           {/* Taxa de Conclusão */}
           <div id="taxa-conclusao" className="taxa-card" style={{ marginBottom: '24px' }}>

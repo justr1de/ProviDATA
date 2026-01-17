@@ -20,7 +20,9 @@ import {
   Send,
   Loader2,
   RefreshCw,
-  Filter
+  Filter,
+  Calendar,
+  X
 } from 'lucide-react'
 import { Tooltip } from '@/components/ui/tooltip'
 
@@ -87,6 +89,8 @@ export default function MensagensPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   
@@ -97,7 +101,7 @@ export default function MensagensPage() {
     if (tenant?.id) {
       loadMessages()
     }
-  }, [tenant?.id, activeTab, currentPage, statusFilter])
+  }, [tenant?.id, activeTab, currentPage, statusFilter, dateFrom, dateTo])
 
   const loadMessages = async () => {
     if (!tenant?.id) return
@@ -131,6 +135,14 @@ export default function MensagensPage() {
 
     if (search) {
       query = query.or(`destinatario_email.ilike.%${search}%,destinatario_nome.ilike.%${search}%,assunto.ilike.%${search}%`)
+    }
+
+    // Filtro de data
+    if (dateFrom) {
+      query = query.gte('enviado_em', `${dateFrom}T00:00:00`)
+    }
+    if (dateTo) {
+      query = query.lte('enviado_em', `${dateTo}T23:59:59`)
     }
 
     const from = (currentPage - 1) * ITEMS_PER_PAGE
@@ -168,6 +180,14 @@ export default function MensagensPage() {
       query = query.or(`destinatario.ilike.%${search}%,assunto.ilike.%${search}%`)
     }
 
+    // Filtro de data
+    if (dateFrom) {
+      query = query.gte('created_at', `${dateFrom}T00:00:00`)
+    }
+    if (dateTo) {
+      query = query.lte('created_at', `${dateTo}T23:59:59`)
+    }
+
     const from = (currentPage - 1) * ITEMS_PER_PAGE
     const to = from + ITEMS_PER_PAGE - 1
 
@@ -188,6 +208,14 @@ export default function MensagensPage() {
     setCurrentPage(1)
     setSearch('')
     setStatusFilter('')
+    setDateFrom('')
+    setDateTo('')
+  }
+
+  const clearDateFilters = () => {
+    setDateFrom('')
+    setDateTo('')
+    setCurrentPage(1)
   }
 
   const formatDate = (dateString: string | null) => {
@@ -428,6 +456,87 @@ export default function MensagensPage() {
             <option value="erro">Erro</option>
           </select>
         </div>
+      </div>
+
+      {/* Date Filters */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: '12px',
+        marginBottom: '24px',
+        padding: '16px',
+        backgroundColor: 'var(--card)',
+        borderRadius: '12px',
+        border: '1px solid var(--border)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Calendar style={{ width: '18px', height: '18px', color: 'var(--text-muted)' }} />
+          <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-color)' }}>Período:</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>De:</span>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => {
+              setDateFrom(e.target.value)
+              setCurrentPage(1)
+            }}
+            style={{
+              padding: '10px 14px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              backgroundColor: 'var(--muted-bg)',
+              fontSize: '14px',
+              color: 'var(--text-color)',
+              cursor: 'pointer'
+            }}
+          />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Até:</span>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => {
+              setDateTo(e.target.value)
+              setCurrentPage(1)
+            }}
+            style={{
+              padding: '10px 14px',
+              borderRadius: '8px',
+              border: '1px solid var(--border)',
+              backgroundColor: 'var(--muted-bg)',
+              fontSize: '14px',
+              color: 'var(--text-color)',
+              cursor: 'pointer'
+            }}
+          />
+        </div>
+        {(dateFrom || dateTo) && (
+          <Tooltip content="Limpar filtro de data" position="top">
+            <button
+              onClick={clearDateFilters}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                border: '1px solid var(--border)',
+                backgroundColor: '#fef2f2',
+                color: '#dc2626',
+                fontSize: '13px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              <X style={{ width: '14px', height: '14px' }} />
+              Limpar
+            </button>
+          </Tooltip>
+        )}
       </div>
 
       {/* Content */}
