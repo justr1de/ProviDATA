@@ -115,28 +115,72 @@ export default function AparenciaPage() {
 
   const handleBackgroundChange = (bg: string | null) => {
     setBackgroundImage(bg)
-    if (bg) {
-      localStorage.setItem('providata-bg-image', bg)
-    } else {
-      localStorage.removeItem('providata-bg-image')
+    try {
+      if (bg) {
+        if (bg.length > 4 * 1024 * 1024) {
+          toast.error('Imagem muito grande. Por favor, use uma imagem menor que 4MB.')
+          return
+        }
+        localStorage.setItem('providata-bg-image', bg)
+        toast.success('Imagem de fundo atualizada!')
+      } else {
+        localStorage.removeItem('providata-bg-image')
+        toast.success('Imagem de fundo removida!')
+      }
+      setTimeout(() => window.location.reload(), 500)
+    } catch (error: any) {
+      console.error('Erro ao salvar imagem:', error)
+      if (error.name === 'QuotaExceededError') {
+        toast.error('Espaco de armazenamento cheio. Tente uma imagem menor.')
+      } else {
+        toast.error('Erro ao salvar imagem de fundo. Tente novamente.')
+      }
     }
-    toast.success('Imagem de fundo atualizada!')
-    // Recarregar para aplicar a mudança
-    window.location.reload()
   }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('A imagem deve ter no máximo 5MB')
+        toast.error('A imagem deve ter no maximo 5MB')
         return
       }
 
+      toast.info('Processando imagem...')
+
+      // Comprimir a imagem antes de salvar
+      const img = new Image()
       const reader = new FileReader()
+      
       reader.onload = (event) => {
-        const result = event.target?.result as string
-        handleBackgroundChange(result)
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const maxWidth = 1920
+          const maxHeight = 1080
+          let width = img.width
+          let height = img.height
+
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width
+            width = maxWidth
+          }
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height
+            height = maxHeight
+          }
+
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          ctx?.drawImage(img, 0, 0, width, height)
+
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7)
+          handleBackgroundChange(compressedDataUrl)
+        }
+        img.src = event.target?.result as string
+      }
+      reader.onerror = () => {
+        toast.error('Erro ao ler a imagem. Tente novamente.')
       }
       reader.readAsDataURL(file)
     }
