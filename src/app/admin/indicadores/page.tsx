@@ -189,9 +189,42 @@ export default function IndicadoresPage() {
                 />
               </Link>
               <div style={{ height: '24px', width: '1px', backgroundColor: 'var(--border)' }} />
-              <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--foreground-muted)' }}>
-                Indicadores de Providências
-              </span>
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <span style={{ 
+                  fontSize: '20px', 
+                  fontWeight: 700, 
+                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #16a34a 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  letterSpacing: '0.5px',
+                  textTransform: 'uppercase'
+                }}>
+                  Indicadores
+                </span>
+                {/* Efeito de reflexo/espelho */}
+                <span style={{ 
+                  position: 'absolute',
+                  left: 0,
+                  top: '100%',
+                  fontSize: '20px', 
+                  fontWeight: 700, 
+                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #16a34a 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  letterSpacing: '0.5px',
+                  textTransform: 'uppercase',
+                  transform: 'scaleY(-1)',
+                  opacity: 0.15,
+                  maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%)',
+                  WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%)',
+                  pointerEvents: 'none'
+                }}>
+                  Indicadores
+                </span>
+              </div>
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
