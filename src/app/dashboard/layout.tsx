@@ -734,7 +734,7 @@ export default function DashboardLayout({
           display: 'flex',
           flexDirection: 'column',
           transition: 'margin-left 0.3s ease',
-          backgroundColor: 'var(--background)'
+          backgroundColor: customBgImage ? 'transparent' : 'var(--background)'
         }}
       >
         {/* Header - Cores padronizadas */}
