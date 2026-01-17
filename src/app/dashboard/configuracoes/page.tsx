@@ -22,13 +22,13 @@ export default function ConfiguracoesPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [gabineteData, setGabineteData] = useState({
-    name: '',
-    parlamentar_name: '',
+    nome: '',
+    parlamentar_nome: '',
     parlamentar_nickname: '',
-    cargo: '',
+    parlamentar_cargo: '',
     partido: '',
-    email_contato: '',
-    telefone_contato: '',
+    email: '',
+    telefone: '',
     logo_url: '',
   })
   const { gabinete, setGabinete } = useAuthStore()
@@ -38,14 +38,15 @@ export default function ConfiguracoesPage() {
 
   useEffect(() => {
     if (gabinete) {
+      // Carregar dados do gabinete - a view tenants mapeia os campos
       setGabineteData({
-        name: gabinete.nome || (gabinete as any).name || '',
-        parlamentar_name: gabinete.parlamentar_nome || (gabinete as any).parlamentar_name || '',
+        nome: gabinete.nome || (gabinete as any).name || '',
+        parlamentar_nome: gabinete.parlamentar_nome || (gabinete as any).parlamentar_name || '',
         parlamentar_nickname: (gabinete as any).parlamentar_nickname || '',
-        cargo: (gabinete as any).cargo || '',
+        parlamentar_cargo: (gabinete as any).cargo || (gabinete as any).parlamentar_cargo || '',
         partido: gabinete.partido || '',
-        email_contato: (gabinete as any).email_contato || '',
-        telefone_contato: (gabinete as any).telefone_contato || '',
+        email: (gabinete as any).email_contato || (gabinete as any).email || '',
+        telefone: (gabinete as any).telefone_contato || (gabinete as any).telefone || '',
         logo_url: gabinete.logo_url || '',
       })
     }
@@ -56,16 +57,16 @@ export default function ConfiguracoesPage() {
 
     setIsLoading(true)
     try {
+      // Atualizar diretamente na tabela gabinetes (não na view tenants)
       const { data, error } = await supabase
-        .from('tenants')
+        .from('gabinetes')
         .update({
-          name: gabineteData.name,
-          parlamentar_name: gabineteData.parlamentar_name,
-          parlamentar_nickname: gabineteData.parlamentar_nickname || null,
-          cargo: gabineteData.cargo || null,
+          nome: gabineteData.nome,
+          parlamentar_nome: gabineteData.parlamentar_nome,
+          parlamentar_cargo: gabineteData.parlamentar_cargo || null,
           partido: gabineteData.partido || null,
-          email_contato: gabineteData.email_contato || null,
-          telefone_contato: gabineteData.telefone_contato || null,
+          email: gabineteData.email || null,
+          telefone: gabineteData.telefone || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', gabinete.id)
@@ -81,8 +82,8 @@ export default function ConfiguracoesPage() {
       if (data) {
         setGabinete({
           ...gabinete,
-          nome: data.name,
-          parlamentar_nome: data.parlamentar_name,
+          nome: data.nome,
+          parlamentar_nome: data.parlamentar_nome,
           partido: data.partido,
           logo_url: data.logo_url,
         })
@@ -125,8 +126,9 @@ export default function ConfiguracoesPage() {
         .from('tenant-assets')
         .getPublicUrl(fileName)
 
+      // Atualizar diretamente na tabela gabinetes
       const { error: updateError } = await supabase
-        .from('tenants')
+        .from('gabinetes')
         .update({ logo_url: publicUrl, updated_at: new Date().toISOString() })
         .eq('id', gabinete.id)
 
@@ -292,8 +294,8 @@ export default function ConfiguracoesPage() {
             <div>
               <label style={labelStyle}>Nome do Gabinete</label>
               <input
-                value={gabineteData.name}
-                onChange={(e) => setGabineteData({ ...gabineteData, name: e.target.value })}
+                value={gabineteData.nome}
+                onChange={(e) => setGabineteData({ ...gabineteData, nome: e.target.value })}
                 style={inputStyle}
                 placeholder="Digite o nome do gabinete"
               />
@@ -303,8 +305,8 @@ export default function ConfiguracoesPage() {
               <div>
                 <label style={labelStyle}>Nome do Parlamentar</label>
                 <input
-                  value={gabineteData.parlamentar_name}
-                  onChange={(e) => setGabineteData({ ...gabineteData, parlamentar_name: e.target.value })}
+                  value={gabineteData.parlamentar_nome}
+                  onChange={(e) => setGabineteData({ ...gabineteData, parlamentar_nome: e.target.value })}
                   style={inputStyle}
                   placeholder="Digite o nome do parlamentar"
                 />
@@ -325,8 +327,8 @@ export default function ConfiguracoesPage() {
               <div>
                 <label style={labelStyle}>Cargo</label>
                 <select
-                  value={gabineteData.cargo}
-                  onChange={(e) => setGabineteData({ ...gabineteData, cargo: e.target.value })}
+                  value={gabineteData.parlamentar_cargo}
+                  onChange={(e) => setGabineteData({ ...gabineteData, parlamentar_cargo: e.target.value })}
                   style={inputStyle}
                 >
                   <option value="">Selecione o cargo</option>
@@ -356,8 +358,8 @@ export default function ConfiguracoesPage() {
                 <label style={labelStyle}>E-mail de Contato</label>
                 <input
                   type="email"
-                  value={gabineteData.email_contato}
-                  onChange={(e) => setGabineteData({ ...gabineteData, email_contato: e.target.value })}
+                  value={gabineteData.email}
+                  onChange={(e) => setGabineteData({ ...gabineteData, email: e.target.value })}
                   style={inputStyle}
                   placeholder="contato@gabinete.gov.br"
                 />
@@ -366,8 +368,8 @@ export default function ConfiguracoesPage() {
               <div>
                 <label style={labelStyle}>Telefone de Contato</label>
                 <input
-                  value={gabineteData.telefone_contato}
-                  onChange={(e) => setGabineteData({ ...gabineteData, telefone_contato: e.target.value })}
+                  value={gabineteData.telefone}
+                  onChange={(e) => setGabineteData({ ...gabineteData, telefone: e.target.value })}
                   style={inputStyle}
                   placeholder="(00) 00000-0000"
                 />
