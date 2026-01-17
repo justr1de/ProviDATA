@@ -87,8 +87,12 @@ function ProvidenciasContent() {
 
   useEffect(() => {
     const status = searchParams.get('status')
+    const prioridade = searchParams.get('prioridade')
     if (status) {
       setStatusFilter(status)
+    }
+    if (prioridade) {
+      setPriorityFilter(prioridade)
     }
   }, [searchParams])
 

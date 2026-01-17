@@ -658,100 +658,108 @@ export default function DashboardPage() {
               marginBottom: '16px'
             }}>
               {/* Total */}
-              <div className="stat-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <Tooltip content="Total de providências" position="top">
-                    <div style={{ 
-                      width: '48px', 
-                      height: '48px', 
-                      borderRadius: '12px',
-                      backgroundColor: '#dbeafe',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <FileText style={{ width: '24px', height: '24px', color: '#2563eb' }} />
+              <Link href="/dashboard/providencias" style={{ textDecoration: 'none' }}>
+                <div className="stat-card" style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <Tooltip content="Ver todas as providências" position="top">
+                      <div style={{ 
+                        width: '48px', 
+                        height: '48px', 
+                        borderRadius: '12px',
+                        backgroundColor: '#dbeafe',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <FileText style={{ width: '24px', height: '24px', color: '#2563eb' }} />
+                      </div>
+                    </Tooltip>
+                    <div>
+                      <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.total}</p>
+                      <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Total</p>
                     </div>
-                  </Tooltip>
-                  <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.total}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Total</p>
                   </div>
                 </div>
-              </div>
+              </Link>
 
               {/* Pendentes */}
-              <div className="stat-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <Tooltip content="Aguardando análise" position="top">
-                    <div style={{ 
-                      width: '48px', 
-                      height: '48px', 
-                      borderRadius: '12px',
-                      backgroundColor: '#fef3c7',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <Clock style={{ width: '24px', height: '24px', color: '#d97706' }} />
+              <Link href="/dashboard/providencias?status=pendente" style={{ textDecoration: 'none' }}>
+                <div className="stat-card" style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <Tooltip content="Ver providências pendentes" position="top">
+                      <div style={{ 
+                        width: '48px', 
+                        height: '48px', 
+                        borderRadius: '12px',
+                        backgroundColor: '#fef3c7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <Clock style={{ width: '24px', height: '24px', color: '#d97706' }} />
+                      </div>
+                    </Tooltip>
+                    <div>
+                      <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.pendentes}</p>
+                      <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Pendentes</p>
                     </div>
-                  </Tooltip>
-                  <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.pendentes}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Pendentes</p>
                   </div>
                 </div>
-              </div>
+              </Link>
 
               {/* Em Andamento */}
-              <div className="stat-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <Tooltip content="Em processamento" position="top">
-                    <div style={{ 
-                      width: '48px', 
-                      height: '48px', 
-                      borderRadius: '12px',
-                      backgroundColor: '#e0e7ff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <TrendingUp style={{ width: '24px', height: '24px', color: '#4f46e5' }} />
+              <Link href="/dashboard/providencias?status=em_andamento" style={{ textDecoration: 'none' }}>
+                <div className="stat-card" style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <Tooltip content="Ver providências em andamento" position="top">
+                      <div style={{ 
+                        width: '48px', 
+                        height: '48px', 
+                        borderRadius: '12px',
+                        backgroundColor: '#e0e7ff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <TrendingUp style={{ width: '24px', height: '24px', color: '#4f46e5' }} />
+                      </div>
+                    </Tooltip>
+                    <div>
+                      <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.em_andamento}</p>
+                      <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Em Andamento</p>
                     </div>
-                  </Tooltip>
-                  <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.em_andamento}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Em Andamento</p>
                   </div>
                 </div>
-              </div>
+              </Link>
 
               {/* Concluídas */}
-              <div className="stat-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <Tooltip content="Finalizadas com sucesso" position="top">
-                    <div style={{ 
-                      width: '48px', 
-                      height: '48px', 
-                      borderRadius: '12px',
-                      backgroundColor: '#dcfce7',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <CheckCircle2 style={{ width: '24px', height: '24px', color: 'var(--primary)' }} />
+              <Link href="/dashboard/providencias?status=concluido" style={{ textDecoration: 'none' }}>
+                <div className="stat-card" style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <Tooltip content="Ver providências concluídas" position="top">
+                      <div style={{ 
+                        width: '48px', 
+                        height: '48px', 
+                        borderRadius: '12px',
+                        backgroundColor: '#dcfce7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <CheckCircle2 style={{ width: '24px', height: '24px', color: 'var(--primary)' }} />
+                      </div>
+                    </Tooltip>
+                    <div>
+                      <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.concluidas}</p>
+                      <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Concluídas</p>
                     </div>
-                  </Tooltip>
-                  <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.concluidas}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Concluídas</p>
                   </div>
                 </div>
-              </div>
+              </Link>
             </div>
 
             {/* Segunda linha - 3 cards adicionais */}
@@ -761,76 +769,82 @@ export default function DashboardPage() {
               gap: '16px'
             }}>
               {/* Urgentes */}
-              <div className="stat-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <Tooltip content="Prioridade máxima" position="top">
-                    <div style={{ 
-                      width: '48px', 
-                      height: '48px', 
-                      borderRadius: '12px',
-                      backgroundColor: '#fee2e2',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <AlertTriangle style={{ width: '24px', height: '24px', color: '#dc2626' }} />
+              <Link href="/dashboard/providencias?prioridade=urgente" style={{ textDecoration: 'none' }}>
+                <div className="stat-card" style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <Tooltip content="Ver providências urgentes" position="top">
+                      <div style={{ 
+                        width: '48px', 
+                        height: '48px', 
+                        borderRadius: '12px',
+                        backgroundColor: '#fee2e2',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <AlertTriangle style={{ width: '24px', height: '24px', color: '#dc2626' }} />
+                      </div>
+                    </Tooltip>
+                    <div>
+                      <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.urgentes}</p>
+                      <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Urgentes</p>
                     </div>
-                  </Tooltip>
-                  <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.urgentes}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Urgentes</p>
                   </div>
                 </div>
-              </div>
+              </Link>
 
               {/* Em Análise */}
-              <div className="stat-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <Tooltip content="Sendo analisadas" position="top">
-                    <div style={{ 
-                      width: '48px', 
-                      height: '48px', 
-                      borderRadius: '12px',
-                      backgroundColor: '#f3e8ff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <Search style={{ width: '24px', height: '24px', color: '#9333ea' }} />
+              <Link href="/dashboard/providencias?status=em_analise" style={{ textDecoration: 'none' }}>
+                <div className="stat-card" style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <Tooltip content="Ver providências em análise" position="top">
+                      <div style={{ 
+                        width: '48px', 
+                        height: '48px', 
+                        borderRadius: '12px',
+                        backgroundColor: '#f3e8ff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <Search style={{ width: '24px', height: '24px', color: '#9333ea' }} />
+                      </div>
+                    </Tooltip>
+                    <div>
+                      <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.em_analise}</p>
+                      <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Em Análise</p>
                     </div>
-                  </Tooltip>
-                  <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.em_analise}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Em Análise</p>
                   </div>
                 </div>
-              </div>
+              </Link>
 
               {/* Encaminhadas */}
-              <div className="stat-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <Tooltip content="Enviadas para órgãos" position="top">
-                    <div style={{ 
-                      width: '48px', 
-                      height: '48px', 
-                      borderRadius: '12px',
-                      backgroundColor: '#cffafe',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <Send style={{ width: '24px', height: '24px', color: '#0891b2' }} />
+              <Link href="/dashboard/providencias?status=encaminhado" style={{ textDecoration: 'none' }}>
+                <div className="stat-card" style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <Tooltip content="Ver providências encaminhadas" position="top">
+                      <div style={{ 
+                        width: '48px', 
+                        height: '48px', 
+                        borderRadius: '12px',
+                        backgroundColor: '#cffafe',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <Send style={{ width: '24px', height: '24px', color: '#0891b2' }} />
+                      </div>
+                    </Tooltip>
+                    <div>
+                      <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.encaminhadas}</p>
+                      <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Encaminhadas</p>
                     </div>
-                  </Tooltip>
-                  <div>
-                    <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.encaminhadas}</p>
-                    <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Encaminhadas</p>
                   </div>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
 
