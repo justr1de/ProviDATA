@@ -409,7 +409,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="dashboard-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Loader2 style={{ width: '32px', height: '32px', animation: 'spin 1s linear infinite', color: '#16a34a' }} />
+        <Loader2 style={{ width: '32px', height: '32px', animation: 'spin 1s linear infinite', color: 'var(--primary)' }} />
       </div>
     )
   }
@@ -440,7 +440,7 @@ export default function DashboardPage() {
                 width: '56px',
                 height: '56px',
                 borderRadius: '16px',
-                background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light, var(--primary)) 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -470,7 +470,7 @@ export default function DashboardPage() {
                     width: index === currentTourStep ? '24px' : '8px',
                     height: '8px',
                     borderRadius: '4px',
-                    backgroundColor: index === currentTourStep ? '#16a34a' : '#e5e7eb',
+                    backgroundColor: index === currentTourStep ? 'var(--primary)' : '#e5e7eb',
                     transition: 'all 0.3s ease'
                   }}
                 />
@@ -520,7 +520,7 @@ export default function DashboardPage() {
                   fontWeight: '700',
                   borderRadius: '10px',
                   border: 'none',
-                  backgroundColor: '#16a34a',
+                  backgroundColor: 'var(--primary)',
                   color: 'white',
                   cursor: 'pointer'
                 }}
@@ -557,11 +557,11 @@ export default function DashboardPage() {
                     width: '48px', 
                     height: '48px', 
                     borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                    background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light, var(--primary)) 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
+                    boxShadow: '0 4px 12px var(--primary-muted, rgba(22, 163, 74, 0.25))'
                   }}>
                     <LayoutDashboard style={{ width: '24px', height: '24px', color: 'white' }} />
                   </div>
@@ -630,14 +630,14 @@ export default function DashboardPage() {
                       alignItems: 'center',
                       gap: '8px',
                       padding: '10px 20px',
-                      backgroundColor: '#16a34a',
+                      backgroundColor: 'var(--primary)',
                       color: 'white',
                       fontSize: '14px',
                       fontWeight: '600',
                       borderRadius: '8px',
                       border: 'none',
                       cursor: 'pointer',
-                      boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
+                      boxShadow: '0 4px 12px var(--primary-muted, rgba(22, 163, 74, 0.25))'
                     }}>
                       <Plus style={{ width: '18px', height: '18px' }} />
                       Nova Providência
@@ -743,7 +743,7 @@ export default function DashboardPage() {
                       justifyContent: 'center',
                       flexShrink: 0
                     }}>
-                      <CheckCircle2 style={{ width: '24px', height: '24px', color: '#16a34a' }} />
+                      <CheckCircle2 style={{ width: '24px', height: '24px', color: 'var(--primary)' }} />
                     </div>
                   </Tooltip>
                   <div>
@@ -841,7 +841,7 @@ export default function DashboardPage() {
                 <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>Taxa de Conclusão</h3>
                 <p style={{ fontSize: '14px', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Providências concluídas vs total</p>
               </div>
-              <span style={{ fontSize: '32px', fontWeight: '700', color: '#16a34a' }}>{taxaConclusao}%</span>
+              <span style={{ fontSize: '32px', fontWeight: '700', color: 'var(--primary)' }}>{taxaConclusao}%</span>
             </div>
             <div style={{ 
               width: '100%', 
@@ -852,7 +852,7 @@ export default function DashboardPage() {
             }}>
               <div style={{ 
                 height: '100%', 
-                background: 'linear-gradient(90deg, #16a34a 0%, #22c55e 100%)',
+                background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-light, var(--primary)) 100%)',
                 borderRadius: '6px',
                 width: `${taxaConclusao}%`,
                 transition: 'width 0.5s ease'
@@ -892,7 +892,7 @@ export default function DashboardPage() {
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}>
-                    <BarChart3 style={{ width: '20px', height: '20px', color: '#16a34a' }} />
+                    <BarChart3 style={{ width: '20px', height: '20px', color: 'var(--primary)' }} />
                   </div>
                 </Tooltip>
                 <div>
@@ -1051,7 +1051,7 @@ export default function DashboardPage() {
                             alignItems: 'center',
                             justifyContent: 'center'
                           }}>
-                            <ChartIcon style={{ width: '18px', height: '18px', color: '#16a34a' }} />
+                            <ChartIcon style={{ width: '18px', height: '18px', color: 'var(--primary)' }} />
                           </div>
                           <div>
                             <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{chart.title}</h4>
@@ -1152,7 +1152,7 @@ export default function DashboardPage() {
                   alignItems: 'center',
                   gap: '4px',
                   fontSize: '14px',
-                  color: '#16a34a',
+                  color: 'var(--primary)',
                   fontWeight: '600',
                   backgroundColor: 'transparent',
                   border: 'none',
@@ -1188,7 +1188,7 @@ export default function DashboardPage() {
                     alignItems: 'center',
                     gap: '8px',
                     padding: '12px 20px',
-                    backgroundColor: '#16a34a',
+                    backgroundColor: 'var(--primary)',
                     color: 'white',
                     fontSize: '14px',
                     fontWeight: '600',
@@ -1293,7 +1293,7 @@ export default function DashboardPage() {
               {/* Header do Painel */}
               <div style={{ 
                 padding: '20px',
-                background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)'
+                background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light, var(--primary)) 100%)'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1342,8 +1342,8 @@ export default function DashboardPage() {
                           gap: '6px',
                           padding: '12px 8px',
                           borderRadius: '10px',
-                          border: selectedChartType === type.id ? '2px solid #16a34a' : '2px solid #e5e7eb',
-                          backgroundColor: selectedChartType === type.id ? '#f0fdf4' : 'var(--card)',
+                          border: selectedChartType === type.id ? '2px solid var(--primary)' : '2px solid #e5e7eb',
+                          backgroundColor: selectedChartType === type.id ? 'var(--primary-muted, #f0fdf4)' : 'var(--card)',
                           cursor: 'pointer',
                           transition: 'all 0.2s'
                         }}
@@ -1351,12 +1351,12 @@ export default function DashboardPage() {
                         <type.icon style={{ 
                           width: '20px', 
                           height: '20px', 
-                          color: selectedChartType === type.id ? '#16a34a' : '#9ca3af'
+                          color: selectedChartType === type.id ? 'var(--primary)' : '#9ca3af'
                         }} />
                         <span style={{ 
                           fontSize: '11px', 
                           fontWeight: '600',
-                          color: selectedChartType === type.id ? '#16a34a' : '#6b7280'
+                          color: selectedChartType === type.id ? 'var(--primary)' : '#6b7280'
                         }}>{type.name}</span>
                       </button>
                     ))}
@@ -1494,7 +1494,7 @@ export default function DashboardPage() {
                     justifyContent: 'center',
                     gap: '8px',
                     padding: '12px 20px',
-                    backgroundColor: generatingChart ? '#86efac' : '#16a34a',
+                    backgroundColor: generatingChart ? 'var(--primary-light, #86efac)' : 'var(--primary)',
                     color: 'white',
                     fontSize: '14px',
                     fontWeight: '700',

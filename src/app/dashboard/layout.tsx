@@ -446,10 +446,10 @@ export default function DashboardLayout({
                 style={{
                   width: '100%',
                   padding: '8px 12px',
-                  backgroundColor: 'rgba(22, 163, 74, 0.15)',
-                  border: '1px solid rgba(22, 163, 74, 0.3)',
+                  backgroundColor: 'var(--primary-muted, rgba(22, 163, 74, 0.15))',
+                  border: '1px solid var(--primary)',
                   borderRadius: '8px',
-                  color: '#22c55e',
+                  color: 'var(--primary)',
                   fontSize: '12px',
                   fontWeight: '500',
                   cursor: 'pointer',
@@ -486,10 +486,10 @@ export default function DashboardLayout({
                       style={{
                         width: '100%',
                         padding: '10px 12px',
-                        backgroundColor: gabinete?.id === gab.id ? 'rgba(22, 163, 74, 0.2)' : 'transparent',
+                        backgroundColor: gabinete?.id === gab.id ? 'var(--primary-muted, rgba(22, 163, 74, 0.2))' : 'transparent',
                         border: 'none',
                         borderBottom: '1px solid var(--border)',
-                        color: gabinete?.id === gab.id ? '#22c55e' : 'var(--foreground)',
+                        color: gabinete?.id === gab.id ? 'var(--primary)' : 'var(--foreground)',
                         fontSize: '11px',
                         textAlign: 'left',
                         cursor: 'pointer',
@@ -497,7 +497,7 @@ export default function DashboardLayout({
                       }}
                       onMouseEnter={(e) => {
                         if (gabinete?.id !== gab.id) {
-                          e.currentTarget.style.backgroundColor = 'rgba(22, 163, 74, 0.1)'
+                          e.currentTarget.style.backgroundColor = 'var(--primary-muted, rgba(22, 163, 74, 0.1))'
                         }
                       }}
                       onMouseLeave={(e) => {
