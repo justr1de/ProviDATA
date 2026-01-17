@@ -22,8 +22,8 @@ export default function ConfiguracoesPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [gabineteData, setGabineteData] = useState({
-    nome: '',
-    parlamentar_nome: '',
+    name: '',
+    parlamentar_name: '',
     parlamentar_nickname: '',
     cargo: '',
     partido: '',
@@ -39,8 +39,8 @@ export default function ConfiguracoesPage() {
   useEffect(() => {
     if (gabinete) {
       setGabineteData({
-        nome: gabinete.nome || '',
-        parlamentar_nome: gabinete.parlamentar_nome || '',
+        name: gabinete.nome || (gabinete as any).name || '',
+        parlamentar_name: gabinete.parlamentar_nome || (gabinete as any).parlamentar_name || '',
         parlamentar_nickname: (gabinete as any).parlamentar_nickname || '',
         cargo: (gabinete as any).cargo || '',
         partido: gabinete.partido || '',
@@ -59,25 +59,38 @@ export default function ConfiguracoesPage() {
       const { data, error } = await supabase
         .from('tenants')
         .update({
-          nome: gabineteData.nome,
-          parlamentar_nome: gabineteData.parlamentar_nome,
+          name: gabineteData.name,
+          parlamentar_name: gabineteData.parlamentar_name,
           parlamentar_nickname: gabineteData.parlamentar_nickname || null,
           cargo: gabineteData.cargo || null,
           partido: gabineteData.partido || null,
           email_contato: gabineteData.email_contato || null,
           telefone_contato: gabineteData.telefone_contato || null,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', gabinete.id)
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
 
-      setGabinete(data)
+      // Atualizar o estado local com os novos dados
+      if (data) {
+        setGabinete({
+          ...gabinete,
+          nome: data.name,
+          parlamentar_nome: data.parlamentar_name,
+          partido: data.partido,
+          logo_url: data.logo_url,
+        })
+      }
       toast.success('Configurações salvas com sucesso!')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving settings:', error)
-      toast.error('Erro ao salvar configurações')
+      toast.error(`Erro ao salvar configurações: ${error.message || 'Erro desconhecido'}`)
     } finally {
       setIsLoading(false)
     }
@@ -114,7 +127,7 @@ export default function ConfiguracoesPage() {
 
       const { error: updateError } = await supabase
         .from('tenants')
-        .update({ logo_url: publicUrl })
+        .update({ logo_url: publicUrl, updated_at: new Date().toISOString() })
         .eq('id', gabinete.id)
 
       if (updateError) throw updateError
@@ -122,9 +135,9 @@ export default function ConfiguracoesPage() {
       setGabineteData({ ...gabineteData, logo_url: publicUrl })
       setGabinete({ ...gabinete, logo_url: publicUrl })
       toast.success('Logo atualizado com sucesso!')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading image:', error)
-      toast.error('Erro ao fazer upload da imagem')
+      toast.error(`Erro ao fazer upload da imagem: ${error.message || 'Erro desconhecido'}`)
     } finally {
       setIsUploading(false)
     }
@@ -279,8 +292,8 @@ export default function ConfiguracoesPage() {
             <div>
               <label style={labelStyle}>Nome do Gabinete</label>
               <input
-                value={gabineteData.nome}
-                onChange={(e) => setGabineteData({ ...gabineteData, nome: e.target.value })}
+                value={gabineteData.name}
+                onChange={(e) => setGabineteData({ ...gabineteData, name: e.target.value })}
                 style={inputStyle}
                 placeholder="Digite o nome do gabinete"
               />
@@ -290,8 +303,8 @@ export default function ConfiguracoesPage() {
               <div>
                 <label style={labelStyle}>Nome do Parlamentar</label>
                 <input
-                  value={gabineteData.parlamentar_nome}
-                  onChange={(e) => setGabineteData({ ...gabineteData, parlamentar_nome: e.target.value })}
+                  value={gabineteData.parlamentar_name}
+                  onChange={(e) => setGabineteData({ ...gabineteData, parlamentar_name: e.target.value })}
                   style={inputStyle}
                   placeholder="Digite o nome do parlamentar"
                 />
