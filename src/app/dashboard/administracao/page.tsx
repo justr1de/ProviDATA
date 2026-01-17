@@ -303,14 +303,63 @@ export default function AdministracaoPage() {
   return (
     <div className="max-w-[1400px] mx-auto px-1 md:px-2">
       {/* Header */}
-      <div style={{ marginBottom: '32px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-          <Shield style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
-          <h1 className="text-xl md:text-2xl lg:text-[28px] font-bold" style={{ color: 'var(--foreground)' }}>
-            Administração
-          </h1>
+      <div style={{ marginBottom: '40px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+          }}>
+            <Shield style={{ width: '28px', height: '28px', color: 'white' }} />
+          </div>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <h1 style={{
+              fontSize: '32px',
+              fontWeight: 800,
+              background: 'linear-gradient(135deg, var(--primary) 0%, #8b5cf6 50%, #a78bfa 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              letterSpacing: '-0.5px',
+              margin: 0,
+              lineHeight: 1.2
+            }}>
+              Administração
+            </h1>
+            {/* Efeito de reflexo */}
+            <span style={{
+              position: 'absolute',
+              left: 0,
+              top: '100%',
+              fontSize: '32px',
+              fontWeight: 800,
+              background: 'linear-gradient(135deg, var(--primary) 0%, #8b5cf6 50%, #a78bfa 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              letterSpacing: '-0.5px',
+              transform: 'scaleY(-1)',
+              opacity: 0.12,
+              maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)',
+              pointerEvents: 'none',
+              lineHeight: 1.2
+            }}>
+              Administração
+            </span>
+          </div>
         </div>
-        <p style={{ fontSize: '16px', color: 'var(--foreground-muted)' }}>
+        <p style={{ 
+          fontSize: '16px', 
+          color: 'var(--foreground-muted)',
+          marginLeft: '64px',
+          marginTop: '8px'
+        }}>
           Gerencie usuários, configurações do gabinete e segurança do sistema
         </p>
       </div>
@@ -353,10 +402,44 @@ export default function AdministracaoPage() {
         {activeTab === 'usuarios' && (
           <div>
             {/* Users Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
               <div>
-                <h2 style={{ fontSize: '20px', fontWeight: '600', color: 'var(--foreground)', marginBottom: '4px' }}>Gerenciar Usuários</h2>
-                <p style={{ fontSize: '14px', color: 'var(--foreground-muted)' }}>{usuarios.length} usuário(s) cadastrado(s)</p>
+                <div style={{ position: 'relative', display: 'inline-block', marginBottom: '8px' }}>
+                  <h2 style={{ 
+                    fontSize: '24px', 
+                    fontWeight: 700, 
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 50%, #93c5fd 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    margin: 0,
+                    letterSpacing: '0.3px'
+                  }}>
+                    Gerenciar Usuários
+                  </h2>
+                  {/* Efeito de reflexo sutil */}
+                  <span style={{ 
+                    position: 'absolute',
+                    left: 0,
+                    top: '100%',
+                    fontSize: '24px', 
+                    fontWeight: 700, 
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 50%, #93c5fd 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    transform: 'scaleY(-1)',
+                    opacity: 0.1,
+                    maskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%)',
+                    pointerEvents: 'none'
+                  }}>
+                    Gerenciar Usuários
+                  </span>
+                </div>
+                <p style={{ fontSize: '14px', color: 'var(--foreground-muted)', marginTop: '4px' }}>
+                  {usuarios.length} usuário(s) cadastrado(s)
+                </p>
               </div>
               <button
                 onClick={() => setShowNewUserModal(true)}
