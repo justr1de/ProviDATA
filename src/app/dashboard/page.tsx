@@ -36,6 +36,7 @@ import {
   HelpCircle,
   ChevronDown
 } from 'lucide-react'
+import { Tooltip } from '@/components/ui/tooltip'
 
 interface Providencia {
   id: string
@@ -551,18 +552,20 @@ export default function DashboardPage() {
               gap: '16px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ 
-                  width: '48px', 
-                  height: '48px', 
-                  borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
-                }}>
-                  <LayoutDashboard style={{ width: '24px', height: '24px', color: 'white' }} />
-                </div>
+                <Tooltip content="Painel de controle" position="right">
+                  <div style={{ 
+                    width: '48px', 
+                    height: '48px', 
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
+                  }}>
+                    <LayoutDashboard style={{ width: '24px', height: '24px', color: 'white' }} />
+                  </div>
+                </Tooltip>
                 <div>
                   <h1 style={{ 
                     fontSize: '24px', 
@@ -582,25 +585,27 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <button
-                  onClick={() => setShowTour(true)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '10px 16px',
-                    backgroundColor: 'var(--muted-bg)',
-                    
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: 'var(--text-muted)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <HelpCircle style={{ width: '16px', height: '16px' }} />
-                  Tour
-                </button>
+                <Tooltip content="Iniciar tour guiado" position="bottom">
+                  <button
+                    onClick={() => setShowTour(true)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '10px 16px',
+                      backgroundColor: 'var(--muted-bg)',
+                      
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: 'var(--text-muted)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <HelpCircle style={{ width: '16px', height: '16px' }} />
+                    Tour
+                  </button>
+                </Tooltip>
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(Number(e.target.value))}
@@ -618,25 +623,27 @@ export default function DashboardPage() {
                   <option value={2025}>2025</option>
                   <option value={2024}>2024</option>
                 </select>
-                <Link href="/dashboard/providencias/nova">
-                  <button style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '10px 20px',
-                    backgroundColor: '#16a34a',
-                    color: 'white',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    borderRadius: '8px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
-                  }}>
-                    <Plus style={{ width: '18px', height: '18px' }} />
-                    Nova Providência
-                  </button>
-                </Link>
+                <Tooltip content="Cadastrar nova providência" position="bottom">
+                  <Link href="/dashboard/providencias/nova">
+                    <button style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 20px',
+                      backgroundColor: '#16a34a',
+                      color: 'white',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      borderRadius: '8px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
+                    }}>
+                      <Plus style={{ width: '18px', height: '18px' }} />
+                      Nova Providência
+                    </button>
+                  </Link>
+                </Tooltip>
               </div>
             </div>
           </div>
@@ -653,18 +660,20 @@ export default function DashboardPage() {
               {/* Total */}
               <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ 
-                    width: '48px', 
-                    height: '48px', 
-                    borderRadius: '12px',
-                    backgroundColor: '#dbeafe',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <FileText style={{ width: '24px', height: '24px', color: '#2563eb' }} />
-                  </div>
+                  <Tooltip content="Total de providências" position="top">
+                    <div style={{ 
+                      width: '48px', 
+                      height: '48px', 
+                      borderRadius: '12px',
+                      backgroundColor: '#dbeafe',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <FileText style={{ width: '24px', height: '24px', color: '#2563eb' }} />
+                    </div>
+                  </Tooltip>
                   <div>
                     <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.total}</p>
                     <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Total</p>
@@ -675,18 +684,20 @@ export default function DashboardPage() {
               {/* Pendentes */}
               <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ 
-                    width: '48px', 
-                    height: '48px', 
-                    borderRadius: '12px',
-                    backgroundColor: '#fef3c7',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <Clock style={{ width: '24px', height: '24px', color: '#d97706' }} />
-                  </div>
+                  <Tooltip content="Aguardando análise" position="top">
+                    <div style={{ 
+                      width: '48px', 
+                      height: '48px', 
+                      borderRadius: '12px',
+                      backgroundColor: '#fef3c7',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <Clock style={{ width: '24px', height: '24px', color: '#d97706' }} />
+                    </div>
+                  </Tooltip>
                   <div>
                     <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.pendentes}</p>
                     <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Pendentes</p>
@@ -697,18 +708,20 @@ export default function DashboardPage() {
               {/* Em Andamento */}
               <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ 
-                    width: '48px', 
-                    height: '48px', 
-                    borderRadius: '12px',
-                    backgroundColor: '#e0e7ff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <TrendingUp style={{ width: '24px', height: '24px', color: '#4f46e5' }} />
-                  </div>
+                  <Tooltip content="Em processamento" position="top">
+                    <div style={{ 
+                      width: '48px', 
+                      height: '48px', 
+                      borderRadius: '12px',
+                      backgroundColor: '#e0e7ff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <TrendingUp style={{ width: '24px', height: '24px', color: '#4f46e5' }} />
+                    </div>
+                  </Tooltip>
                   <div>
                     <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.em_andamento}</p>
                     <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Em Andamento</p>
@@ -719,18 +732,20 @@ export default function DashboardPage() {
               {/* Concluídas */}
               <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ 
-                    width: '48px', 
-                    height: '48px', 
-                    borderRadius: '12px',
-                    backgroundColor: '#dcfce7',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <CheckCircle2 style={{ width: '24px', height: '24px', color: '#16a34a' }} />
-                  </div>
+                  <Tooltip content="Finalizadas com sucesso" position="top">
+                    <div style={{ 
+                      width: '48px', 
+                      height: '48px', 
+                      borderRadius: '12px',
+                      backgroundColor: '#dcfce7',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <CheckCircle2 style={{ width: '24px', height: '24px', color: '#16a34a' }} />
+                    </div>
+                  </Tooltip>
                   <div>
                     <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.concluidas}</p>
                     <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Concluídas</p>
@@ -748,18 +763,20 @@ export default function DashboardPage() {
               {/* Urgentes */}
               <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ 
-                    width: '48px', 
-                    height: '48px', 
-                    borderRadius: '12px',
-                    backgroundColor: '#fee2e2',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <AlertTriangle style={{ width: '24px', height: '24px', color: '#dc2626' }} />
-                  </div>
+                  <Tooltip content="Prioridade máxima" position="top">
+                    <div style={{ 
+                      width: '48px', 
+                      height: '48px', 
+                      borderRadius: '12px',
+                      backgroundColor: '#fee2e2',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <AlertTriangle style={{ width: '24px', height: '24px', color: '#dc2626' }} />
+                    </div>
+                  </Tooltip>
                   <div>
                     <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.urgentes}</p>
                     <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Urgentes</p>
@@ -770,18 +787,20 @@ export default function DashboardPage() {
               {/* Em Análise */}
               <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ 
-                    width: '48px', 
-                    height: '48px', 
-                    borderRadius: '12px',
-                    backgroundColor: '#f3e8ff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <Search style={{ width: '24px', height: '24px', color: '#9333ea' }} />
-                  </div>
+                  <Tooltip content="Sendo analisadas" position="top">
+                    <div style={{ 
+                      width: '48px', 
+                      height: '48px', 
+                      borderRadius: '12px',
+                      backgroundColor: '#f3e8ff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <Search style={{ width: '24px', height: '24px', color: '#9333ea' }} />
+                    </div>
+                  </Tooltip>
                   <div>
                     <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.em_analise}</p>
                     <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Em Análise</p>
@@ -792,18 +811,20 @@ export default function DashboardPage() {
               {/* Encaminhadas */}
               <div className="stat-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ 
-                    width: '48px', 
-                    height: '48px', 
-                    borderRadius: '12px',
-                    backgroundColor: '#cffafe',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <Send style={{ width: '24px', height: '24px', color: '#0891b2' }} />
-                  </div>
+                  <Tooltip content="Enviadas para órgãos" position="top">
+                    <div style={{ 
+                      width: '48px', 
+                      height: '48px', 
+                      borderRadius: '12px',
+                      backgroundColor: '#cffafe',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <Send style={{ width: '24px', height: '24px', color: '#0891b2' }} />
+                    </div>
+                  </Tooltip>
                   <div>
                     <p style={{ fontSize: '28px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>{stats.encaminhadas}</p>
                     <p style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>Encaminhadas</p>
@@ -861,17 +882,19 @@ export default function DashboardPage() {
               borderBottom: '1px solid #e5e7eb'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ 
-                  width: '40px', 
-                  height: '40px', 
-                  borderRadius: '10px',
-                  backgroundColor: '#f0fdf4',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <BarChart3 style={{ width: '20px', height: '20px', color: '#16a34a' }} />
-                </div>
+                <Tooltip content="Visualização de dados" position="right">
+                  <div style={{ 
+                    width: '40px', 
+                    height: '40px', 
+                    borderRadius: '10px',
+                    backgroundColor: '#f0fdf4',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <BarChart3 style={{ width: '20px', height: '20px', color: '#16a34a' }} />
+                  </div>
+                </Tooltip>
                 <div>
                   <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-color)', margin: 0 }}>Área de Gráficos Personalizados</h3>
                   <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>Adicione gráficos usando o painel lateral</p>

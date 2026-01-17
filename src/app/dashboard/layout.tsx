@@ -30,6 +30,7 @@ import {
 } from 'lucide-react'
 import { Toaster } from 'sonner'
 import { trackPageView } from '@/lib/monitoring'
+import { Tooltip } from '@/components/ui/tooltip'
 
 const SIDEBAR_WIDTH = 280
 
@@ -316,22 +317,24 @@ export default function DashboardLayout({
       >
         {/* Close button for mobile */}
         {!isDesktop && sidebarOpen && (
-          <button
-            onClick={() => setSidebarOpen(false)}
-            style={{
-              position: 'absolute',
-              top: '16px',
-              right: '16px',
-              padding: '8px',
-              borderRadius: '8px',
-              backgroundColor: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'white'
-            }}
-          >
-            <X style={{ width: '24px', height: '24px' }} />
-          </button>
+          <Tooltip content="Fechar menu" position="left">
+            <button
+              onClick={() => setSidebarOpen(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                padding: '8px',
+                borderRadius: '8px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'white'
+              }}
+            >
+              <X style={{ width: '24px', height: '24px' }} />
+            </button>
+          </Tooltip>
         )}
 
         {/* Logo ProviDATA - Ocupa todo o espaço do cabeçalho */}
@@ -531,21 +534,23 @@ export default function DashboardLayout({
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  <div
-                    className="sidebar-nav-icon"
-                    style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.3s ease',
-                      backgroundColor: active ? 'rgba(255,255,255,0.2)' : undefined
-                    }}
-                  >
-                    <Icon style={{ width: '20px', height: '20px' }} />
-                  </div>
+                  <Tooltip content={item.name} position="right">
+                    <div
+                      className="sidebar-nav-icon"
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.3s ease',
+                        backgroundColor: active ? 'rgba(255,255,255,0.2)' : undefined
+                      }}
+                    >
+                      <Icon style={{ width: '20px', height: '20px' }} />
+                    </div>
+                  </Tooltip>
                   <span>{item.name}</span>
                 </Link>
               )
@@ -580,7 +585,9 @@ export default function DashboardLayout({
             }}
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Settings style={{ width: '18px', height: '18px' }} />
+              <Tooltip content="Configurações do sistema" position="right">
+                <Settings style={{ width: '18px', height: '18px' }} />
+              </Tooltip>
               Administração
             </span>
             {adminExpanded ? <ChevronUp style={{ width: '18px', height: '18px' }} /> : <ChevronDown style={{ width: '18px', height: '18px' }} />}
@@ -619,7 +626,9 @@ export default function DashboardLayout({
                       transition: 'all 0.3s ease'
                     }}
                   >
-                    <Icon style={{ width: '18px', height: '18px' }} />
+                    <Tooltip content={item.name} position="right">
+                      <Icon style={{ width: '18px', height: '18px' }} />
+                    </Tooltip>
                     <span>{item.name}</span>
                   </Link>
                 )
@@ -671,7 +680,9 @@ export default function DashboardLayout({
             >
               DATA-RO Inteligência Territorial
             </span>
-            <Copyright className="sidebar-footer-icon" style={{ width: '12px', height: '12px', flexShrink: 0 }} />
+<Tooltip content="Todos os direitos reservados" position="top">
+              <Copyright className="sidebar-footer-icon" style={{ width: '12px', height: '12px', flexShrink: 0 }} />
+            </Tooltip>
           </a>
         </div>
       </aside>
@@ -709,19 +720,21 @@ export default function DashboardLayout({
           >
             {/* Mobile menu button */}
             {!isDesktop && (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                style={{
-                  padding: '10px',
-                  borderRadius: '10px',
-                  backgroundColor: 'var(--muted)',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: 'var(--foreground-muted)'
-                }}
-              >
-                <Menu style={{ width: '24px', height: '24px' }} />
-              </button>
+              <Tooltip content="Abrir menu" position="bottom">
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  style={{
+                    padding: '10px',
+                    borderRadius: '10px',
+                    backgroundColor: 'var(--muted)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--foreground-muted)'
+                  }}
+                >
+                  <Menu style={{ width: '24px', height: '24px' }} />
+                </button>
+              </Tooltip>
             )}
 
             {/* Slogan centralizado */}
@@ -759,21 +772,23 @@ export default function DashboardLayout({
               <ThemeToggle />
 
               {/* Notifications */}
-              <Link
-                href="/dashboard/notificacoes"
-                style={{
-                  padding: '10px',
-                  borderRadius: '10px',
-                  color: 'var(--foreground-muted)',
-                  textDecoration: 'none',
-                  backgroundColor: 'var(--muted)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <Bell style={{ width: '20px', height: '20px' }} />
-              </Link>
+              <Tooltip content="Notificações" position="bottom">
+                <Link
+                  href="/dashboard/notificacoes"
+                  style={{
+                    padding: '10px',
+                    borderRadius: '10px',
+                    color: 'var(--foreground-muted)',
+                    textDecoration: 'none',
+                    backgroundColor: 'var(--muted)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <Bell style={{ width: '20px', height: '20px' }} />
+                </Link>
+              </Tooltip>
 
               {/* User menu */}
               <div style={{ position: 'relative' }}>
@@ -790,19 +805,21 @@ export default function DashboardLayout({
                     cursor: 'pointer'
                   }}
                 >
-                  <div
-                    style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '50%',
-                      backgroundColor: customPrimaryColor,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <User style={{ width: '18px', height: '18px', color: 'white' }} />
-                  </div>
+                  <Tooltip content="Meu perfil" position="bottom">
+                    <div
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        backgroundColor: customPrimaryColor,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <User style={{ width: '18px', height: '18px', color: 'white' }} />
+                    </div>
+                  </Tooltip>
                   {isDesktop && (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                       <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--foreground)', lineHeight: '1.2' }}>
@@ -888,7 +905,9 @@ export default function DashboardLayout({
                             borderRadius: '8px'
                           }}
                         >
-                          <Settings style={{ width: '18px', height: '18px' }} />
+                          <Tooltip content="Configurações da conta" position="left">
+                            <Settings style={{ width: '18px', height: '18px' }} />
+                          </Tooltip>
                           Configurações
                         </Link>
                         <Link
@@ -905,7 +924,9 @@ export default function DashboardLayout({
                             borderRadius: '8px'
                           }}
                         >
-                          <Palette style={{ width: '18px', height: '18px' }} />
+                          <Tooltip content="Personalizar tema" position="left">
+                            <Palette style={{ width: '18px', height: '18px' }} />
+                          </Tooltip>
                           Aparência
                         </Link>
                         <button
@@ -925,7 +946,9 @@ export default function DashboardLayout({
                             textAlign: 'left'
                           }}
                         >
-                          <LogOut style={{ width: '18px', height: '18px' }} />
+                          <Tooltip content="Encerrar sessão" position="left">
+                            <LogOut style={{ width: '18px', height: '18px' }} />
+                          </Tooltip>
                           Sair
                         </button>
                       </div>
