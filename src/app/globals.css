@@ -188,17 +188,17 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #16a34a;
+  background: var(--primary);
 }
 
-/* Selection */
+/* Selection - usa cor primária dinâmica */
 ::selection {
-  background-color: rgba(22, 163, 74, 0.2);
+  background-color: var(--primary-muted, rgba(22, 163, 74, 0.2));
 }
 
-/* Focus */
+/* Focus - usa cor primária dinâmica */
 :focus-visible {
-  outline: 2px solid #16a34a;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
@@ -276,7 +276,7 @@ input, textarea, select {
   --sidebar-muted: #64748b;
   --sidebar-hover: #e2e8f0;
   --sidebar-accent: #f1f5f9;
-  --sidebar-item-active: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  --sidebar-item-active: linear-gradient(135deg, var(--primary) 0%, var(--primary-light, var(--primary)) 100%);
   
   /* Background RGB para overlay */
   --background-rgb: 255, 255, 255;
@@ -350,7 +350,7 @@ input, textarea, select {
   --sidebar-muted: #94a3b8;
   --sidebar-hover: #334155;
   --sidebar-accent: #0f172a;
-  --sidebar-item-active: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  --sidebar-item-active: linear-gradient(135deg, var(--primary) 0%, var(--primary-light, var(--primary)) 100%);
   
   /* Background RGB para overlay */
   --background-rgb: 15, 23, 42;
@@ -369,15 +369,24 @@ input, textarea, select {
 /* ========================================
    GRADIENTES E EFEITOS
    ======================================== */
+
+/* Gradiente dinâmico baseado na cor primária */
+.text-primary-gradient {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light, var(--primary)) 50%, var(--primary-lighter, var(--primary)) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .text-providata-gradient {
-  background: linear-gradient(135deg, #15803d 0%, #22c55e 50%, #4ade80 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light, #22c55e) 50%, var(--primary-lighter, #4ade80) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .dark .text-providata-gradient {
-  background: linear-gradient(135deg, #22c55e 0%, #4ade80 50%, #86efac 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light, #4ade80) 50%, var(--primary-lighter, #86efac) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -387,9 +396,23 @@ input, textarea, select {
   color: var(--foreground);
 }
 
-/* Botão primário elegante */
+/* Background gradiente dinâmico */
+.bg-primary-gradient {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light, var(--primary)) 100%);
+}
+
+/* Sombra dinâmica baseada na cor primária */
+.shadow-primary {
+  box-shadow: 0 4px 14px 0 color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+.shadow-primary-lg {
+  box-shadow: 0 6px 20px 0 color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+/* Botão primário elegante - usa cor dinâmica */
 .btn-primary {
-  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light, var(--primary)) 100%);
   color: white;
   font-weight: 500;
   border-radius: 10px;
@@ -397,16 +420,37 @@ input, textarea, select {
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 14px 0 rgba(22, 163, 74, 0.25);
+  box-shadow: 0 4px 14px 0 color-mix(in srgb, var(--primary) 25%, transparent);
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px 0 rgba(22, 163, 74, 0.35);
+  box-shadow: 0 6px 20px 0 color-mix(in srgb, var(--primary) 40%, transparent);
+  filter: brightness(1.1);
 }
 
 .btn-primary:active {
   transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+/* Efeito de hover para botões com cor primária */
+.hover-primary:hover {
+  background-color: var(--primary) !important;
+  color: white !important;
+  transition: all 0.2s ease;
+}
+
+/* Borda com cor primária no hover */
+.hover-border-primary:hover {
+  border-color: var(--primary) !important;
+  transition: all 0.2s ease;
+}
+
+/* Texto com cor primária no hover */
+.hover-text-primary:hover {
+  color: var(--primary) !important;
+  transition: all 0.2s ease;
 }
 
 /* Botão secundário */

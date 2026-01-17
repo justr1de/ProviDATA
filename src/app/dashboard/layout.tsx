@@ -124,9 +124,20 @@ export default function DashboardLayout({
   useEffect(() => {
     const savedBgImage = localStorage.getItem('providata-bg-image')
     const savedPrimaryColor = localStorage.getItem('providata-primary-color')
+    const savedLight = localStorage.getItem('providata-primary-light')
+    const savedLighter = localStorage.getItem('providata-primary-lighter')
+    const savedHover = localStorage.getItem('providata-primary-hover')
 
     if (savedBgImage) setCustomBgImage(savedBgImage)
-    if (savedPrimaryColor) setCustomPrimaryColor(savedPrimaryColor)
+    if (savedPrimaryColor) {
+      setCustomPrimaryColor(savedPrimaryColor)
+      document.documentElement.style.setProperty('--primary', savedPrimaryColor)
+      document.documentElement.style.setProperty('--primary-muted', `${savedPrimaryColor}1a`)
+      document.documentElement.style.setProperty('--ring', savedPrimaryColor)
+    }
+    if (savedLight) document.documentElement.style.setProperty('--primary-light', savedLight)
+    if (savedLighter) document.documentElement.style.setProperty('--primary-lighter', savedLighter)
+    if (savedHover) document.documentElement.style.setProperty('--primary-hover', savedHover)
   }, [])
 
   useEffect(() => {

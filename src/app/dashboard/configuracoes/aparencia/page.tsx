@@ -43,16 +43,73 @@ export default function AparenciaPage() {
     const savedColor = localStorage.getItem('providata-primary-color')
     const savedBg = localStorage.getItem('providata-bg-image')
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null
+    const savedLight = localStorage.getItem('providata-primary-light')
+    const savedLighter = localStorage.getItem('providata-primary-lighter')
+    const savedHover = localStorage.getItem('providata-primary-hover')
     
-    if (savedColor) setPrimaryColor(savedColor)
+    if (savedColor) {
+      setPrimaryColor(savedColor)
+      document.documentElement.style.setProperty('--primary', savedColor)
+      document.documentElement.style.setProperty('--primary-muted', `${savedColor}1a`)
+      document.documentElement.style.setProperty('--ring', savedColor)
+    }
+    if (savedLight) document.documentElement.style.setProperty('--primary-light', savedLight)
+    if (savedLighter) document.documentElement.style.setProperty('--primary-lighter', savedLighter)
+    if (savedHover) document.documentElement.style.setProperty('--primary-hover', savedHover)
     if (savedBg) setBackgroundImage(savedBg)
     if (savedTheme) setTheme(savedTheme)
   }, [])
 
+  // Função para gerar variações de cor
+  const generateColorVariants = (hexColor: string) => {
+    // Converter hex para RGB
+    const r = parseInt(hexColor.slice(1, 3), 16)
+    const g = parseInt(hexColor.slice(3, 5), 16)
+    const b = parseInt(hexColor.slice(5, 7), 16)
+    
+    // Gerar versão mais clara (light)
+    const lighten = (value: number, amount: number) => Math.min(255, Math.floor(value + (255 - value) * amount))
+    const lightR = lighten(r, 0.3)
+    const lightG = lighten(g, 0.3)
+    const lightB = lighten(b, 0.3)
+    const lightColor = `#${lightR.toString(16).padStart(2, '0')}${lightG.toString(16).padStart(2, '0')}${lightB.toString(16).padStart(2, '0')}`
+    
+    // Gerar versão ainda mais clara (lighter)
+    const lighterR = lighten(r, 0.5)
+    const lighterG = lighten(g, 0.5)
+    const lighterB = lighten(b, 0.5)
+    const lighterColor = `#${lighterR.toString(16).padStart(2, '0')}${lighterG.toString(16).padStart(2, '0')}${lighterB.toString(16).padStart(2, '0')}`
+    
+    // Gerar versão mais escura (hover)
+    const darken = (value: number, amount: number) => Math.max(0, Math.floor(value * (1 - amount)))
+    const hoverR = darken(r, 0.15)
+    const hoverG = darken(g, 0.15)
+    const hoverB = darken(b, 0.15)
+    const hoverColor = `#${hoverR.toString(16).padStart(2, '0')}${hoverG.toString(16).padStart(2, '0')}${hoverB.toString(16).padStart(2, '0')}`
+    
+    return { light: lightColor, lighter: lighterColor, hover: hoverColor }
+  }
+
   const handleColorChange = (color: string) => {
     setPrimaryColor(color)
     localStorage.setItem('providata-primary-color', color)
+    
+    // Aplicar cor primária
     document.documentElement.style.setProperty('--primary', color)
+    
+    // Gerar e aplicar variantes
+    const variants = generateColorVariants(color)
+    document.documentElement.style.setProperty('--primary-light', variants.light)
+    document.documentElement.style.setProperty('--primary-lighter', variants.lighter)
+    document.documentElement.style.setProperty('--primary-hover', variants.hover)
+    document.documentElement.style.setProperty('--primary-muted', `${color}1a`) // 10% opacity
+    document.documentElement.style.setProperty('--ring', color)
+    
+    // Salvar variantes no localStorage
+    localStorage.setItem('providata-primary-light', variants.light)
+    localStorage.setItem('providata-primary-lighter', variants.lighter)
+    localStorage.setItem('providata-primary-hover', variants.hover)
+    
     toast.success('Cor primária atualizada!')
   }
 
