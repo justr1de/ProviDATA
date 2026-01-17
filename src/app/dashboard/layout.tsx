@@ -105,6 +105,7 @@ export default function DashboardLayout({
   const [customPrimaryColor, setCustomPrimaryColor] = useState('#16a34a')
   const [allGabinetes, setAllGabinetes] = useState<any[]>([])
   const [showGabineteSelector, setShowGabineteSelector] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
@@ -121,24 +122,45 @@ export default function DashboardLayout({
     return () => window.removeEventListener('resize', checkWidth)
   }, [])
 
+  // Marcar componente como montado no cliente
   useEffect(() => {
-    const savedBgImage = localStorage.getItem('providata-bg-image')
-    const savedPrimaryColor = localStorage.getItem('providata-primary-color')
-    const savedLight = localStorage.getItem('providata-primary-light')
-    const savedLighter = localStorage.getItem('providata-primary-lighter')
-    const savedHover = localStorage.getItem('providata-primary-hover')
-
-    if (savedBgImage) setCustomBgImage(savedBgImage)
-    if (savedPrimaryColor) {
-      setCustomPrimaryColor(savedPrimaryColor)
-      document.documentElement.style.setProperty('--primary', savedPrimaryColor)
-      document.documentElement.style.setProperty('--primary-muted', `${savedPrimaryColor}1a`)
-      document.documentElement.style.setProperty('--ring', savedPrimaryColor)
-    }
-    if (savedLight) document.documentElement.style.setProperty('--primary-light', savedLight)
-    if (savedLighter) document.documentElement.style.setProperty('--primary-lighter', savedLighter)
-    if (savedHover) document.documentElement.style.setProperty('--primary-hover', savedHover)
+    setIsMounted(true)
   }, [])
+
+  // Carregar configurações de tema do localStorage
+  useEffect(() => {
+    if (!isMounted) return
+    
+    try {
+      const savedBgImage = localStorage.getItem('providata-bg-image')
+      const savedPrimaryColor = localStorage.getItem('providata-primary-color')
+      const savedLight = localStorage.getItem('providata-primary-light')
+      const savedLighter = localStorage.getItem('providata-primary-lighter')
+      const savedHover = localStorage.getItem('providata-primary-hover')
+
+      console.log('[Theme] Loading settings from localStorage:', {
+        hasBgImage: !!savedBgImage,
+        bgImageLength: savedBgImage?.length || 0,
+        primaryColor: savedPrimaryColor
+      })
+
+      if (savedBgImage) {
+        setCustomBgImage(savedBgImage)
+        console.log('[Theme] Background image set successfully')
+      }
+      if (savedPrimaryColor) {
+        setCustomPrimaryColor(savedPrimaryColor)
+        document.documentElement.style.setProperty('--primary', savedPrimaryColor)
+        document.documentElement.style.setProperty('--primary-muted', `${savedPrimaryColor}1a`)
+        document.documentElement.style.setProperty('--ring', savedPrimaryColor)
+      }
+      if (savedLight) document.documentElement.style.setProperty('--primary-light', savedLight)
+      if (savedLighter) document.documentElement.style.setProperty('--primary-lighter', savedLighter)
+      if (savedHover) document.documentElement.style.setProperty('--primary-hover', savedHover)
+    } catch (error) {
+      console.error('[Theme] Error loading settings:', error)
+    }
+  }, [isMounted])
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -282,17 +304,23 @@ export default function DashboardLayout({
     }
   `
 
+  // Estilo de fundo com imagem personalizada
+  const backgroundStyle: React.CSSProperties = {
+    minHeight: '100vh',
+    backgroundColor: 'var(--background)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundAttachment: 'fixed',
+    backgroundRepeat: 'no-repeat'
+  }
+
+  // Aplicar imagem de fundo apenas quando montado no cliente
+  if (isMounted && customBgImage) {
+    backgroundStyle.backgroundImage = `url(${customBgImage})`
+  }
+
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: 'var(--background)',
-        backgroundImage: customBgImage ? `url(${customBgImage})` : 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
-      }}
-    >
+    <div style={backgroundStyle}>
       <style>{glowStyle}</style>
       <Toaster position="top-right" richColors />
 
