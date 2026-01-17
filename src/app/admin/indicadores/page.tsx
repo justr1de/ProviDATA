@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   TrendingUp,
   Building,
+  Building2,
   BarChart3,
   PieChart,
   Calendar,
@@ -23,7 +24,8 @@ import {
   Target,
   Timer,
   Activity,
-  ArrowLeft
+  ArrowLeft,
+  Users
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -194,23 +196,45 @@ export default function IndicadoresPage() {
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <Link
+                href="/dashboard"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  background: 'linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 8px rgba(6, 182, 212, 0.25)'
+                }}
+              >
+                <Building2 size={18} />
+                Meu Gabinete
+              </Link>
+              <Link
                 href="/admin/gabinetes"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                   padding: '8px 16px',
-                  backgroundColor: 'var(--background)',
-                  color: 'var(--foreground)',
-                  border: '1px solid var(--border)',
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)',
+                  color: 'white',
+                  border: 'none',
                   borderRadius: '8px',
                   fontSize: '14px',
                   fontWeight: 500,
                   cursor: 'pointer',
-                  textDecoration: 'none'
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 8px rgba(59, 130, 246, 0.25)'
                 }}
               >
-                <ArrowLeft size={18} />
+                <Users size={18} />
                 Gabinetes
               </Link>
               <ThemeToggle />

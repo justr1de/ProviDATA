@@ -637,6 +637,27 @@ export default function GabinetesPage() {
             {/* Ações do Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <Link
+                href="/dashboard"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 8px rgba(59, 130, 246, 0.25)'
+                }}
+              >
+                <Building2 size={18} />
+                <span>Gabinetes</span>
+              </Link>
+              <Link
                 href="/admin/monitoramento"
                 style={{
                   display: 'flex',

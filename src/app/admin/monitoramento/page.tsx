@@ -342,6 +342,27 @@ export default function MonitoramentoPage() {
             {/* Ações do Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <Link
+                href="/dashboard"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  background: 'linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 8px rgba(6, 182, 212, 0.25)'
+                }}
+              >
+                <Building2 size={18} />
+                <span>Meu Gabinete</span>
+              </Link>
+              <Link
                 href="/admin/gabinetes"
                 style={{
                   display: 'flex',
@@ -359,7 +380,7 @@ export default function MonitoramentoPage() {
                   boxShadow: '0 2px 8px rgba(59, 130, 246, 0.25)'
                 }}
               >
-                <Building2 size={18} />
+                <Users size={18} />
                 <span>Gabinetes</span>
               </Link>
               <Link
