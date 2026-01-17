@@ -301,9 +301,9 @@ export default function AdministracaoPage() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto px-1 md:px-2">
+    <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8">
       {/* Header */}
-      <div style={{ marginBottom: '40px' }}>
+      <div style={{ marginBottom: '40px', paddingLeft: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
           <div style={{
             width: '48px',
@@ -398,11 +398,11 @@ export default function AdministracaoPage() {
       </div>
 
       {/* Content */}
-      <div className="p-4 md:p-6 lg:p-7 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
+      <div className="p-5 md:p-7 lg:p-8 rounded-2xl bg-[var(--card)] border border-[var(--border)]">
         {activeTab === 'usuarios' && (
           <div>
             {/* Users Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', paddingLeft: '4px' }}>
               <div>
                 <div style={{ position: 'relative', display: 'inline-block', marginBottom: '8px' }}>
                   <h2 style={{ 
