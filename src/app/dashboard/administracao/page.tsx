@@ -242,54 +242,48 @@ export default function AdministracaoPage() {
       return
     }
 
+    // Validar senha mínima
+    if (newUserPassword.length < 6) {
+      toast.error('A senha deve ter pelo menos 6 caracteres')
+      return
+    }
+
     setSavingUser(true)
 
     try {
-      // Criar usuário no Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: newUserEmail,
-        password: newUserPassword,
-        options: {
-          data: {
-            nome: newUserName
-          }
-        }
+      // Usar API route para criar usuário (sem rate limit)
+      const response = await fetch('/api/admin/create-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: newUserEmail,
+          password: newUserPassword,
+          nome: newUserName,
+          role: newUserRole,
+          gabinete_id: tenant?.id,
+          created_by: user?.id
+        })
       })
 
-      if (authError) {
-        console.error('Auth error:', authError)
-        if (authError.message.includes('already registered')) {
-          toast.error('Este e-mail já está cadastrado')
-        } else {
-          toast.error(`Erro ao criar usuário: ${authError.message}`)
-        }
+      const result = await response.json()
+
+      if (!response.ok) {
+        toast.error(result.error || 'Erro ao criar usuário')
         setSavingUser(false)
         return
       }
 
-      if (authData.user) {
-        // Criar registro na tabela users
-        const { error: userError } = await supabase.from('users').insert({
-          id: authData.user.id,
-          gabinete_id: tenant?.id,
-          nome: newUserName,
-          email: newUserEmail,
-          role: newUserRole,
-          ativo: true
-        })
-        
-        if (userError) throw userError
-
-        toast.success('Usuário criado com sucesso!')
-        setShowNewUserModal(false)
-        resetForm()
-        loadUsers()
-      }
+      toast.success('Usuário criado com sucesso!')
+      setShowNewUserModal(false)
+      resetForm()
+      loadUsers()
     } catch (error: any) {
-        console.error('Error creating user:', error)
-        toast.error('Erro ao criar usuário')
+      console.error('Error creating user:', error)
+      toast.error('Erro ao criar usuário. Tente novamente.')
     } finally {
-        setSavingUser(false)
+      setSavingUser(false)
     }
   }
 
