@@ -26,7 +26,8 @@ import {
   Palette,
   Copyright,
   MapPin,
-  Files
+  Files,
+  Send
 } from 'lucide-react'
 import { Toaster } from 'sonner'
 import { trackPageView } from '@/lib/monitoring'
@@ -39,6 +40,7 @@ const navigation = [
   { name: 'Providências', href: '/dashboard/providencias', icon: FileText },
   { name: 'Cidadãos', href: '/dashboard/cidadaos', icon: Users },
   { name: 'Documentos', href: '/dashboard/documentos', icon: Files },
+  { name: 'Mensagens', href: '/dashboard/mensagens', icon: Send },
   { name: 'Relatórios', href: '/dashboard/relatorios', icon: FileBarChart },
   { name: 'Mapa de Calor', href: '/dashboard/mapa-calor', icon: MapPin },
   { name: 'Categorias', href: '/dashboard/categorias', icon: FolderOpen },
