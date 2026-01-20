@@ -11,6 +11,11 @@ import { trackLogin, getGeoLocation } from '@/lib/monitoring'
 // Email do super admin geral do sistema
 const SUPER_ADMIN_EMAIL = 'contato@dataro-it.com.br'
 
+// Usuários bloqueados com mensagens personalizadas
+const BLOCKED_USERS: Record<string, string> = {
+  'richaelmenezes@gmail.com': 'Sistema em Manutenção'
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -25,6 +30,17 @@ export default function LoginPage() {
       toast.error('Informe um e-mail válido')
       return
     }
+
+    // Verificar se o usuário está bloqueado
+    const normalizedEmail = email.toLowerCase().trim()
+    if (BLOCKED_USERS[normalizedEmail]) {
+      toast.error(BLOCKED_USERS[normalizedEmail], {
+        duration: 5000,
+        icon: '🛠️'
+      })
+      return
+    }
+
     setIsLoading(true)
 
     try {
