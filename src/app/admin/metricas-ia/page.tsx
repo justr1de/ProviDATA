@@ -63,7 +63,7 @@ interface RecentLog {
 
 export default function MetricasIAPage() {
   const router = useRouter()
-  const { user, profile, isLoading: authLoading } = useAuthStore()
+  const { user, isLoading: authLoading } = useAuthStore()
   const supabase = createClient()
   
   const [isLoading, setIsLoading] = useState(true)
@@ -78,13 +78,13 @@ export default function MetricasIAPage() {
     if (!authLoading) {
       if (!user) {
         router.push('/login')
-      } else if (profile?.role !== 'super_admin') {
+      } else if (user?.role !== 'super_admin') {
         router.push('/dashboard')
       } else {
         loadData()
       }
     }
-  }, [user, profile, authLoading, router])
+  }, [user, authLoading, router])
   
   const loadData = async () => {
     setIsLoading(true)
