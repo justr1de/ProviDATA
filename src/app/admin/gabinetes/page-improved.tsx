@@ -27,7 +27,8 @@ import {
   Shield,
   Save,
   BarChart3,
-  Activity
+  Activity,
+  Cpu
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -727,6 +728,27 @@ export default function GabinetesPage() {
               >
                 <BarChart3 size={18} />
                 <span>Indicadores</span>
+              </Link>
+              <Link
+                href="/admin/metricas-ia"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 8px rgba(245, 158, 11, 0.25)'
+                }}
+              >
+                <Cpu size={18} />
+                <span>Métricas IA</span>
               </Link>
               <ThemeToggle />
               <button
