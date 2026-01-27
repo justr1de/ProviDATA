@@ -422,17 +422,30 @@ export default function DashboardPage() {
     setAiLoading(true)
     setAiResponse('')
     
-    // Simular resposta da IA (em produção, isso seria uma chamada real à API)
-    setTimeout(() => {
-      const responses = [
-        `Com base nos dados do seu gabinete, identifiquei que ${stats.pendentes} providências estão pendentes. Recomendo priorizar as ${stats.urgentes} urgentes primeiro.`,
-        `Analisando o histórico, a taxa de conclusão está em ${Math.round((stats.concluidas / Math.max(stats.total, 1)) * 100)}%. Para melhorar, sugiro focar nas providências em andamento.`,
-        `Cruzando os dados, percebi que a maioria das providências pendentes são de alta prioridade. Considere redistribuir a carga de trabalho.`,
-        `Os dados mostram que você tem ${stats.total} providências no total. ${stats.concluidas} foram concluídas, representando um bom progresso!`
-      ]
-      setAiResponse(responses[Math.floor(Math.random() * responses.length)])
+    try {
+      const response = await fetch('/api/admin/ai/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ question: aiQuery })
+      })
+      
+      const data = await response.json()
+      
+      if (data.answer) {
+        setAiResponse(data.answer)
+      } else if (data.error) {
+        setAiResponse(`Desculpe, ocorreu um erro: ${data.error}`)
+      } else {
+        setAiResponse('Desculpe, não consegui processar sua pergunta. Tente novamente.')
+      }
+    } catch (error) {
+      console.error('Erro ao consultar IA:', error)
+      setAiResponse('Desculpe, ocorreu um erro ao processar sua pergunta. Por favor, tente novamente.')
+    } finally {
       setAiLoading(false)
-    }, 1500)
+    }
   }
 
   const taxaConclusao = stats.total > 0 

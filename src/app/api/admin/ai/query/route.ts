@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import OpenAI from 'openai'
 
-// Inicializar cliente OpenAI
-const openai = new OpenAI()
+// Chave da API do Gemini
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDIvU_7l4vDYpRxJ03ZuaLBwR0aKmNBtWc'
 
 // Schema do banco de dados para contexto da IA
 const DATABASE_SCHEMA = `
@@ -56,14 +55,13 @@ Tabelas do banco de dados ProviDATA:
    - ativo (boolean): Se está ativo
    - created_at (timestamp): Data de criação
 
-4. profiles - Perfis de usuários
+4. users - Usuários do sistema
    - id (uuid): ID único (mesmo do auth.users)
    - email (varchar): Email
-   - full_name (varchar): Nome completo
+   - nome (varchar): Nome completo
    - role (varchar): super_admin, admin, gestor, assessor, operador, colaborador, visualizador
    - gabinete_id (uuid): FK para gabinetes
-   - cargo (varchar): Cargo no gabinete
-   - avatar_url (varchar): URL do avatar
+   - ativo (boolean): Se está ativo
    - created_at (timestamp): Data de criação
 
 5. cidadaos - Cidadãos que fazem solicitações
@@ -100,14 +98,44 @@ Regras importantes:
 - Use CASE WHEN para transformar valores
 `
 
+// Função para chamar a API do Gemini
+async function callGemini(prompt: string, systemPrompt: string): Promise<string> {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: `${systemPrompt}\n\nUsuário: ${prompt}` }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 2000,
+        }
+      })
+    }
+  )
+
+  if (!response.ok) {
+    const error = await response.text()
+    console.error('Erro na API do Gemini:', error)
+    throw new Error(`Erro na API do Gemini: ${response.status}`)
+  }
+
+  const data = await response.json()
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+}
+
 // Função para gerar SQL a partir de pergunta em linguagem natural
 async function generateSQL(question: string): Promise<string> {
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4.1-mini',
-    messages: [
-      {
-        role: 'system',
-        content: `Você é um assistente especializado em gerar consultas SQL PostgreSQL para o sistema ProviDATA.
+  const systemPrompt = `Você é um assistente especializado em gerar consultas SQL PostgreSQL para o sistema ProviDATA.
         
 ${DATABASE_SCHEMA}
 
@@ -120,49 +148,50 @@ Regras para gerar SQL:
 6. Limite resultados a 100 linhas por padrão
 7. Use COALESCE para tratar valores nulos
 8. Retorne apenas a query SQL, sem markdown ou explicações`
-      },
-      {
-        role: 'user',
-        content: question
-      }
-    ],
-    temperature: 0.1,
-    max_tokens: 1000
-  })
-  
-  return completion.choices[0]?.message?.content?.trim() || ''
+
+  const result = await callGemini(question, systemPrompt)
+  return result.trim()
 }
 
 // Função para formatar resultados em texto legível
 async function formatResults(question: string, results: unknown[], sql: string): Promise<string> {
-  const completion = await openai.chat.completions.create({
-    model: 'gpt-4.1-mini',
-    messages: [
-      {
-        role: 'system',
-        content: `Você é um assistente do sistema ProviDATA que ajuda a interpretar dados de providências parlamentares.
+  const systemPrompt = `Você é um assistente do sistema ProviDATA que ajuda a interpretar dados de providências parlamentares.
         
 Formate a resposta de forma clara e objetiva em português brasileiro.
 Use formatação markdown quando apropriado.
 Destaque números importantes.
 Se não houver resultados, informe de forma amigável.
 Não mencione SQL ou detalhes técnicos na resposta.`
-      },
-      {
-        role: 'user',
-        content: `Pergunta do usuário: ${question}
+
+  const prompt = `Pergunta do usuário: ${question}
 
 Dados encontrados:
 ${JSON.stringify(results, null, 2)}
 
 Formate uma resposta clara e amigável para o usuário.`
-      }
-    ],
-    temperature: 0.3,
-    max_tokens: 1500
-  })
-  
-  return completion.choices[0]?.message?.content?.trim() || 'Não foi possível processar a resposta.'
+
+  return await callGemini(prompt, systemPrompt)
+}
+
+// Função para responder perguntas gerais sobre o sistema
+async function answerGeneralQuestion(question: string, gabineteInfo: any, stats: any): Promise<string> {
+  const systemPrompt = `Você é o assistente de IA do ProviDATA, um sistema de gestão de pedidos de providência para gabinetes parlamentares.
+
+Informações do gabinete atual:
+${JSON.stringify(gabineteInfo, null, 2)}
+
+Estatísticas atuais:
+${JSON.stringify(stats, null, 2)}
+
+Você deve:
+1. Responder perguntas sobre o sistema e suas funcionalidades
+2. Fornecer insights sobre os dados do gabinete
+3. Dar sugestões de como melhorar a gestão de providências
+4. Ser sempre educado e profissional
+5. Responder em português brasileiro
+6. Usar markdown para formatação quando apropriado`
+
+  return await callGemini(question, systemPrompt)
 }
 
 export async function POST(request: Request) {
@@ -175,15 +204,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
     
-    // Verificar se é super_admin
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
+    // Buscar informações do usuário
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('role, gabinete_id, nome')
       .eq('id', user.id)
       .single()
     
-    if (profile?.role !== 'super_admin') {
-      return NextResponse.json({ error: 'Acesso negado. Apenas super_admin pode usar esta funcionalidade.' }, { status: 403 })
+    if (!userProfile) {
+      return NextResponse.json({ error: 'Perfil não encontrado' }, { status: 404 })
     }
     
     // Obter pergunta do corpo da requisição
@@ -194,56 +223,81 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Pergunta não fornecida' }, { status: 400 })
     }
     
-    // Gerar SQL a partir da pergunta
-    let sql = await generateSQL(question)
+    // Buscar informações do gabinete
+    let gabineteInfo = null
+    let stats = null
     
-    // Limpar SQL (remover markdown se houver)
-    sql = sql.replace(/```sql\n?/g, '').replace(/```\n?/g, '').trim()
-    
-    // Validar que é apenas SELECT
-    if (!sql.toLowerCase().startsWith('select')) {
-      return NextResponse.json({ 
-        error: 'Apenas consultas de leitura são permitidas',
-        answer: 'Desculpe, só posso responder perguntas que envolvam consulta de dados. Não posso modificar informações no banco de dados.'
-      }, { status: 400 })
-    }
-    
-    // Executar consulta
-    const { data: results, error: queryError } = await supabase.rpc('execute_readonly_query', {
-      query_text: sql
-    })
-    
-    // Se a função RPC não existir, tentar executar diretamente (menos seguro)
-    let finalResults = results
-    if (queryError) {
-      console.log('RPC não disponível, tentando consulta direta...')
-      // Fallback: executar consulta direta (apenas para super_admin)
-      const { data: directResults, error: directError } = await supabase
-        .from('providencias')
+    if (userProfile.gabinete_id) {
+      const { data: gabinete } = await supabase
+        .from('gabinetes')
         .select('*')
-        .limit(1)
+        .eq('id', userProfile.gabinete_id)
+        .single()
       
-      if (directError) {
-        console.error('Erro na consulta:', directError)
-        return NextResponse.json({ 
-          error: 'Erro ao executar consulta',
-          answer: 'Desculpe, houve um erro ao processar sua pergunta. Por favor, tente reformular de outra forma.',
-          sql
-        }, { status: 500 })
+      gabineteInfo = gabinete
+      
+      // Buscar estatísticas
+      const { data: providencias } = await supabase
+        .from('providencias')
+        .select('status, prioridade')
+        .eq('gabinete_id', userProfile.gabinete_id)
+      
+      if (providencias) {
+        stats = {
+          total: providencias.length,
+          pendentes: providencias.filter(p => p.status === 'pendente').length,
+          em_analise: providencias.filter(p => p.status === 'em_analise').length,
+          em_andamento: providencias.filter(p => p.status === 'em_andamento').length,
+          encaminhadas: providencias.filter(p => p.status === 'encaminhado').length,
+          concluidas: providencias.filter(p => p.status === 'concluido').length,
+          urgentes: providencias.filter(p => p.prioridade === 'urgente').length,
+        }
       }
-      
-      // Usar resultados simulados para demonstração
-      finalResults = []
     }
     
-    // Formatar resposta
-    const answer = await formatResults(question, finalResults || [], sql)
+    // Se for super_admin e a pergunta parecer ser sobre dados/relatórios, tentar gerar SQL
+    const isSuperAdmin = userProfile.role === 'super_admin'
+    const isDataQuery = /quantos|total|lista|relatório|dados|estatísticas|média|soma|contagem/i.test(question)
+    
+    if (isSuperAdmin && isDataQuery) {
+      try {
+        // Gerar SQL a partir da pergunta
+        let sql = await generateSQL(question)
+        
+        // Limpar SQL (remover markdown se houver)
+        sql = sql.replace(/```sql\n?/g, '').replace(/```\n?/g, '').trim()
+        
+        // Validar que é apenas SELECT
+        if (sql.toLowerCase().startsWith('select')) {
+          // Executar consulta
+          const { data: results, error: queryError } = await supabase.rpc('execute_readonly_query', {
+            query_text: sql
+          })
+          
+          if (!queryError && results) {
+            // Formatar resposta
+            const answer = await formatResults(question, results, sql)
+            
+            return NextResponse.json({
+              answer,
+              sql,
+              results,
+              rowCount: Array.isArray(results) ? results.length : 0
+            })
+          }
+        }
+      } catch (sqlError) {
+        console.log('Erro ao gerar/executar SQL, usando resposta geral:', sqlError)
+      }
+    }
+    
+    // Responder pergunta geral
+    const answer = await answerGeneralQuestion(question, gabineteInfo, stats)
     
     return NextResponse.json({
       answer,
-      sql,
-      results: finalResults,
-      rowCount: Array.isArray(finalResults) ? finalResults.length : 0
+      gabinete: gabineteInfo?.nome,
+      stats
     })
     
   } catch (error) {
