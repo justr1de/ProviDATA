@@ -98,8 +98,41 @@ Regras importantes:
 - Use CASE WHEN para transformar valores
 `
 
+// Interface para o log de uso
+interface AIUsageLog {
+  user_id: string
+  gabinete_id: string | null
+  question: string
+  answer: string | null
+  tokens_input: number | null
+  tokens_output: number | null
+  response_time_ms: number
+  model: string
+  status: 'success' | 'error'
+  error_message: string | null
+}
+
+// Função para registrar o uso da IA
+async function logAIUsage(supabase: any, log: AIUsageLog) {
+  try {
+    await supabase.from('ai_usage_logs').insert(log)
+  } catch (error) {
+    console.error('Erro ao registrar uso da IA:', error)
+    // Não interrompe o fluxo se o log falhar
+  }
+}
+
+// Função para estimar tokens (aproximação simples)
+function estimateTokens(text: string): number {
+  // Aproximação: ~4 caracteres por token em português
+  return Math.ceil(text.length / 4)
+}
+
 // Função para chamar a API do Gemini
-async function callGemini(prompt: string, systemPrompt: string): Promise<string> {
+async function callGemini(prompt: string, systemPrompt: string): Promise<{ text: string; tokensInput: number; tokensOutput: number }> {
+  const fullPrompt = `${systemPrompt}\n\nUsuário: ${prompt}`
+  const tokensInput = estimateTokens(fullPrompt)
+  
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
     {
@@ -111,7 +144,7 @@ async function callGemini(prompt: string, systemPrompt: string): Promise<string>
         contents: [
           {
             parts: [
-              { text: `${systemPrompt}\n\nUsuário: ${prompt}` }
+              { text: fullPrompt }
             ]
           }
         ],
@@ -130,11 +163,14 @@ async function callGemini(prompt: string, systemPrompt: string): Promise<string>
   }
 
   const data = await response.json()
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+  const tokensOutput = estimateTokens(text)
+  
+  return { text, tokensInput, tokensOutput }
 }
 
 // Função para gerar SQL a partir de pergunta em linguagem natural
-async function generateSQL(question: string): Promise<string> {
+async function generateSQL(question: string): Promise<{ sql: string; tokensInput: number; tokensOutput: number }> {
   const systemPrompt = `Você é um assistente especializado em gerar consultas SQL PostgreSQL para o sistema ProviDATA.
         
 ${DATABASE_SCHEMA}
@@ -150,11 +186,11 @@ Regras para gerar SQL:
 8. Retorne apenas a query SQL, sem markdown ou explicações`
 
   const result = await callGemini(question, systemPrompt)
-  return result.trim()
+  return { sql: result.text.trim(), tokensInput: result.tokensInput, tokensOutput: result.tokensOutput }
 }
 
 // Função para formatar resultados em texto legível
-async function formatResults(question: string, results: unknown[], sql: string): Promise<string> {
+async function formatResults(question: string, results: unknown[], sql: string): Promise<{ text: string; tokensInput: number; tokensOutput: number }> {
   const systemPrompt = `Você é um assistente do sistema ProviDATA que ajuda a interpretar dados de providências parlamentares.
         
 Formate a resposta de forma clara e objetiva em português brasileiro.
@@ -174,7 +210,7 @@ Formate uma resposta clara e amigável para o usuário.`
 }
 
 // Função para responder perguntas gerais sobre o sistema
-async function answerGeneralQuestion(question: string, gabineteInfo: any, stats: any): Promise<string> {
+async function answerGeneralQuestion(question: string, gabineteInfo: any, stats: any): Promise<{ text: string; tokensInput: number; tokensOutput: number }> {
   const systemPrompt = `Você é o assistente de IA do ProviDATA, um sistema de gestão de pedidos de providência para gabinetes parlamentares.
 
 Informações do gabinete atual:
@@ -195,6 +231,11 @@ Você deve:
 }
 
 export async function POST(request: Request) {
+  const startTime = Date.now()
+  let userId: string | null = null
+  let gabineteId: string | null = null
+  let question: string = ''
+  
   try {
     const supabase = await createClient()
     
@@ -203,6 +244,8 @@ export async function POST(request: Request) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
+    
+    userId = user.id
     
     // Buscar informações do usuário
     const { data: userProfile } = await supabase
@@ -215,9 +258,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Perfil não encontrado' }, { status: 404 })
     }
     
+    gabineteId = userProfile.gabinete_id
+    
     // Obter pergunta do corpo da requisição
     const body = await request.json()
-    const { question } = body
+    question = body.question
     
     if (!question || typeof question !== 'string') {
       return NextResponse.json({ error: 'Pergunta não fornecida' }, { status: 400 })
@@ -259,10 +304,17 @@ export async function POST(request: Request) {
     const isSuperAdmin = userProfile.role === 'super_admin'
     const isDataQuery = /quantos|total|lista|relatório|dados|estatísticas|média|soma|contagem/i.test(question)
     
+    let totalTokensInput = 0
+    let totalTokensOutput = 0
+    
     if (isSuperAdmin && isDataQuery) {
       try {
         // Gerar SQL a partir da pergunta
-        let sql = await generateSQL(question)
+        const sqlResult = await generateSQL(question)
+        totalTokensInput += sqlResult.tokensInput
+        totalTokensOutput += sqlResult.tokensOutput
+        
+        let sql = sqlResult.sql
         
         // Limpar SQL (remover markdown se houver)
         sql = sql.replace(/```sql\n?/g, '').replace(/```\n?/g, '').trim()
@@ -276,10 +328,28 @@ export async function POST(request: Request) {
           
           if (!queryError && results) {
             // Formatar resposta
-            const answer = await formatResults(question, results, sql)
+            const formatResult = await formatResults(question, results, sql)
+            totalTokensInput += formatResult.tokensInput
+            totalTokensOutput += formatResult.tokensOutput
+            
+            const responseTime = Date.now() - startTime
+            
+            // Registrar uso da IA
+            await logAIUsage(supabase, {
+              user_id: userId,
+              gabinete_id: gabineteId,
+              question,
+              answer: formatResult.text,
+              tokens_input: totalTokensInput,
+              tokens_output: totalTokensOutput,
+              response_time_ms: responseTime,
+              model: 'gemini-2.0-flash',
+              status: 'success',
+              error_message: null
+            })
             
             return NextResponse.json({
-              answer,
+              answer: formatResult.text,
               sql,
               results,
               rowCount: Array.isArray(results) ? results.length : 0
@@ -292,16 +362,59 @@ export async function POST(request: Request) {
     }
     
     // Responder pergunta geral
-    const answer = await answerGeneralQuestion(question, gabineteInfo, stats)
+    const answerResult = await answerGeneralQuestion(question, gabineteInfo, stats)
+    totalTokensInput += answerResult.tokensInput
+    totalTokensOutput += answerResult.tokensOutput
+    
+    const responseTime = Date.now() - startTime
+    
+    // Registrar uso da IA
+    await logAIUsage(supabase, {
+      user_id: userId,
+      gabinete_id: gabineteId,
+      question,
+      answer: answerResult.text,
+      tokens_input: totalTokensInput,
+      tokens_output: totalTokensOutput,
+      response_time_ms: responseTime,
+      model: 'gemini-2.0-flash',
+      status: 'success',
+      error_message: null
+    })
     
     return NextResponse.json({
-      answer,
+      answer: answerResult.text,
       gabinete: gabineteInfo?.nome,
       stats
     })
     
   } catch (error) {
     console.error('Erro na API de IA:', error)
+    
+    const responseTime = Date.now() - startTime
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+    
+    // Tentar registrar o erro
+    if (userId) {
+      try {
+        const supabase = await createClient()
+        await logAIUsage(supabase, {
+          user_id: userId,
+          gabinete_id: gabineteId,
+          question,
+          answer: null,
+          tokens_input: null,
+          tokens_output: null,
+          response_time_ms: responseTime,
+          model: 'gemini-2.0-flash',
+          status: 'error',
+          error_message: errorMessage
+        })
+      } catch (logError) {
+        console.error('Erro ao registrar falha:', logError)
+      }
+    }
+    
     return NextResponse.json({ 
       error: 'Erro interno do servidor',
       answer: 'Desculpe, ocorreu um erro ao processar sua pergunta. Por favor, tente novamente.'
