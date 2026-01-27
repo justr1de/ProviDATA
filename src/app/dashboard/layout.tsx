@@ -32,6 +32,7 @@ import {
 import { Toaster } from 'sonner'
 import { trackPageView } from '@/lib/monitoring'
 import { Tooltip } from '@/components/ui/tooltip'
+import { AIChat } from '@/components/ai-chat'
 
 const SIDEBAR_WIDTH = 280
 
@@ -1014,6 +1015,9 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
+      
+      {/* Assistente de IA - disponível para todos os usuários */}
+      <AIChat />
     </div>
   )
 }
